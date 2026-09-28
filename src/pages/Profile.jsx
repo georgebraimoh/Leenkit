@@ -4,6 +4,7 @@ import PageTransition from '../components/layout/PageTransition';
 import HangoutCard from '../components/hangout/HangoutCard';
 import Button from '../components/common/Button';
 import ReportModal from '../components/safety/ReportModal';
+import ProfileImageViewer from '../components/common/ProfileImageViewer';
 import { MapPin, Edit3, ShieldCheck, Sparkles, Calendar, LogOut, ShieldAlert, ExternalLink, Globe } from 'lucide-react';
 import { InstagramIcon, TikTokIcon, SpotifyIcon } from '../components/common/SocialIcons';
 import { useUser } from '../context/UserContext';
@@ -17,6 +18,7 @@ export default function Profile() {
   const navigate = useNavigate();
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [asyncUser, setAsyncUser] = useState(null);
   const [isFetchingProfile, setIsFetchingProfile] = useState(false);
   const [isVibeLoading, setIsVibeLoading] = useState(false);
@@ -126,6 +128,14 @@ export default function Profile() {
           targetTitle={profileUser.name}
         />
 
+        {/* Profile Image Full View Modal */}
+        <ProfileImageViewer
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+          src={profileUser.avatar}
+          alt={`${profileUser.name}'s profile picture`}
+        />
+
         {/* Profile Card Header */}
         <div className="editorial-surface p-6 md:p-10 relative overflow-hidden bg-white shadow-xl border border-[#DDE3E0] rounded-3xl">
           <span className="accent-orb -right-8 -top-8 w-24 h-24 bg-[#18A999]/6" />
@@ -134,7 +144,10 @@ export default function Profile() {
               <img
                 src={profileUser.avatar}
                 alt={profileUser.name}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-[#EEF1EF] shadow-md shrink-0"
+                title={`View ${profileUser.name}'s profile picture`}
+                aria-label={`View ${profileUser.name}'s profile picture`}
+                onClick={() => setIsViewerOpen(true)}
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-[#EEF1EF] shadow-md shrink-0 cursor-pointer hover:scale-105 hover:border-[#18A999]/40 transition-all duration-200"
               />
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
