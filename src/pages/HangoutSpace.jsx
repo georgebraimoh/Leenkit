@@ -7,7 +7,7 @@ import ChatInput from '../components/space/ChatInput';
 import Button from '../components/common/Button';
 import ReportModal from '../components/safety/ReportModal';
 import { Lock, Sparkles, ShieldAlert, LogOut } from 'lucide-react';
-import { useQleenq } from '../context/QleenqContext';
+import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 
 export default function HangoutSpace() {
@@ -23,7 +23,7 @@ export default function HangoutSpace() {
     isHangoutsLoading,
     joinHangout,
     leaveHangout
-  } = useQleenq();
+  } = useLeenkit();
   const { currentUser, isAuthLoading } = useUser();
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -68,8 +68,8 @@ export default function HangoutSpace() {
     return (
       <PageTransition key="space-loading">
         <div className="max-w-md mx-auto p-10 text-center space-y-4 my-10">
-          <div className="w-8 h-8 border-4 border-[#800020] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs font-semibold text-[#6F6F6F]">Connecting to Qleenq Space...</p>
+          <div className="w-8 h-8 border-4 border-[#18A999] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-semibold text-[#3D4948]">Connecting to LEENKIT Space...</p>
         </div>
       </PageTransition>
     );
@@ -81,7 +81,7 @@ export default function HangoutSpace() {
       <PageTransition key="space-not-found">
         <div className="max-w-md mx-auto p-10 text-center space-y-4 my-10">
           <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto" />
-          <h2 className="text-xl font-bold font-heading text-[#171717]">Hangout not found</h2>
+          <h2 className="text-xl font-bold font-heading text-[#172121]">Hangout not found</h2>
           <Button onClick={() => navigate('/explore')}>Return to Explore</Button>
         </div>
       </PageTransition>
@@ -93,20 +93,20 @@ export default function HangoutSpace() {
     return (
       <PageTransition key="space-locked">
         <div className="min-h-[80vh] flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white border border-[#E8E6E1] rounded-3xl p-8 text-center space-y-6 shadow-xl">
-            <div className="w-16 h-16 rounded-full bg-[#FDF0F2] text-[#800020] flex items-center justify-center mx-auto">
+          <div className="max-w-md w-full bg-white border border-[#DDE3E0] rounded-3xl p-8 text-center space-y-6 shadow-xl">
+            <div className="w-16 h-16 rounded-full bg-[#DDF4EF] text-[#18A999] flex items-center justify-center mx-auto">
               <Lock className="w-8 h-8" />
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#800020]">
-                Qleenq Space Access
+              <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">
+                LEENKIT Space Access
               </span>
-              <h2 className="text-2xl font-bold font-heading text-[#171717]">
+              <h2 className="text-2xl font-bold font-heading text-[#172121]">
                 Attendees Only
               </h2>
-              <p className="text-sm text-[#6F6F6F] leading-relaxed">
-                The Qleenq Space for <strong className="text-[#171717]">"{hangout.title}"</strong> is exclusive to confirmed attendees. Join the Hangout to communicate with attendees.
+              <p className="text-sm text-[#3D4948] leading-relaxed">
+                The LEENKIT Space for <strong className="text-[#172121]">"{hangout.title}"</strong> is exclusive to confirmed attendees. Join the Hangout to communicate with attendees.
               </p>
             </div>
 
@@ -125,7 +125,7 @@ export default function HangoutSpace() {
 
               <button
                 onClick={() => navigate(`/hangout/${hangout.id}`)}
-                className="text-xs font-semibold text-[#6F6F6F] hover:text-[#171717] block mx-auto pt-2 cursor-pointer"
+                className="text-xs font-semibold text-[#3D4948] hover:text-[#172121] block mx-auto pt-2 cursor-pointer"
               >
                 View Hangout details
               </button>
@@ -147,7 +147,7 @@ export default function HangoutSpace() {
   };
 
   const handleLeaveActivity = () => {
-    if (window.confirm("Are you sure you want to leave this Hangout? You will lose access to the Qleenq Space.")) {
+    if (window.confirm("Are you sure you want to leave this Hangout? You will lose access to the LEENKIT Space.")) {
       leaveHangout(hangout.id);
       navigate('/explore');
     }
@@ -155,7 +155,7 @@ export default function HangoutSpace() {
 
   return (
     <PageTransition key="space-content">
-      <div className="min-h-screen flex flex-col bg-[#FAF4F5]">
+      <div className="min-h-screen flex flex-col bg-[#F7F5EF]">
         {/* Safety Report Modal */}
         <ReportModal
           isOpen={reportModalOpen}
@@ -169,8 +169,8 @@ export default function HangoutSpace() {
         <SpaceHeader hangout={hangout} />
 
         {/* Space Context Banner & Actions */}
-        <div className="bg-[#E8F0E8] border-b border-[#D5E4D5] px-4 py-2.5 flex flex-wrap items-center justify-between text-xs text-[#2D5A27] font-medium gap-2">
-          <span>💬 Temporary Qleenq Space for attendees of this Hangout.</span>
+        <div className="bg-[#DDF4EF] border-b border-[#DDE3E0] px-4 py-2.5 flex flex-wrap items-center justify-between text-xs text-[#087F73] font-medium gap-2">
+          <span>💬 Temporary LEENKIT Space for attendees of this Hangout.</span>
 
           <div className="flex items-center gap-3">
             <button
@@ -200,14 +200,14 @@ export default function HangoutSpace() {
           className="flex-1 max-w-3xl w-full mx-auto p-4 md:p-6 overflow-y-auto space-y-2"
         >
           {roomMessages.length === 0 ? (
-            /* Qleenq Intentional Empty State */
+            /* LEENKIT Intentional Empty State */
             <div className="py-16 text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-[#FDF0F2] text-[#800020] flex items-center justify-center mx-auto shadow-xs">
+              <div className="w-12 h-12 rounded-full bg-[#DDF4EF] text-[#18A999] flex items-center justify-center mx-auto shadow-xs">
                 <Sparkles className="w-6 h-6" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-bold font-heading text-[#171717]">You're early.</h3>
-                <p className="text-xs text-[#6F6F6F] max-w-xs mx-auto">
+                <h3 className="text-base font-bold font-heading text-[#172121]">You're early.</h3>
+                <p className="text-xs text-[#3D4948] max-w-xs mx-auto">
                   Say something and start the conversation with other attendees!
                 </p>
               </div>

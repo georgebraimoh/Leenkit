@@ -11,8 +11,8 @@ export default function FormField({
   return (
     <div className={`space-y-1.5 ${className}`}>
       {label && (
-        <label className="block text-xs font-semibold text-[#171717] tracking-wider uppercase">
-          {label} {required && <span className="text-[#800020]">*</span>}
+        <label className="block text-xs font-semibold text-[#172121] tracking-wider uppercase">
+          {label} {required && <span className="text-[#18A999]">*</span>}
         </label>
       )}
       {children}

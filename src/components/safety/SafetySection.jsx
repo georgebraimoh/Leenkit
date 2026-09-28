@@ -60,25 +60,25 @@ export default function SafetySection() {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
     >
-      <div className="editorial-surface p-8 md:p-12 bg-white border border-[#E8E6E1] rounded-3xl shadow-xs space-y-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#E8E6E1]">
+      <div className="editorial-surface p-8 md:p-12 bg-white border border-[#DDE3E0] rounded-3xl shadow-xs space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#DDE3E0]">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F0E8] text-[#2D5A27] text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#DDF4EF] text-[#087F73] text-xs font-semibold">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Trust & Safety</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold font-heading text-[#171717]">
+            <h2 className="text-3xl md:text-4xl font-extrabold font-heading text-[#172121]">
               Meet people. Have fun. Stay safe.
             </h2>
-            <p className="text-sm md:text-base text-[#6F6F6F] leading-relaxed">
-              Qleenq is about getting out, trying new things and meeting people through real-life Hangouts. A little awareness goes a long way.
+            <p className="text-sm md:text-base text-[#3D4948] leading-relaxed">
+              LEENKIT is about getting out, trying new things and meeting people through real-life Hangouts. A little awareness goes a long way.
             </p>
           </div>
 
           <Link to="/safety" className="shrink-0">
             <Button variant="outline" size="md" className="gap-2">
               <span>Read safety guide</span>
-              <ArrowRight className="w-4 h-4 text-[#800020]" />
+              <ArrowRight className="w-4 h-4 text-[#18A999]" />
             </Button>
           </Link>
         </div>
@@ -95,23 +95,23 @@ export default function SafetySection() {
                 onClick={() => setExpandedId(isExpanded ? null : tip.id)}
                 className={`pressable p-5 rounded-2xl border transition-all cursor-pointer ${
                   isExpanded
-                    ? 'border-[#800020] bg-[#FDF0F2]/40 shadow-sm'
-                    : 'border-[#E8E6E1] bg-[#F7F6F2] hover:border-[#D6D2C9] hover:-translate-y-0.5'
+                    ? 'border-[#18A999] bg-[#DDF4EF]/40 shadow-sm'
+                    : 'border-[#DDE3E0] bg-[#EEF1EF] hover:border-[#18A999]/30 hover:-translate-y-0.5'
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#FDF0F2] text-[#800020] flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#DDF4EF] text-[#18A999] flex items-center justify-center shrink-0">
                       <Icon className="w-4 h-4" />
                     </div>
-                    <h3 className="font-heading font-bold text-sm text-[#171717]">
+                    <h3 className="font-heading font-bold text-sm text-[#172121]">
                       {tip.title}
                     </h3>
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-[#6F6F6F] transition-transform ${isExpanded ? 'rotate-180 text-[#800020]' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-[#3D4948] transition-transform ${isExpanded ? 'rotate-180 text-[#18A999]' : ''}`} />
                 </div>
 
-                <p className="text-xs text-[#6F6F6F] mt-2 font-medium leading-relaxed">
+                <p className="text-xs text-[#3D4948] mt-2 font-medium leading-relaxed">
                   {tip.summary}
                 </p>
 
@@ -123,7 +123,7 @@ export default function SafetySection() {
                       exit={{ opacity: 0, height: 0 }}
                       className="overflow-hidden"
                     >
-                      <p className="text-xs text-[#171717] pt-3 mt-3 border-t border-[#E8E6E1] leading-relaxed">
+                      <p className="text-xs text-[#172121] pt-3 mt-3 border-t border-[#DDE3E0] leading-relaxed">
                         {tip.details}
                       </p>
                     </motion.div>

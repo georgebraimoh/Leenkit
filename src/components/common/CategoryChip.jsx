@@ -16,7 +16,7 @@ export default function CategoryChip({ label, active, onClick, count, emoji }) {
       {active && (
         <motion.div
           layoutId="activeCategoryBg"
-          className="absolute inset-0 bg-[#800020] rounded-full -z-0"
+          className="absolute inset-0 bg-[#18A999] rounded-full -z-0"
           transition={{ type: "spring", stiffness: 450, damping: 32 }}
         />
       )}

@@ -12,6 +12,7 @@ export function UserProvider({ children }) {
 
   const [users, setUsers] = useState(() => {
     try {
+      localStorage.removeItem('leenkit_all_users');
       localStorage.removeItem('leenq_all_users');
     } catch (e) {}
     return [];
@@ -281,7 +282,7 @@ export function UserProvider({ children }) {
 
     return {
       id,
-      name: 'Qleenq Member',
+      name: 'LEENKIT Member',
       avatar:
         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       location: 'Abuja'

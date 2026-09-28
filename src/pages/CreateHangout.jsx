@@ -9,7 +9,7 @@ import LocationPicker from '../components/common/LocationPicker';
 import SafetyReminder from '../components/safety/SafetyReminder';
 import ShareModal from '../components/common/ShareModal';
 import { CATEGORIES } from '../data/categories';
-import { useQleenq } from '../context/QleenqContext';
+import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 import { hangoutService } from '../services/hangout/hangoutService';
 
@@ -25,7 +25,7 @@ const PRESET_IMAGES = [
 
 export default function CreateHangout() {
   const navigate = useNavigate();
-  const { createHangout } = useQleenq();
+  const { createHangout } = useLeenkit();
   const { currentUser } = useUser();
 
   const [formData, setFormData] = useState({
@@ -167,17 +167,17 @@ export default function CreateHangout() {
               </div>
 
               <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#800020]">Success</span>
-                <h2 className="text-3xl font-bold font-heading text-[#171717]">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Success</span>
+                <h2 className="text-3xl font-bold font-heading text-[#172121]">
                   Your Hangout is live.
                 </h2>
-                <p className="text-sm text-[#6F6F6F] max-w-md mx-auto leading-relaxed">
-                  Your Qleenq Space is ready. People can now discover and join you at {createdActivity.location?.placeName || 'your venue'}.
+                <p className="text-sm text-[#3D4948] max-w-md mx-auto leading-relaxed">
+                  Your LEENKIT Space is ready. People can now discover and join you at {createdActivity.location?.placeName || 'your venue'}.
                 </p>
               </div>
 
-              <div className="p-4 bg-[#F7F6F2] rounded-2xl max-w-sm mx-auto text-left space-y-1 border border-[#E8E6E1]">
-                <p className="text-xs font-bold uppercase text-[#800020]">{createdActivity.category}</p>
+              <div className="p-4 bg-[#EEF1EF] rounded-2xl max-w-sm mx-auto text-left space-y-1 border border-[#DDE3E0]">
+                <p className="text-xs font-bold uppercase text-[#18A999]">{createdActivity.category}</p>
                 <h4 className="font-bold text-[#171717] font-heading">{createdActivity.title}</h4>
                 <p className="text-xs text-[#6F6F6F]">
                   📍 {createdActivity.location?.placeName || 'Venue'} · {createdActivity.date} at {createdActivity.time}
@@ -214,11 +214,11 @@ export default function CreateHangout() {
             /* FORM SECTION */
             <div className="space-y-8">
               <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#800020]">Host a Hangout</span>
-                <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#171717]">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Host a Hangout</span>
+                <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#172121]">
                   What Hangout are you planning?
                 </h1>
-                <p className="text-sm text-[#6F6F6F]">
+                <p className="text-sm text-[#3D4948]">
                   Specify the location and details to host your Hangout.
                 </p>
               </div>
@@ -226,7 +226,7 @@ export default function CreateHangout() {
               {/* Host Safety Reminder */}
               <SafetyReminder mode="host" />
 
-              <form onSubmit={handleSubmit} className="bg-white border border-[#E8E6E1] rounded-3xl p-6 md:p-10 shadow-xs space-y-6">
+              <form onSubmit={handleSubmit} className="bg-white border border-[#DDE3E0] rounded-3xl p-6 md:p-10 shadow-xs space-y-6">
                 {/* Activity Name */}
                 <FormField label="Hangout Title" required error={errors.title}>
                   <input
@@ -234,7 +234,7 @@ export default function CreateHangout() {
                     value={formData.title}
                     onChange={e => setFormData({ ...formData, title: e.target.value })}
                     placeholder="e.g. Sunset Photowalk, Board Games & Suya, Rooftop Catan..."
-                    className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020]"
+                    className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                   />
                 </FormField>
 
@@ -252,7 +252,7 @@ export default function CreateHangout() {
                   <select
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020]"
+                    className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                   >
                     {CATEGORIES.filter(c => c.id !== 'all').map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.label}</option>
@@ -267,7 +267,7 @@ export default function CreateHangout() {
                       type="date"
                       value={formData.date}
                       onChange={e => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020]"
+                      className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                     />
                   </FormField>
 
@@ -276,7 +276,7 @@ export default function CreateHangout() {
                       type="time"
                       value={formData.time}
                       onChange={e => setFormData({ ...formData, time: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020]"
+                      className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                     />
                   </FormField>
 
@@ -287,7 +287,7 @@ export default function CreateHangout() {
                       max="50"
                       value={formData.maxAttendees}
                       onChange={e => setFormData({ ...formData, maxAttendees: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020]"
+                      className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                     />
                   </FormField>
                 </div>
@@ -299,7 +299,7 @@ export default function CreateHangout() {
                     value={formData.description}
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Provide details about the meeting point, activities, vibes..."
-                    className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020]"
+                    className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                   />
                 </FormField>
 
@@ -308,8 +308,8 @@ export default function CreateHangout() {
                   <div className="space-y-4 pt-1">
                     {/* Device Upload Control */}
                     <div className="flex flex-wrap items-center gap-3">
-                      <label className="px-4 py-2.5 bg-white border border-[#E8E6E1] hover:border-[#800020] hover:text-[#800020] rounded-2xl text-xs font-semibold text-[#171717] flex items-center gap-2 transition-all shadow-xs cursor-pointer">
-                        <Upload className="w-4 h-4 text-[#800020]" />
+                      <label className="px-4 py-2.5 bg-white border border-[#DDE3E0] hover:border-[#18A999] hover:text-[#18A999] rounded-2xl text-xs font-semibold text-[#172121] flex items-center gap-2 transition-all shadow-xs cursor-pointer">
+                        <Upload className="w-4 h-4 text-[#18A999]" />
                         <span>Upload photo from device</span>
                         <input
                           type="file"
@@ -340,9 +340,9 @@ export default function CreateHangout() {
 
                     {/* Custom Image Preview */}
                     {customImagePreview ? (
-                      <div className="relative h-40 rounded-2xl overflow-hidden border-2 border-[#800020] max-w-md shadow-md">
+                      <div className="relative h-40 rounded-2xl overflow-hidden border-2 border-[#18A999] max-w-md shadow-md">
                         <img src={customImagePreview} alt="Custom cover preview" className="w-full h-full object-cover" />
-                        <div className="absolute top-2 right-2 bg-[#800020] text-white p-1 rounded-full shadow-xs">
+                        <div className="absolute top-2 right-2 bg-[#18A999] text-white p-1 rounded-full shadow-xs">
                           <CheckCircle className="w-4 h-4" />
                         </div>
                         <span className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold p-2 text-center truncate">
@@ -365,12 +365,12 @@ export default function CreateHangout() {
                                 setFormData({ ...formData, image: img.url });
                               }}
                               className={`relative h-20 rounded-xl overflow-hidden border-2 transition-colors cursor-pointer ${
-                                isSelected ? 'border-[#800020] shadow-md' : 'border-transparent opacity-75 hover:opacity-100'
+                                isSelected ? 'border-[#18A999] shadow-md' : 'border-transparent opacity-75 hover:opacity-100'
                               }`}
                             >
                               <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
                               {isSelected && (
-                                <div className="absolute top-1 right-1 bg-[#800020] text-white p-0.5 rounded-full shadow-xs">
+                                <div className="absolute top-1 right-1 bg-[#18A999] text-white p-0.5 rounded-full shadow-xs">
                                   <CheckCircle className="w-3.5 h-3.5" />
                                 </div>
                               )}

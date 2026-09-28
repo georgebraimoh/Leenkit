@@ -2,14 +2,17 @@
 
 @layer base {
   :root {
-    --bg-canvas: #F7F6F2;
-    --text-primary: #171717;
-    --text-secondary: #6F6F6F;
-    --accent-primary: #800020;
-    --accent-hover: #69001A;
-    --accent-sage: #E8F0E8;
+    --bg-canvas: #F7F5EF;
+    --text-primary: #172121;
+    --text-secondary: #3D4948;
+    --text-muted: #687473;
+    --accent-primary: #18A999;
+    --accent-hover: #087F73;
+    --accent-sage: #DDF4EF;
+    --accent-yellow: #FFD166;
     --surface-card: #FFFFFF;
-    --border-color: #E8E6E1;
+    --surface-secondary: #EEF1EF;
+    --border-color: #DDE3E0;
   }
 
   body {
@@ -30,23 +33,23 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F7F6F2;
+  background: #F7F5EF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D8D4CC;
+  background: #DDE3E0;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B0AAA0;
+  background: #687473;
 }
 
 /* Custom Editorial Glass Utilities */
 .editorial-card,
 .editorial-surface {
   background-color: #FFFFFF;
-  border: 1px solid #E8E6E1;
+  border: 1px solid #DDE3E0;
   border-radius: 1.25rem;
-  box-shadow: 0 4px 20px -2px rgba(23, 23, 23, 0.03);
+  box-shadow: 0 4px 20px -2px rgba(23, 33, 33, 0.03);
 }
 
 .editorial-card {
@@ -58,8 +61,8 @@
 @media (hover: hover) and (pointer: fine) {
   .editorial-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 32px -4px rgba(23, 23, 23, 0.08);
-    border-color: #D6D2C9;
+    box-shadow: 0 12px 32px -4px rgba(23, 33, 33, 0.08);
+    border-color: #18A999;
   }
 
   .img-zoom:hover img,
@@ -105,13 +108,13 @@
 }
 
 .badge-sage {
-  background-color: #E8F0E8;
-  color: #2D5A27;
+  background-color: #DDF4EF;
+  color: #087F73;
 }
 
 .badge-terracotta {
-  background-color: #FDF0F2;
-  color: #800020;
+  background-color: #DDF4EF;
+  color: #18A999;
 }
 
 /* Smooth hide scrollbars for horizontal chip bars */

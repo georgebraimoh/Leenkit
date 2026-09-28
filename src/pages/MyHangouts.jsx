@@ -4,12 +4,12 @@ import PageTransition from '../components/layout/PageTransition';
 import HangoutCard from '../components/hangout/HangoutCard';
 import EmptyState from '../components/common/EmptyState';
 import { Calendar, Shield, CheckCircle2, Compass } from 'lucide-react';
-import { useQleenq } from '../context/QleenqContext';
+import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 
 export default function MyHangouts() {
   const navigate = useNavigate();
-  const { hangouts } = useQleenq();
+  const { hangouts } = useLeenkit();
   const { currentUser, isAuthLoading } = useUser();
   const [activeTab, setActiveTab] = useState('upcoming');
 
@@ -18,7 +18,7 @@ export default function MyHangouts() {
     return (
       <PageTransition>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
-          <div className="w-8 h-8 border-4 border-[#800020] border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-4 border-[#18A999] border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs font-semibold text-[#6F6F6F]">Loading your Hangouts...</p>
         </div>
       </PageTransition>
@@ -63,7 +63,7 @@ export default function MyHangouts() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#800020]">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">
             Your Schedule
           </span>
           <h1 className="text-4xl font-extrabold font-heading text-[#171717]">

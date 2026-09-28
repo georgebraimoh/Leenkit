@@ -12,7 +12,7 @@ export default function SearchBar({ value, onChange, placeholder = "Search activ
       className="relative w-full max-w-xl"
     >
       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#6F6F6F]">
-        <Search className={`w-5 h-5 transition-colors ${isFocused ? 'text-[#800020]' : ''}`} />
+        <Search className={`w-5 h-5 transition-colors ${isFocused ? 'text-[#18A999]' : ''}`} />
       </div>
       <input
         type="text"
@@ -21,7 +21,7 @@ export default function SearchBar({ value, onChange, placeholder = "Search activ
         onBlur={() => setIsFocused(false)}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full pl-11 pr-10 py-3.5 bg-white border border-[#E8E6E1] rounded-full text-sm text-[#171717] placeholder-[#6F6F6F] focus:outline-none focus:ring-2 focus:ring-[#800020]/30 focus:border-[#800020] shadow-xs transition-all"
+        className="w-full pl-11 pr-10 py-3.5 bg-white border border-[#E8E6E1] rounded-full text-sm text-[#171717] placeholder-[#6F6F6F] focus:outline-none focus:ring-2 focus:ring-[#18A999]/30 focus:border-[#18A999] shadow-xs transition-all"
       />
       <AnimatePresence>
         {value && (

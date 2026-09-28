@@ -3,12 +3,13 @@ import { locationService, calculateDistance } from '../services/location/locatio
 
 const LocationContext = createContext();
 
-const STORAGE_KEY_LOCATION = 'leenq_active_location';
+const STORAGE_KEY_LOCATION = 'leenkit_active_location';
+const FALLBACK_STORAGE_KEY_LOCATION = 'leenq_active_location';
 
 export function LocationProvider({ children }) {
   const [userLocation, setUserLocation] = useState(null);
   const [activeSearchLocation, setActiveSearchLocation] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY_LOCATION);
+    const saved = localStorage.getItem(STORAGE_KEY_LOCATION) || localStorage.getItem(FALLBACK_STORAGE_KEY_LOCATION);
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }

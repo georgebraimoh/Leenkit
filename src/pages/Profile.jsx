@@ -6,13 +6,13 @@ import Button from '../components/common/Button';
 import ReportModal from '../components/safety/ReportModal';
 import { MapPin, Edit3, ShieldCheck, Sparkles, Calendar, LogOut, ShieldAlert } from 'lucide-react';
 import { useUser } from '../context/UserContext';
-import { useQleenq } from '../context/QleenqContext';
+import { useLeenkit } from '../context/LeenkitContext';
 import { authService } from '../services/auth/authService';
 
 export default function Profile() {
   const { username } = useParams();
   const { users, currentUser, logout, isAuthenticated, isAuthLoading, isVibingWith, vibeWith, unvibeWith, vibingIds, getUserById, openAuthModal } = useUser();
-  const { hangouts } = useQleenq();
+  const { hangouts } = useLeenkit();
   const navigate = useNavigate();
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -62,7 +62,7 @@ export default function Profile() {
     return (
       <PageTransition>
         <div className="max-w-5xl mx-auto px-4 py-20 text-center space-y-4">
-          <div className="w-8 h-8 border-4 border-[#800020] border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-4 border-[#18A999] border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs font-semibold text-[#6F6F6F]">Loading profile...</p>
         </div>
       </PageTransition>
@@ -124,28 +124,28 @@ export default function Profile() {
         />
 
         {/* Profile Card Header */}
-        <div className="editorial-surface p-6 md:p-10 relative overflow-hidden bg-white shadow-xl">
-          <span className="accent-orb -right-8 -top-8 w-24 h-24 bg-[#800020]/6" />
+        <div className="editorial-surface p-6 md:p-10 relative overflow-hidden bg-white shadow-xl border border-[#DDE3E0] rounded-3xl">
+          <span className="accent-orb -right-8 -top-8 w-24 h-24 bg-[#18A999]/6" />
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               <img
                 src={profileUser.avatar}
                 alt={profileUser.name}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-[#F7F6F2] shadow-md shrink-0"
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-[#EEF1EF] shadow-md shrink-0"
               />
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#171717]">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#172121]">
                     {profileUser.name}
                   </h1>
                 </div>
 
-                <p className="text-sm font-semibold text-[#800020]">
+                <p className="text-sm font-semibold text-[#18A999]">
                   {profileUser.title || "Community Member"}
                 </p>
 
                 <p className="text-xs text-[#6F6F6F] flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#800020]" /> {profileUser.location}
+                  <MapPin className="w-3.5 h-3.5 text-[#18A999]" /> {profileUser.location}
                 </p>
 
                 <p className="text-sm text-[#171717] max-w-xl leading-relaxed pt-1">
@@ -189,7 +189,7 @@ export default function Profile() {
                     <span>Updating...</span>
                   ) : isVibing ? (
                     <>
-                      <Sparkles className="w-4 h-4 text-[#800020] fill-[#800020]" />
+                      <Sparkles className="w-4 h-4 text-[#18A999] fill-[#18A999]" />
                       <span>Vibing</span>
                     </>
                   ) : (
@@ -222,7 +222,7 @@ export default function Profile() {
               {profileUser.interests.map((interest, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1 bg-[#F7F6F2] text-[#171717] text-xs font-semibold rounded-full border border-[#E8E6E1]"
+                  className="px-3 py-1 bg-[#EEF1EF] text-[#172121] text-xs font-semibold rounded-full border border-[#DDE3E0]"
                 >
                   {interest}
                 </span>
@@ -232,34 +232,34 @@ export default function Profile() {
 
           {/* Clean Stats Row (NO Followers / Vanity metrics!) */}
           <div className="pt-6 mt-6 border-t border-[#E8E6E1] grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div className="p-3 bg-[#F7F6F2] rounded-2xl">
-              <span className="text-2xl font-extrabold font-heading text-[#171717]">{hosted.length}</span>
+            <div className="p-3 bg-[#EEF1EF] rounded-2xl">
+              <span className="text-2xl font-extrabold font-heading text-[#172121]">{hosted.length}</span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F6F6F] block mt-0.5">Hosted</span>
             </div>
-            <div className="p-3 bg-[#F7F6F2] rounded-2xl">
-              <span className="text-2xl font-extrabold font-heading text-[#171717]">{attended.length}</span>
+            <div className="p-3 bg-[#EEF1EF] rounded-2xl">
+              <span className="text-2xl font-extrabold font-heading text-[#172121]">{attended.length}</span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F6F6F] block mt-0.5">Attended</span>
             </div>
-            <div className="p-3 bg-[#E8F0E8] rounded-2xl col-span-2">
-              <span className="text-xs font-bold text-[#2D5A27] block">Active Member</span>
-              <span className="text-[10px] text-[#2D5A27]/80 block mt-0.5">Joined real-life Hangouts through Qleenq.</span>
+            <div className="p-3 bg-[#DDF4EF] rounded-2xl col-span-2">
+              <span className="text-xs font-bold text-[#087F73] block">Active Member</span>
+              <span className="text-[10px] text-[#087F73]/80 block mt-0.5">Joined real-life Hangouts through LEENKIT.</span>
             </div>
           </div>
         </div>
 
         {/* Who You Vibe With Section (Visible on own profile) */}
         {isOwnProfile && (
-          <div className="space-y-6 pt-6 border-t border-[#E8E6E1]">
+          <div className="space-y-6 pt-6 border-t border-[#DDE3E0]">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#800020]" />
+              <Sparkles className="w-5 h-5 text-[#18A999]" />
               <h2 className="text-2xl font-bold font-heading text-[#171717]">
                 Who you vibe with
               </h2>
             </div>
 
             {vibingProfiles.length === 0 ? (
-              <div className="p-6 bg-[#F7F6F2] rounded-2xl text-center space-y-2 border border-[#E8E6E1]">
-                <p className="text-sm font-semibold text-[#171717]">No vibes added yet</p>
+              <div className="p-6 bg-[#EEF1EF] rounded-2xl text-center space-y-2 border border-[#DDE3E0]">
+                <p className="text-sm font-semibold text-[#172121]">No vibes added yet</p>
                 <p className="text-xs text-[#6F6F6F]">
                   Discover Hangouts in Explore and click <strong>Vibe</strong> on members you connect with!
                 </p>
@@ -283,7 +283,7 @@ export default function Profile() {
                         <p className="text-xs text-[#6F6F6F] truncate">@{u.username} · {u.location}</p>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 bg-[#FAF4F5] text-[#800020] text-[10px] font-extrabold uppercase rounded-full border border-[#F0D5DA] shrink-0 ml-2">
+                    <span className="px-2.5 py-1 bg-[#DDF4EF] text-[#087F73] text-[10px] font-extrabold uppercase rounded-full border border-[#18A999]/30 shrink-0 ml-2">
                       Vibing
                     </span>
                   </Link>
@@ -297,7 +297,7 @@ export default function Profile() {
         {hosted.length > 0 && (
           <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[#800020]" />
+              <ShieldCheck className="w-5 h-5 text-[#18A999]" />
               <h2 className="text-2xl font-bold font-heading text-[#171717]">
                 Hosted by {profileUser.name.split(' ')[0]}
               </h2>
@@ -315,7 +315,7 @@ export default function Profile() {
         {attended.length > 0 && (
           <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#800020]" />
+              <Calendar className="w-5 h-5 text-[#18A999]" />
               <h2 className="text-2xl font-bold font-heading text-[#171717]">
                 Hangouts Attended ({attended.length})
               </h2>

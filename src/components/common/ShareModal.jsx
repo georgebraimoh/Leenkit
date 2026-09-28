@@ -27,7 +27,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
 
   const shareUrl = `${window.location.origin}/hangout/${hangout.id}`;
 
-  const whatsappMessage = `🎉 Join the Hangout "${hangout.title}" on Qleenq!\n\n📍 ${locName}\n${formattedDate ? `📅 ${formattedDate}` : ''}${hangout.time ? ` at ${hangout.time}` : ''}\n\n👉 Join the Hangout: ${shareUrl}`;
+  const whatsappMessage = `🎉 Join the Hangout "${hangout.title}" on LEENKIT!\n\n📍 ${locName}\n${formattedDate ? `📅 ${formattedDate}` : ''}${hangout.time ? ` at ${hangout.time}` : ''}\n\n👉 Join the Hangout: ${shareUrl}`;
 
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappMessage)}`;
   const canNativeShare = typeof navigator !== 'undefined' && Boolean(navigator.share);
@@ -47,8 +47,8 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
     if (!canNativeShare) return;
     try {
       await navigator.share({
-        title: `${hangout.title} · Qleenq`,
-        text: `${hangout.title} — join this Hangout on Qleenq.`,
+        title: `${hangout.title} · LEENKIT`,
+        text: `${hangout.title} — join this Hangout on LEENKIT.`,
         url: shareUrl
       });
     } catch (err) {
@@ -64,7 +64,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
     <Modal isOpen={isOpen} onClose={onClose} title="Share Hangout">
       <div className="space-y-6 pt-2">
         {/* Hangout Summary Card */}
-        <div className="p-4 bg-[#F7F6F2] rounded-2xl flex items-center gap-4 border border-[#E8E6E1]">
+        <div className="p-4 bg-[#EEF1EF] rounded-2xl flex items-center gap-4 border border-[#DDE3E0]">
           <img
             src={coverSrc}
             alt={hangout.title}
@@ -72,13 +72,13 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
             className="w-16 h-16 rounded-xl object-cover shrink-0"
           />
           <div className="min-w-0 space-y-0.5">
-            <span className="text-[10px] uppercase font-bold text-[#800020] tracking-wider block">
+            <span className="text-[10px] uppercase font-bold text-[#18A999] tracking-wider block">
               {hangout.category || 'Hangout'}
             </span>
-            <h4 className="font-heading font-bold text-sm text-[#171717] truncate">
+            <h4 className="font-heading font-bold text-sm text-[#172121] truncate">
               {hangout.title}
             </h4>
-            <p className="text-xs text-[#6F6F6F] truncate">
+            <p className="text-xs text-[#3D4948] truncate">
               📍 {locName}
             </p>
           </div>
@@ -114,8 +114,8 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
         </div>
 
         {/* Share Link Copy Section */}
-        <div className="pt-2 border-t border-[#E8E6E1] space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-[#6F6F6F] block">
+        <div className="pt-2 border-t border-[#DDE3E0] space-y-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-[#3D4948] block">
             Hangout Share Link
           </label>
           <div className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
               type="text"
               readOnly
               value={shareUrl}
-              className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-xs text-[#171717] font-mono focus:outline-none select-all"
+              className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-xs text-[#172121] font-mono focus:outline-none select-all"
             />
             <Button
               onClick={handleCopy}

@@ -101,7 +101,7 @@ export const notificationService = {
       )
       .subscribe((status, err) => {
         if (status === 'CHANNEL_ERROR') {
-          console.error(`[Qleenq Realtime] Notification channel error for user ${userId}:`, err || status);
+          console.error(`[LEENKIT Realtime] Notification channel error for user ${userId}:`, err || status);
         }
       });
 

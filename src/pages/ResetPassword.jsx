@@ -89,19 +89,19 @@ export default function ResetPassword() {
   return (
     <PageTransition>
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full bg-white border border-[#E8E6E1] rounded-3xl p-8 shadow-xl space-y-6">
+        <div className="max-w-md w-full bg-white border border-[#DDE3E0] rounded-3xl p-8 shadow-xl space-y-6">
           {/* Header Branding */}
           <div className="text-center space-y-2">
             <Link to="/" className="inline-flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-2xl bg-[#800020] flex items-center justify-center text-white font-heading font-extrabold text-xl shadow-md">
-                Q
+              <div className="w-10 h-10 rounded-2xl bg-[#18A999] flex items-center justify-center text-white font-heading font-extrabold text-xl shadow-md">
+                L
               </div>
             </Link>
-            <h1 className="text-2xl font-bold font-heading text-[#171717]">
+            <h1 className="text-2xl font-bold font-heading text-[#172121]">
               Reset Your Password
             </h1>
-            <p className="text-xs text-[#6F6F6F]">
-              Enter a new secure password for your Qleenq account.
+            <p className="text-xs text-[#3D4948]">
+              Enter a new secure password for your LEENKIT account.
             </p>
           </div>
 
@@ -157,7 +157,7 @@ export default function ResetPassword() {
                     }}
                     placeholder="Enter new password"
                     disabled={isLoading}
-                    className="w-full pl-10 pr-10 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020] disabled:opacity-50"
+                    className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
                   />
                   <button
                     type="button"
@@ -183,7 +183,7 @@ export default function ResetPassword() {
                     }}
                     placeholder="Confirm new password"
                     disabled={isLoading}
-                    className="w-full pl-10 pr-10 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020] disabled:opacity-50"
+                    className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
                   />
                   <button
                     type="button"
@@ -210,7 +210,7 @@ export default function ResetPassword() {
                 <button
                   type="button"
                   onClick={handleReturnToLogin}
-                  className="text-xs text-[#6F6F6F] hover:text-[#800020] font-semibold cursor-pointer transition-colors"
+                  className="text-xs text-[#6F6F6F] hover:text-[#18A999] font-semibold cursor-pointer transition-colors"
                 >
                   Return to sign in
                 </button>

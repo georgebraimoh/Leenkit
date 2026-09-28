@@ -50,8 +50,8 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Report Concern">
       <form onSubmit={handleSubmit} className="space-y-5 pt-2">
-        <div className="p-3.5 bg-[#FDF0F2] border border-[#800020]/20 rounded-2xl flex items-center gap-3">
-          <ShieldAlert className="w-5 h-5 text-[#800020] shrink-0" />
+        <div className="p-3.5 bg-[#DDF4EF]/40 border border-[#18A999]/30 rounded-2xl flex items-center gap-3">
+          <ShieldAlert className="w-5 h-5 text-[#18A999] shrink-0" />
           <p className="text-xs text-[#171717]">
             Reporting <strong className="font-bold">"{targetTitle || targetType}"</strong>. Reports are anonymous and handled discreetly by our safety team.
           </p>
@@ -64,7 +64,7 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
                 key={idx}
                 className={`flex items-center gap-3 p-3 rounded-2xl border text-xs font-semibold cursor-pointer transition-all ${
                   reason === r
-                    ? 'border-[#800020] bg-[#FDF0F2] text-[#171717]'
+                    ? 'border-[#18A999] bg-[#DDF4EF]/50 text-[#171717]'
                     : 'border-[#E8E6E1] bg-[#F7F6F2] text-[#6F6F6F] hover:text-[#171717]'
                 }`}
               >
@@ -74,7 +74,7 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
                   value={r}
                   checked={reason === r}
                   onChange={() => setReason(r)}
-                  className="accent-[#800020]"
+                  className="accent-[#18A999]"
                 />
                 <span>{r}</span>
               </label>
@@ -88,7 +88,7 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Describe what happened..."
-            className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020]"
+            className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
           />
         </FormField>
 

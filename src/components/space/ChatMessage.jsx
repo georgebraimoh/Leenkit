@@ -37,7 +37,7 @@ export default function ChatMessage({ message, isOwnMessage }) {
           className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover shrink-0 border border-[#E8E6E1] shadow-xs"
         />
       ) : (
-        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#800020] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#18A999] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
           {initials}
         </div>
       )}
@@ -54,7 +54,7 @@ export default function ChatMessage({ message, isOwnMessage }) {
         <div
           className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line break-words ${
             isOwnMessage
-              ? 'bg-[#800020] text-white rounded-tr-xs shadow-xs text-left'
+              ? 'bg-[#18A999] text-white rounded-tr-xs shadow-xs text-left'
               : 'bg-white text-[#171717] border border-[#E8E6E1] rounded-tl-xs shadow-xs text-left'
           }`}
         >

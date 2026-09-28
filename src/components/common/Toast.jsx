@@ -35,7 +35,7 @@ export function ToastProvider({ children }) {
               }`}
             >
               <div className="flex items-center gap-3">
-                {toast.type === 'success' && <CheckCircle className="w-5 h-5 text-[#800020]" />}
+                {toast.type === 'success' && <CheckCircle className="w-5 h-5 text-[#18A999]" />}
                 {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-400" />}
                 {toast.type === 'info' && <Info className="w-5 h-5 text-indigo-500" />}
                 <p className="text-xs font-semibold">{toast.message}</p>

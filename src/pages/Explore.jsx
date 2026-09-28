@@ -4,12 +4,12 @@ import PageTransition from '../components/layout/PageTransition';
 import SearchBar from '../components/hangout/SearchBar';
 import FilterBar from '../components/hangout/FilterBar';
 import HangoutGrid from '../components/hangout/HangoutGrid';
-import { useQleenq } from '../context/QleenqContext';
+import { useLeenkit } from '../context/LeenkitContext';
 import { useLocationContext } from '../context/LocationContext';
 import { MapPin, RefreshCw } from 'lucide-react';
 
 export default function Explore() {
-  const { hangouts } = useQleenq();
+  const { hangouts } = useLeenkit();
   const {
     activeSearchLocation,
     distanceRadius,
@@ -101,7 +101,7 @@ export default function Explore() {
         {/* Header Section */}
         <div className="space-y-4 max-w-3xl">
           <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#171717] tracking-tight">
-            What Hangouts are happening <span className="text-[#800020]">{locationTitle}?</span>
+            What Hangouts are happening <span className="text-[#18A999]">{locationTitle}?</span>
           </h1>
 
           <p className="text-base text-[#6F6F6F] leading-relaxed">
@@ -125,7 +125,7 @@ export default function Explore() {
           {isFiltered && (
             <button
               onClick={handleResetFilters}
-              className="text-[#800020] hover:underline font-semibold cursor-pointer flex items-center gap-1 pressable link-nudge"
+              className="text-[#18A999] hover:underline font-semibold cursor-pointer flex items-center gap-1 pressable link-nudge"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Reset all filters</span>

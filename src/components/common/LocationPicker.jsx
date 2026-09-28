@@ -88,8 +88,8 @@ export default function LocationPicker({
     <div className="space-y-4 w-full">
       {/* REQUIRED LOCATION TEXT INPUT */}
       <div className="space-y-1.5">
-        <label className="text-xs font-bold text-[#171717] uppercase tracking-wider flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-[#800020]" />
+        <label className="text-xs font-bold text-[#172121] uppercase tracking-wider flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-[#18A999]" />
           <span>Location</span>
           <span className="text-rose-500 font-bold">*</span>
         </label>
@@ -99,7 +99,7 @@ export default function LocationPicker({
           value={locationText}
           onChange={handleTextChange}
           placeholder="e.g. Landmark Beach, Victoria Island, Lagos"
-          className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm text-[#171717] placeholder-[#6F6F6F] focus:outline-none focus:bg-white focus:border-[#800020] shadow-xs transition-all"
+          className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm text-[#172121] placeholder-[#6F6F6F] focus:outline-none focus:bg-white focus:border-[#18A999] shadow-xs transition-all"
         />
         
         <p className="text-[11px] text-[#6F6F6F]">
@@ -108,9 +108,9 @@ export default function LocationPicker({
       </div>
 
       {/* OPTIONAL GOOGLE MAPS LINK INPUT */}
-      <div className="space-y-1.5 pt-1 border-t border-[#E8E6E1]">
-        <label className="text-xs font-bold text-[#171717] uppercase tracking-wider flex items-center gap-1.5 pt-1">
-          <LinkIcon className="w-3.5 h-3.5 text-[#800020]" />
+      <div className="space-y-1.5 pt-1 border-t border-[#DDE3E0]">
+        <label className="text-xs font-bold text-[#172121] uppercase tracking-wider flex items-center gap-1.5 pt-1">
+          <LinkIcon className="w-3.5 h-3.5 text-[#18A999]" />
           <span>Google Maps link (optional)</span>
         </label>
 
@@ -119,8 +119,8 @@ export default function LocationPicker({
           value={googleMapsUrl}
           onChange={handleUrlChange}
           placeholder="Paste Google Maps link (e.g. https://maps.app.goo.gl/...)"
-          className={`w-full px-4 py-3 bg-[#F7F6F2] border rounded-2xl text-sm text-[#171717] placeholder-[#6F6F6F] focus:outline-none focus:bg-white transition-all shadow-xs ${
-            urlValidationError ? 'border-rose-400 focus:border-rose-600 bg-rose-50/20' : 'border-[#E8E6E1] focus:border-[#800020]'
+          className={`w-full px-4 py-3 bg-[#EEF1EF] border rounded-2xl text-sm text-[#172121] placeholder-[#6F6F6F] focus:outline-none focus:bg-white transition-all shadow-xs ${
+            urlValidationError ? 'border-rose-400 focus:border-rose-600 bg-rose-50/20' : 'border-[#DDE3E0] focus:border-[#18A999]'
           }`}
         />
 

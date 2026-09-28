@@ -21,7 +21,7 @@ import EmptyState from '../components/common/EmptyState';
 import ShareModal from '../components/common/ShareModal';
 import ReportModal from '../components/safety/ReportModal';
 import SafetyReminder from '../components/safety/SafetyReminder';
-import { useQleenq } from '../context/QleenqContext';
+import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 
 const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80";
@@ -29,7 +29,7 @@ const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1528605248644-14d
 export default function HangoutDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getHangoutById, joinHangout, leaveHangout, isAttending } = useQleenq();
+  const { getHangoutById, joinHangout, leaveHangout, isAttending } = useLeenkit();
   const { getUserById, currentUser, isAuthenticated, openAuthModal } = useUser();
 
   const [isJoining, setIsJoining] = useState(false);
@@ -142,7 +142,7 @@ export default function HangoutDetails() {
               size="sm"
               className="gap-1.5"
             >
-              <Share2 className="w-3.5 h-3.5 text-[#800020]" />
+              <Share2 className="w-3.5 h-3.5 text-[#18A999]" />
               <span>Share Hangout</span>
             </Button>
 
@@ -199,7 +199,7 @@ export default function HangoutDetails() {
               <div className="p-5 bg-white border border-[#E8E6E1] rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 shadow-xs">
                 {/* Date & Time */}
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[#FDF0F2] text-[#800020] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-2xl bg-[#DDF4EF] text-[#18A999] flex items-center justify-center shrink-0">
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
@@ -212,7 +212,7 @@ export default function HangoutDetails() {
 
                 {/* Location & Google Maps Link */}
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[#FDF0F2] text-[#800020] flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-10 h-10 rounded-2xl bg-[#DDF4EF] text-[#18A999] flex items-center justify-center shrink-0 mt-0.5">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
@@ -226,7 +226,7 @@ export default function HangoutDetails() {
                         href={googleMapsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 mt-1 px-3 py-1.5 bg-[#800020] hover:bg-[#600018] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 mt-1 px-3 py-1.5 bg-[#18A999] hover:bg-[#087F73] text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>Open in Google Maps</span>
@@ -240,7 +240,7 @@ export default function HangoutDetails() {
             {/* Description Section */}
             {hangout.description && hangout.description.trim().length > 0 && (
               <div className="space-y-3 pt-2">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#800020]">About this Hangout</h3>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-[#18A999]">About this Hangout</h3>
                 <div className="p-6 bg-white border border-[#E8E6E1] rounded-2xl shadow-xs">
                   <p className="text-base text-[#333] leading-relaxed whitespace-pre-line font-sans">
                     {hangout.description}
@@ -254,7 +254,7 @@ export default function HangoutDetails() {
 
             {/* Host Section */}
             <div className="space-y-3 pt-2">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-[#800020]">Host</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Host</h3>
               <HostCard hostId={hangout.hostId} />
             </div>
 
@@ -262,7 +262,7 @@ export default function HangoutDetails() {
             <div className="space-y-4 pt-4 border-t border-[#E8E6E1]">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#800020]">Who's Going</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Who's Going</h3>
                   <p className="text-sm font-bold text-[#171717] font-heading mt-0.5">
                     {attendeeIds.length} {attendeeIds.length === 1 ? 'person' : 'people'} going
                   </p>
@@ -283,7 +283,7 @@ export default function HangoutDetails() {
                     <Link
                       key={user.id}
                       to={`/profile/${user.username}`}
-                      className="p-3 bg-white border border-[#E8E6E1] rounded-2xl flex items-center gap-3 hover:border-[#800020]/40 transition-colors pressable"
+                      className="p-3 bg-white border border-[#E8E6E1] rounded-2xl flex items-center gap-3 hover:border-[#18A999]/40 transition-colors pressable"
                     >
                       {user.avatar ? (
                         <img
@@ -292,7 +292,7 @@ export default function HangoutDetails() {
                           className="w-10 h-10 rounded-full object-cover shrink-0"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-[#800020] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-[#18A999] text-white flex items-center justify-center font-bold text-xs shrink-0">
                           {initials}
                         </div>
                       )}
@@ -323,7 +323,7 @@ export default function HangoutDetails() {
                     <span className="text-rose-500">Hangout Full</span>
                   ) : (
                     <span className="flex items-center gap-1">
-                      <span className="font-bold text-[#800020]">{spotsRemaining}</span>
+                      <span className="font-bold text-[#18A999]">{spotsRemaining}</span>
                       <span>{spotsRemaining === 1 ? 'spot remaining' : 'spots remaining'}</span>
                     </span>
                   )}
@@ -370,7 +370,7 @@ export default function HangoutDetails() {
                   fullWidth
                   className="gap-2"
                 >
-                  <Share2 className="w-4 h-4 text-[#800020]" />
+                  <Share2 className="w-4 h-4 text-[#18A999]" />
                   <span>Share Hangout</span>
                 </Button>
               </div>
@@ -407,7 +407,7 @@ export default function HangoutDetails() {
               className="p-2"
               title="Share Hangout"
             >
-              <Share2 className="w-4 h-4 text-[#800020]" />
+              <Share2 className="w-4 h-4 text-[#18A999]" />
             </Button>
 
             {attending || isHost ? (

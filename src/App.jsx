@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, MotionConfig } from 'framer-motion';
 
 import { UserProvider, useUser } from './context/UserContext';
-import { QleenqProvider } from './context/QleenqContext';
+import { LeenkitProvider } from './context/LeenkitContext';
 import { LocationProvider } from './context/LocationContext';
 import { ToastProvider } from './components/common/Toast';
 
@@ -31,8 +31,8 @@ function PageFallback() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-8">
       <div className="text-center space-y-3">
-        <div className="w-8 h-8 border-4 border-[#800020] border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-xs font-semibold text-[#6F6F6F]">Loading Qleenq...</p>
+        <div className="w-8 h-8 border-4 border-[#18A999] border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-xs font-semibold text-[#3D4948]">Loading LEENKIT...</p>
       </div>
     </div>
   );
@@ -80,11 +80,11 @@ export default function App() {
     <ToastProvider>
       <UserProvider>
         <LocationProvider>
-          <QleenqProvider>
+          <LeenkitProvider>
             <MotionConfig reducedMotion="user">
               <BrowserRouter>
                 <ScrollToTop />
-                <div className="min-h-screen flex flex-col justify-between bg-[#FAF4F5] font-sans selection:bg-[#800020]/20 selection:text-[#800020]">
+                <div className="min-h-screen flex flex-col justify-between bg-[#F7F5EF] font-sans selection:bg-[#18A999]/20 selection:text-[#18A999]">
                   <div>
                     <Navbar />
                     <main>
@@ -97,7 +97,7 @@ export default function App() {
                 </div>
               </BrowserRouter>
             </MotionConfig>
-          </QleenqProvider>
+          </LeenkitProvider>
         </LocationProvider>
       </UserProvider>
     </ToastProvider>

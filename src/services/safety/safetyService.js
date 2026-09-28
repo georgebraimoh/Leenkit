@@ -2,12 +2,13 @@
  * Safety & Trust Service — Handles reporting of activities, hosts, and chat members
  */
 
-const STORAGE_KEY_REPORTS = 'leenq_safety_reports';
+const STORAGE_KEY_REPORTS = 'leenkit_safety_reports';
+const FALLBACK_STORAGE_KEY_REPORTS = 'leenq_safety_reports';
 
 export const safetyService = {
   getReports() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_REPORTS);
+      const saved = localStorage.getItem(STORAGE_KEY_REPORTS) || localStorage.getItem(FALLBACK_STORAGE_KEY_REPORTS);
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
       return [];

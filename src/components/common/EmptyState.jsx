@@ -21,7 +21,7 @@ export default function EmptyState({
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.25 }}
-        className="w-16 h-16 rounded-full bg-[#FDF0F2] text-[#800020] flex items-center justify-center mb-4"
+        className="w-16 h-16 rounded-full bg-[#DDF4EF] text-[#18A999] flex items-center justify-center mb-4"
       >
         <Icon className="w-8 h-8" />
       </motion.div>

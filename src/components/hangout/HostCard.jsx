@@ -20,16 +20,16 @@ export default function HostCard({ hostId }) {
         <div>
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#6F6F6F]">Hosted by</span>
-            <ShieldCheck className="w-3.5 h-3.5 text-[#800020]" />
+            <ShieldCheck className="w-3.5 h-3.5 text-[#18A999]" />
           </div>
           <Link
             to={`/profile/${host.username}`}
-            className="font-bold text-[#171717] hover:text-[#800020] transition-colors font-heading text-lg block"
+            className="font-bold text-[#171717] hover:text-[#18A999] transition-colors font-heading text-lg block"
           >
             {host.name}
           </Link>
           <p className="text-xs text-[#6F6F6F] flex items-center gap-1 mt-0.5">
-            <MapPin className="w-3 h-3 text-[#800020]" /> {host.location}
+            <MapPin className="w-3 h-3 text-[#18A999]" /> {host.location}
           </p>
         </div>
       </div>

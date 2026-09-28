@@ -1,5 +1,5 @@
 /**
- * Qleenq Location Service — Worldwide Manual Location Entry & Google Maps Validation
+ * LEENKIT Location Service — Worldwide Manual Location Entry & Google Maps Validation
  * Zero external map API calls (Google Places API / Nominatim / Overpass removed).
  */
 

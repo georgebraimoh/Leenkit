@@ -11,7 +11,7 @@ function formatUser(authUser, profile = {}) {
       authUser.user_metadata?.full_name ||
       authUser.user_metadata?.name ||
       authUser.email?.split('@')[0] ||
-      'Qleenq User',
+      'LEENKIT User',
     email: authUser.email,
     username:
       profile.username ||
@@ -35,7 +35,7 @@ function formatProfile(p) {
   if (!p) return null;
   return {
     id: p.id,
-    name: p.name || 'Qleenq Member',
+    name: p.name || 'LEENKIT Member',
     email: p.email || '',
     username: p.username || `user_${p.id.slice(0, 8)}`,
     avatar: p.avatar || DEFAULT_AVATAR,
@@ -67,7 +67,7 @@ async function getProfile(authUser) {
     authUser.user_metadata?.full_name ||
     authUser.user_metadata?.name ||
     authUser.email?.split('@')[0] ||
-    'Qleenq User';
+    'LEENKIT User';
 
   const username =
     authUser.user_metadata?.username ||
@@ -86,7 +86,7 @@ async function getProfile(authUser) {
     username,
     avatar,
     location: 'Abuja',
-    bio: 'Joined Qleenq to discover real-life Hangouts!',
+    bio: 'Joined LEENKIT to discover real-life Hangouts!',
     interests: [],
     hosted_count: 0,
     attended_count: 0
@@ -227,7 +227,7 @@ export const authService = {
       username,
       avatar: avatar || DEFAULT_AVATAR,
       location: 'Abuja',
-      bio: 'Joined Qleenq to discover real-life Hangouts!',
+      bio: 'Joined LEENKIT to discover real-life Hangouts!',
       interests: [],
       hosted_count: 0,
       attended_count: 0

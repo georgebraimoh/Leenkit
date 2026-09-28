@@ -53,7 +53,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
               key={idx}
               onClick={() => setAvatar(imgUrl)}
               className={`w-11 h-11 rounded-full overflow-hidden border-2 transition-all cursor-pointer ${
-                avatar === imgUrl ? 'border-[#800020] ring-2 ring-[#800020]/30 scale-105' : 'border-transparent opacity-70 hover:opacity-100'
+                avatar === imgUrl ? 'border-[#18A999] ring-2 ring-[#18A999]/30 scale-105' : 'border-transparent opacity-70 hover:opacity-100'
               }`}
             >
               <img src={imgUrl} alt="Avatar option" className="w-full h-full object-cover" />
@@ -73,7 +73,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
             onChange={e => setName(e.target.value)}
             placeholder="e.g. Alex Danjuma"
             disabled={isLoading}
-            className="w-full pl-10 pr-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020] disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
         </div>
       </FormField>
@@ -89,7 +89,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
             onChange={e => setEmail(e.target.value)}
             placeholder="name@example.com"
             disabled={isLoading}
-            className="w-full pl-10 pr-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020] disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
         </div>
       </FormField>
@@ -105,7 +105,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
             onChange={e => setPassword(e.target.value)}
             placeholder="Create a secure password"
             disabled={isLoading}
-            className="w-full pl-10 pr-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020] disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
         </div>
       </FormField>
@@ -127,7 +127,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
           <button
             type="button"
             onClick={onToggleSignIn}
-            className="text-[#800020] font-bold hover:underline cursor-pointer"
+            className="text-[#18A999] font-bold hover:underline cursor-pointer"
           >
             Sign in
           </button>

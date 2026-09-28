@@ -5,6 +5,7 @@ import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
 import { useUser } from '../../context/UserContext';
 import { Mail, Sparkles } from 'lucide-react';
+import leenkitIcon from '../../assets/Leenkit icon.png';
 
 export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) {
   const { loginWithGoogle, loginWithFacebook, loginWithEmail, registerWithEmail } = useUser();
@@ -70,14 +71,18 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="space-y-6 text-center pt-2">
         {/* Header Branding */}
-        <div className="space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-[#800020] flex items-center justify-center text-white mx-auto shadow-md">
-            <span className="font-heading font-extrabold text-2xl">Q</span>
+        <div className="space-y-3">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl mx-auto shadow-xl shadow-black/10 border border-[#DDE3E0] bg-white overflow-hidden flex items-center justify-center">
+            <img
+              src={leenkitIcon}
+              alt="LEENKIT Logo Icon"
+              className="w-full h-full object-cover scale-[2.2]"
+            />
           </div>
-          <h2 className="text-2xl font-bold font-heading text-[#171717]">
-            Welcome to Qleen<span className="text-[#800020]">q</span>
+          <h2 className="text-2xl sm:text-3xl font-bold font-heading text-[#172121]">
+            Welcome to LEEN<span className="text-[#18A999]">KIT</span>
           </h2>
-          <p className="text-xs text-[#6F6F6F] max-w-xs mx-auto">
+          <p className="text-xs text-[#3D4948] max-w-xs mx-auto">
             Find your people. Find something to do anywhere in the world.
           </p>
         </div>
@@ -89,7 +94,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
             <button
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="pressable w-full py-3 px-4 bg-white border border-[#E8E6E1] hover:bg-[#F7F6F2] hover:border-[#D6D2C9] rounded-full text-xs font-semibold text-[#171717] flex items-center justify-center gap-3 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              className="pressable w-full py-3 px-4 bg-white border border-[#DDE3E0] hover:bg-[#EEF1EF] hover:border-[#18A999]/30 rounded-full text-xs font-semibold text-[#172121] flex items-center justify-center gap-3 transition-all shadow-xs cursor-pointer disabled:opacity-50"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -115,18 +120,18 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
             {/* Email Button */}
             <button
               onClick={() => setView('signup')}
-              className="pressable w-full py-3 px-4 bg-stone-900 hover:bg-stone-800 text-white rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
+              className="pressable w-full py-3 px-4 bg-[#172121] hover:bg-[#3D4948] text-white rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
             >
-              <Mail className="w-4 h-4 text-[#800020]" />
+              <Mail className="w-4 h-4 text-[#18A999]" />
               <span>Continue with Email</span>
             </button>
 
-            <div className="pt-4 border-t border-[#E8E6E1] text-xs text-[#6F6F6F]">
+            <div className="pt-4 border-t border-[#DDE3E0] text-xs text-[#3D4948]">
               Already have an account?{' '}
               <button
                 type="button"
                 onClick={() => setView('login')}
-                className="text-[#800020] font-bold hover:underline cursor-pointer"
+                className="text-[#18A999] font-bold hover:underline cursor-pointer"
               >
                 Sign in
               </button>

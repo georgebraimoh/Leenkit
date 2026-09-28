@@ -1,1 +1,2 @@
-export { QleenqProvider as LeenQProvider, useQleenq as useLeenQ } from './QleenqContext';
+export * from './LeenkitContext';
+export { LeenkitProvider as LeenQProvider, useLeenkit as useLeenQ } from './LeenkitContext';

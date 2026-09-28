@@ -52,13 +52,13 @@ export default function SpaceHeader({ hangout }) {
           {/* Hangout Title & Context Metadata */}
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-bold tracking-widest uppercase text-[#800020] bg-[#FDF0F2] px-2 py-0.5 rounded-full shrink-0">
-                Qleenq Space
+              <span className="text-[10px] font-bold tracking-widest uppercase text-[#18A999] bg-[#DDF4EF] px-2 py-0.5 rounded-full shrink-0">
+                LEENKIT Space
               </span>
 
               {rawLocation && (
-                <span className="text-xs text-[#6F6F6F] truncate flex items-center gap-1 max-w-[200px] sm:max-w-none">
-                  <MapPin className="w-3 h-3 text-[#800020] shrink-0" />
+                <span className="text-xs text-[#3D4948] truncate flex items-center gap-1 max-w-[200px] sm:max-w-none">
+                  <MapPin className="w-3 h-3 text-[#18A999] shrink-0" />
                   <span className="truncate">{rawLocation}</span>
                 </span>
               )}
@@ -78,15 +78,15 @@ export default function SpaceHeader({ hangout }) {
 
             <Link
               to={`/hangout/${hangout.id}`}
-              className="text-base sm:text-lg font-bold font-heading text-[#171717] hover:text-[#800020] transition-colors leading-tight truncate block"
+              className="text-base sm:text-lg font-bold font-heading text-[#172121] hover:text-[#18A999] transition-colors leading-tight truncate block"
             >
               {hangout.title}
             </Link>
 
-            <p className="text-xs text-[#6F6F6F] flex items-center gap-2 truncate">
+            <p className="text-xs text-[#3D4948] flex items-center gap-2 truncate">
               <span>{formattedDate} {hangout.time ? `· ${hangout.time}` : ''}</span>
               <span>•</span>
-              <span className="font-semibold text-[#171717]">
+              <span className="font-semibold text-[#172121]">
                 {attendeeIds.length} {attendeeIds.length === 1 ? 'person' : 'people'} in this Hangout
               </span>
             </p>
@@ -101,10 +101,10 @@ export default function SpaceHeader({ hangout }) {
 
           <Link
             to={`/hangout/${hangout.id}`}
-            className="px-3 py-1.5 rounded-full text-xs font-semibold text-[#171717] bg-[#F7F6F2] hover:bg-[#E8E6E1] transition-colors flex items-center gap-1.5 pressable"
+            className="px-3 py-1.5 rounded-full text-xs font-semibold text-[#172121] bg-[#EEF1EF] hover:bg-[#DDE3E0] transition-colors flex items-center gap-1.5 pressable"
             title="View Hangout Details"
           >
-            <Info className="w-4 h-4 text-[#800020]" />
+            <Info className="w-4 h-4 text-[#18A999]" />
             <span className="hidden sm:inline">Details</span>
           </Link>
         </div>

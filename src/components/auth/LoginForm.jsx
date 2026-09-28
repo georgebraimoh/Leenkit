@@ -81,7 +81,7 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
             }}
             placeholder="name@example.com"
             disabled={isLoading || isResetLoading}
-            className="w-full pl-10 pr-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020] disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
         </div>
       </FormField>
@@ -97,7 +97,7 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
             onChange={e => setPassword(e.target.value)}
             placeholder="Enter your password"
             disabled={isLoading || isResetLoading}
-            className="w-full pl-10 pr-10 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#800020] disabled:opacity-50"
+            className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
           <button
             type="button"
@@ -114,7 +114,7 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
           type="button"
           onClick={handleForgotPassword}
           disabled={isLoading || isResetLoading}
-          className="text-[#6F6F6F] hover:text-[#800020] font-medium cursor-pointer disabled:opacity-50 transition-colors"
+          className="text-[#6F6F6F] hover:text-[#18A999] font-medium cursor-pointer disabled:opacity-50 transition-colors"
         >
           {isResetLoading ? 'Sending reset link...' : 'Forgot password?'}
         </button>
@@ -137,7 +137,7 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
           <button
             type="button"
             onClick={onToggleSignUp}
-            className="text-[#800020] font-bold hover:underline cursor-pointer"
+            className="text-[#18A999] font-bold hover:underline cursor-pointer"
           >
             Create account
           </button>

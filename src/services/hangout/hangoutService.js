@@ -228,7 +228,7 @@ export const hangoutService = {
     return {
       id: dbMessage.id,
       userId: dbMessage.user_id,
-      userName: dbMessage.user_name || 'Qleenq User',
+      userName: dbMessage.user_name || 'LEENKIT User',
       userAvatar: dbMessage.user_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       text: dbMessage.text || '',
       timestamp: formattedTime,
@@ -267,7 +267,7 @@ export const hangoutService = {
     const payload = {
       hangout_id: hangoutId,
       user_id: userId,
-      user_name: userName || 'Qleenq User',
+      user_name: userName || 'LEENKIT User',
       user_avatar: userAvatar || null,
       text: trimmedText,
       type: type || 'user'
