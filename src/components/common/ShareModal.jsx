@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Modal from './Modal';
 import Button from './Button';
 import { useToast } from './Toast';
-import { Copy, Check, Share2, Send } from 'lucide-react';
+import { Copy, Check, Share2, Send, MapPin } from 'lucide-react';
 
 const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=400&q=80";
 
@@ -27,8 +27,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
 
   const shareUrl = `${window.location.origin}/hangout/${hangout.id}`;
 
-  const whatsappMessage = `🎉 Join the Hangout "${hangout.title}" on LEENKIT!\n\n📍 ${locName}\n${formattedDate ? `📅 ${formattedDate}` : ''}${hangout.time ? ` at ${hangout.time}` : ''}\n\n👉 Join the Hangout: ${shareUrl}`;
-
+  const whatsappMessage = `Join the Hangout "${hangout.title}" on LEENKIT!\n\nLocation: ${locName}\n${formattedDate ? `Date: ${formattedDate}` : ''}${hangout.time ? ` at ${hangout.time}` : ''}\n\nJoin the Hangout: ${shareUrl}`;
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappMessage)}`;
   const canNativeShare = typeof navigator !== 'undefined' && Boolean(navigator.share);
 
@@ -78,8 +77,9 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
             <h4 className="font-heading font-bold text-sm text-[#172121] truncate">
               {hangout.title}
             </h4>
-            <p className="text-xs text-[#3D4948] truncate">
-              📍 {locName}
+            <p className="text-xs text-[#3D4948] truncate flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-[#18A999] shrink-0" />
+              <span>{locName}</span>
             </p>
           </div>
         </div>

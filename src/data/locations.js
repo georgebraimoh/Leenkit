@@ -1,15 +1,15 @@
 export const GLOBAL_CITIES = [
-  { id: 'all', name: 'All Cities', country: 'Global', flag: '🌐' },
-  { id: 'london', name: 'London', country: 'United Kingdom', flag: '🇬🇧' },
-  { id: 'new-york', name: 'New York', country: 'United States', flag: '🇺🇸' },
-  { id: 'tokyo', name: 'Tokyo', country: 'Japan', flag: '🇯🇵' },
-  { id: 'lagos', name: 'Lagos', country: 'Nigeria', flag: '🇳🇬' },
-  { id: 'berlin', name: 'Berlin', country: 'Germany', flag: '🇩🇪' },
-  { id: 'toronto', name: 'Toronto', country: 'Canada', flag: '🇨🇦' },
-  { id: 'abuja', name: 'Abuja', country: 'Nigeria', flag: '🇳🇬' },
-  { id: 'nairobi', name: 'Nairobi', country: 'Kenya', flag: '🇰🇪' },
-  { id: 'accra', name: 'Accra', country: 'Ghana', flag: '🇬🇭' },
-  { id: 'cape-town', name: 'Cape Town', country: 'South Africa', flag: '🇿🇦' }
+  { id: 'all', name: 'All Cities', country: 'Global' },
+  { id: 'london', name: 'London', country: 'United Kingdom' },
+  { id: 'new-york', name: 'New York', country: 'United States' },
+  { id: 'tokyo', name: 'Tokyo', country: 'Japan' },
+  { id: 'lagos', name: 'Lagos', country: 'Nigeria' },
+  { id: 'berlin', name: 'Berlin', country: 'Germany' },
+  { id: 'toronto', name: 'Toronto', country: 'Canada' },
+  { id: 'abuja', name: 'Abuja', country: 'Nigeria' },
+  { id: 'nairobi', name: 'Nairobi', country: 'Kenya' },
+  { id: 'accra', name: 'Accra', country: 'Ghana' },
+  { id: 'cape-town', name: 'Cape Town', country: 'South Africa' }
 ];
 
 export const CITY_NEIGHBORHOODS = {

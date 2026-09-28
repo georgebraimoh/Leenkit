@@ -395,7 +395,14 @@ export default function HangoutDetails() {
           <div className="min-w-0">
             <span className="text-[10px] text-[#6F6F6F] uppercase font-bold tracking-wider block">Status</span>
             <p className="text-xs font-bold text-[#171717] font-heading truncate">
-              {attending ? "You're going ✓" : `${attendeeIds.length}/${maxAttendees} going`}
+              {attending ? (
+                <span className="flex items-center gap-1">
+                  <span>You're going</span>
+                  <Check className="w-3.5 h-3.5 text-[#18A999] inline" />
+                </span>
+              ) : (
+                `${attendeeIds.length}/${maxAttendees} going`
+              )}
             </p>
           </div>
 

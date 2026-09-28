@@ -25,7 +25,7 @@ export default function FilterBar({
           <CategoryChip
             key={cat.id}
             label={cat.label}
-            emoji={cat.emoji}
+            icon={cat.icon}
             active={selectedCategory === cat.id}
             onClick={() => onSelectCategory(cat.id)}
           />

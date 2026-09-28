@@ -271,18 +271,21 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {CATEGORIES.filter(c => c.id !== 'all').map(cat => (
-                <Link
-                  key={cat.id}
-                  to={`/explore?category=${cat.id}`}
-                  className="pressable p-4 rounded-2xl bg-[#DDF4EF] border border-[#DDE3E0] hover:bg-[#18A999] hover:text-white hover:-translate-y-0.5 group transition-all duration-200 text-center flex flex-col items-center justify-center space-y-2 cursor-pointer shadow-xs"
-                >
-                  <span className="text-2xl transition-transform duration-200 group-hover:scale-110">{cat.emoji}</span>
-                  <span className="text-xs font-bold font-heading text-[#172121] group-hover:text-white transition-colors">
-                    {cat.label}
-                  </span>
-                </Link>
-              ))}
+              {CATEGORIES.filter(c => c.id !== 'all').map(cat => {
+                const Icon = cat.icon;
+                return (
+                  <Link
+                    key={cat.id}
+                    to={`/explore?category=${cat.id}`}
+                    className="pressable p-4 rounded-2xl bg-[#DDF4EF] border border-[#DDE3E0] hover:bg-[#18A999] hover:text-white hover:-translate-y-0.5 group transition-all duration-200 text-center flex flex-col items-center justify-center space-y-2 cursor-pointer shadow-xs"
+                  >
+                    {Icon && <Icon className="w-6 h-6 text-[#18A999] group-hover:text-white transition-colors duration-200 group-hover:scale-110 transition-transform" />}
+                    <span className="text-xs font-bold font-heading text-[#172121] group-hover:text-white transition-colors">
+                      {cat.label}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </motion.section>

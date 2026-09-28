@@ -179,8 +179,9 @@ export default function CreateHangout() {
               <div className="p-4 bg-[#EEF1EF] rounded-2xl max-w-sm mx-auto text-left space-y-1 border border-[#DDE3E0]">
                 <p className="text-xs font-bold uppercase text-[#18A999]">{createdActivity.category}</p>
                 <h4 className="font-bold text-[#171717] font-heading">{createdActivity.title}</h4>
-                <p className="text-xs text-[#6F6F6F]">
-                  📍 {createdActivity.location?.placeName || 'Venue'} · {createdActivity.date} at {createdActivity.time}
+                <p className="text-xs text-[#6F6F6F] flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-[#18A999] shrink-0" />
+                  <span>{createdActivity.location?.placeName || 'Venue'} · {createdActivity.date} at {createdActivity.time}</span>
                 </p>
               </div>
 

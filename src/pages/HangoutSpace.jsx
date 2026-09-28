@@ -6,7 +6,7 @@ import ChatMessage from '../components/space/ChatMessage';
 import ChatInput from '../components/space/ChatInput';
 import Button from '../components/common/Button';
 import ReportModal from '../components/safety/ReportModal';
-import { Lock, Sparkles, ShieldAlert, LogOut } from 'lucide-react';
+import { Lock, Sparkles, ShieldAlert, LogOut, MessageSquare } from 'lucide-react';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 
@@ -170,7 +170,10 @@ export default function HangoutSpace() {
 
         {/* Space Context Banner & Actions */}
         <div className="bg-[#DDF4EF] border-b border-[#DDE3E0] px-4 py-2.5 flex flex-wrap items-center justify-between text-xs text-[#087F73] font-medium gap-2">
-          <span>💬 Temporary LEENKIT Space for attendees of this Hangout.</span>
+          <span className="flex items-center gap-1.5">
+            <MessageSquare className="w-3.5 h-3.5 text-[#087F73] shrink-0" />
+            <span>Temporary LEENKIT Space for attendees of this Hangout.</span>
+          </span>
 
           <div className="flex items-center gap-3">
             <button
