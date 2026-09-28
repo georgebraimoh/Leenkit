@@ -324,9 +324,23 @@ export const authService = {
       throw new Error('Unsupported image format. Please select a JPG, PNG, or WEBP image.');
     }
 
+    // Always retrieve the true authenticated user directly from the active Supabase Auth session
+    const {
+      data: { user: authUser },
+      error: authError
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
+      console.warn('[Storage Upload] Active Supabase Auth session not found:', authError?.message);
+      throw new Error('Authentication required: No active session found. Please sign in again.');
+    }
+
+    const activeUserId = authUser.id;
     const fileExt = file.name.split('.').pop() || 'jpg';
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-    const filePath = `${userId || 'guest'}/${fileName}`;
+    const filePath = `${activeUserId}/${fileName}`;
+
+    console.log('[Storage Upload] Uploading to "profile-images" at path:', filePath);
 
     const { data, error } = await supabase.storage
       .from('profile-images')
@@ -336,12 +350,33 @@ export const authService = {
       });
 
     if (error) {
-      throw new Error(`Profile picture upload failed: ${error.message}`);
+      console.error('[Storage Upload Diagnostics]', {
+        message: error.message,
+        name: error.name,
+        status: error.status,
+        statusCode: error.statusCode,
+        errorData: error.error,
+        filePath,
+        bucket: 'profile-images',
+        activeUserId
+      });
+
+      if (error.message?.includes('Failed to fetch') || error.name === 'TypeError') {
+        throw new Error(
+          'Profile picture upload network error (Failed to fetch). Please verify connection to Supabase storage or sign in again.'
+        );
+      }
+
+      throw new Error(`Storage upload failed: ${error.message}`);
     }
 
     const { data: publicUrlData } = supabase.storage
       .from('profile-images')
       .getPublicUrl(data.path);
+
+    if (!publicUrlData?.publicUrl) {
+      throw new Error('Failed to generate public URL for uploaded profile picture.');
+    }
 
     return publicUrlData.publicUrl;
   },

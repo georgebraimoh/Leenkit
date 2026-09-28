@@ -123,16 +123,24 @@ export default function EditProfile() {
 
     let finalAvatarUrl = formData.avatar;
 
-    try {
-      if (customAvatarFile) {
-        setSavingState('Uploading profile picture...');
+    if (customAvatarFile) {
+      setSavingState('Uploading profile picture...');
+      try {
         const publicUrl = await authService.uploadAvatarImage(currentUser?.id, customAvatarFile);
         if (publicUrl) {
           finalAvatarUrl = publicUrl;
         }
+      } catch (uploadErr) {
+        console.error('[Profile Picture Upload Stage Error]', uploadErr);
+        setSaveError(uploadErr.message || 'Storage upload failed. Please try again.');
+        setIsSaving(false);
+        setSavingState('');
+        return;
       }
+    }
 
-      setSavingState('Saving profile changes...');
+    setSavingState('Saving profile changes...');
+    try {
       const updated = await updateProfile({
         name: formData.name,
         title: formData.title,
@@ -149,8 +157,9 @@ export default function EditProfile() {
       setTimeout(() => {
         navigate(`/profile/${updated?.username || currentUser?.username}`);
       }, 600);
-    } catch (err) {
-      setSaveError(err.message || 'Failed to update profile. Please try again.');
+    } catch (dbErr) {
+      console.error('[Profile Database Update Stage Error]', dbErr);
+      setSaveError(`Profile details save failed: ${dbErr.message || 'Database update error.'}`);
     } finally {
       setIsSaving(false);
       setSavingState('');
