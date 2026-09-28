@@ -26,6 +26,9 @@ function formatUser(authUser, profile = {}) {
     location: profile.location || 'Abuja',
     bio: profile.bio || '',
     interests: profile.interests || [],
+    instagramUrl: profile.instagram_url || '',
+    tiktokUrl: profile.tiktok_url || '',
+    spotifyUrl: profile.spotify_url || '',
     hostedCount: profile.hosted_count || 0,
     attendedCount: profile.attended_count || 0
   };
@@ -42,6 +45,9 @@ function formatProfile(p) {
     location: p.location || 'Abuja',
     bio: p.bio || '',
     interests: p.interests || [],
+    instagramUrl: p.instagram_url || '',
+    tiktokUrl: p.tiktok_url || '',
+    spotifyUrl: p.spotify_url || '',
     hostedCount: p.hosted_count || 0,
     attendedCount: p.attended_count || 0
   };
@@ -345,7 +351,17 @@ export const authService = {
       throw new Error('User ID is required to update profile.');
     }
 
-    const allowedFields = ['name', 'username', 'avatar', 'location', 'bio', 'interests'];
+    const allowedFields = [
+      'name',
+      'username',
+      'avatar',
+      'location',
+      'bio',
+      'interests',
+      'instagram_url',
+      'tiktok_url',
+      'spotify_url'
+    ];
     const updatesPayload = {};
 
     allowedFields.forEach((field) => {

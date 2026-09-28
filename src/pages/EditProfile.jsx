@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
 import FormField from '../components/common/FormField';
-import { ArrowLeft, CheckCircle, AlertCircle, Upload, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, Upload, X, Globe } from 'lucide-react';
+import { InstagramIcon, TikTokIcon, SpotifyIcon } from '../components/common/SocialIcons';
 import { useUser } from '../context/UserContext';
 import { authService } from '../services/auth/authService';
-import { LOCATIONS } from '../data/locations';
+import { validateAllSocialUrls } from '../utils/socialUrlValidator';
 
 const AVATAR_PRESETS = [
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
@@ -31,12 +32,21 @@ export default function EditProfile() {
     location: currentUser?.location || 'Wuse 2, Abuja',
     bio: currentUser?.bio || '',
     avatar: currentUser?.avatar || AVATAR_PRESETS[0],
-    interests: currentUser?.interests || []
+    interests: currentUser?.interests || [],
+    instagramUrl: currentUser?.instagramUrl || '',
+    tiktokUrl: currentUser?.tiktokUrl || '',
+    spotifyUrl: currentUser?.spotifyUrl || ''
   });
 
   const [customAvatarFile, setCustomAvatarFile] = useState(null);
   const [customAvatarPreview, setCustomAvatarPreview] = useState(null);
   const [avatarError, setAvatarError] = useState('');
+
+  const [socialErrors, setSocialErrors] = useState({
+    instagramUrl: '',
+    tiktokUrl: '',
+    spotifyUrl: ''
+  });
 
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -93,8 +103,23 @@ export default function EditProfile() {
     e.preventDefault();
     setSaved(false);
     setSaveError('');
+    setSocialErrors({ instagramUrl: '', tiktokUrl: '', spotifyUrl: '' });
     setIsSaving(true);
     setSavingState('');
+
+    // Step 4 URL Validation & Security Check
+    const socialValidation = validateAllSocialUrls({
+      instagramUrl: formData.instagramUrl,
+      tiktokUrl: formData.tiktokUrl,
+      spotifyUrl: formData.spotifyUrl
+    });
+
+    if (!socialValidation.isValid) {
+      setSocialErrors(socialValidation.errors);
+      setSaveError('Please check your social profile links for validation errors.');
+      setIsSaving(false);
+      return;
+    }
 
     let finalAvatarUrl = formData.avatar;
 
@@ -109,8 +134,15 @@ export default function EditProfile() {
 
       setSavingState('Saving profile changes...');
       const updated = await updateProfile({
-        ...formData,
-        avatar: finalAvatarUrl
+        name: formData.name,
+        title: formData.title,
+        location: formData.location,
+        bio: formData.bio,
+        avatar: finalAvatarUrl,
+        interests: formData.interests,
+        instagram_url: socialValidation.normalized.instagram_url,
+        tiktok_url: socialValidation.normalized.tiktok_url,
+        spotify_url: socialValidation.normalized.spotify_url
       });
 
       setSaved(true);
@@ -287,6 +319,123 @@ export default function EditProfile() {
               })}
             </div>
           </FormField>
+
+          {/* Social Profiles Section */}
+          <div className="pt-6 border-t border-[#E8E6E1] space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold font-heading text-[#172121] flex items-center gap-2">
+                <Globe className="w-4 h-4 text-[#18A999]" />
+                <span>Social Profiles</span>
+              </h3>
+              <p className="text-xs text-[#6F6F6F]">
+                Connect your public social profiles so other members can find you on Instagram, TikTok, or Spotify. All social links are optional.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Instagram URL */}
+              <FormField label="Instagram Profile URL" helpText="e.g. https://www.instagram.com/your_username">
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-[#18A999]">
+                    <InstagramIcon className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="url"
+                    value={formData.instagramUrl}
+                    onChange={e => {
+                      setFormData({ ...formData, instagramUrl: e.target.value });
+                      if (socialErrors.instagramUrl) setSocialErrors({ ...socialErrors, instagramUrl: '' });
+                    }}
+                    placeholder="https://www.instagram.com/username"
+                    className={`w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border rounded-2xl text-sm focus:outline-none focus:bg-white ${
+                      socialErrors.instagramUrl ? 'border-rose-400 focus:border-rose-500' : 'border-[#DDE3E0] focus:border-[#18A999]'
+                    }`}
+                  />
+                  {formData.instagramUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, instagramUrl: '' })}
+                      className="absolute right-3 text-[#6F6F6F] hover:text-[#172121] cursor-pointer"
+                      title="Clear Instagram URL"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {socialErrors.instagramUrl && (
+                  <p className="text-xs text-rose-500 font-medium pt-1">{socialErrors.instagramUrl}</p>
+                )}
+              </FormField>
+
+              {/* TikTok URL */}
+              <FormField label="TikTok Profile URL" helpText="e.g. https://www.tiktok.com/@your_username">
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-[#172121]">
+                    <TikTokIcon className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="url"
+                    value={formData.tiktokUrl}
+                    onChange={e => {
+                      setFormData({ ...formData, tiktokUrl: e.target.value });
+                      if (socialErrors.tiktokUrl) setSocialErrors({ ...socialErrors, tiktokUrl: '' });
+                    }}
+                    placeholder="https://www.tiktok.com/@username"
+                    className={`w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border rounded-2xl text-sm focus:outline-none focus:bg-white ${
+                      socialErrors.tiktokUrl ? 'border-rose-400 focus:border-rose-500' : 'border-[#DDE3E0] focus:border-[#18A999]'
+                    }`}
+                  />
+                  {formData.tiktokUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tiktokUrl: '' })}
+                      className="absolute right-3 text-[#6F6F6F] hover:text-[#172121] cursor-pointer"
+                      title="Clear TikTok URL"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {socialErrors.tiktokUrl && (
+                  <p className="text-xs text-rose-500 font-medium pt-1">{socialErrors.tiktokUrl}</p>
+                )}
+              </FormField>
+
+              {/* Spotify URL */}
+              <FormField label="Spotify Profile URL" helpText="e.g. https://open.spotify.com/user/your_profile_id">
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-[#1DB954]">
+                    <SpotifyIcon className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="url"
+                    value={formData.spotifyUrl}
+                    onChange={e => {
+                      setFormData({ ...formData, spotifyUrl: e.target.value });
+                      if (socialErrors.spotifyUrl) setSocialErrors({ ...socialErrors, spotifyUrl: '' });
+                    }}
+                    placeholder="https://open.spotify.com/user/profile_id"
+                    className={`w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border rounded-2xl text-sm focus:outline-none focus:bg-white ${
+                      socialErrors.spotifyUrl ? 'border-rose-400 focus:border-rose-500' : 'border-[#DDE3E0] focus:border-[#18A999]'
+                    }`}
+                  />
+                  {formData.spotifyUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, spotifyUrl: '' })}
+                      className="absolute right-3 text-[#6F6F6F] hover:text-[#172121] cursor-pointer"
+                      title="Clear Spotify URL"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {socialErrors.spotifyUrl && (
+                  <p className="text-xs text-rose-500 font-medium pt-1">{socialErrors.spotifyUrl}</p>
+                )}
+              </FormField>
+            </div>
+          </div>
 
           {/* Submit Action */}
           <div className="pt-4 border-t border-[#E8E6E1] flex items-center justify-between">
