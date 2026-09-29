@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Compass, Calendar, Plus, User } from 'lucide-react';
+import { Compass, Calendar, Plus, User, Sparkles } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 
 export default function MobileNav() {
@@ -44,6 +44,31 @@ export default function MobileNav() {
         </NavLink>
 
         <NavLink
+          to="/activity"
+          className="flex flex-col items-center gap-1 relative"
+        >
+          {({ isActive }) => (
+            <motion.div
+              whileTap={{ scale: 0.92 }}
+              className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
+                isActive ? 'text-[#18A999]' : 'text-[#3D4948]'
+              }`}
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>Activity</span>
+
+              {isActive && (
+                <motion.div
+                  layoutId="mobileActiveDot"
+                  className="w-1.5 h-1.5 rounded-full bg-[#18A999] absolute -bottom-1"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+            </motion.div>
+          )}
+        </NavLink>
+
+        <NavLink
           to="/my-hangouts"
           className="flex flex-col items-center gap-1 relative"
         >
@@ -55,7 +80,7 @@ export default function MobileNav() {
               }`}
             >
               <Calendar className="w-5 h-5" />
-              <span>My Hangouts</span>
+              <span>Your Hangouts</span>
 
               {isActive && (
                 <motion.div

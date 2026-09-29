@@ -33,7 +33,10 @@ function formatHangout(dbHangout, attendeesList = []) {
     image: dbHangout.image || "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80",
     status: dbHangout.status || 'upcoming',
     featured: dbHangout.featured || false,
-    isPopular: dbHangout.is_popular || false
+    isPopular: dbHangout.is_popular || false,
+    isPaid: Boolean(dbHangout.is_paid),
+    price: dbHangout.price ? Number(dbHangout.price) : null,
+    currency: dbHangout.currency || 'NGN'
   };
 }
 
@@ -125,6 +128,9 @@ export const hangoutService = {
       status: 'upcoming',
       featured: false,
       is_popular: false,
+      is_paid: Boolean(newHangoutData.isPaid),
+      price: newHangoutData.isPaid && newHangoutData.price ? parseFloat(newHangoutData.price) : null,
+      currency: newHangoutData.isPaid ? (newHangoutData.currency || 'NGN') : 'NGN',
       place_name: (locText || 'Meeting Location').trim(),
       address: (locText || '').trim(),
       city: loc.city || null,
@@ -198,6 +204,55 @@ export const hangoutService = {
     if (error) {
       throw new Error(error.message);
     }
+  },
+
+  async markHangoutCompleted(hangoutId) {
+    const { error } = await supabase
+      .from('hangouts')
+      .update({ status: 'completed' })
+      .eq('id', hangoutId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  },
+
+  async getMyHangouts(userId) {
+    if (!userId) return [];
+
+    const { data: dbHangouts, error: hangoutsError } = await supabase
+      .from('hangouts')
+      .select('*')
+      .eq('host_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (hangoutsError) {
+      console.warn('Could not fetch user hangouts from Supabase:', hangoutsError.message);
+      throw new Error(hangoutsError.message);
+    }
+
+    if (!dbHangouts || dbHangouts.length === 0) return [];
+
+    const hangoutIds = dbHangouts.map(h => h.id);
+
+    const { data: dbAttendees, error: attendeesError } = await supabase
+      .from('hangout_attendees')
+      .select('*')
+      .in('hangout_id', hangoutIds);
+
+    if (attendeesError) {
+      console.warn('Could not fetch attendees for user hangouts:', attendeesError.message);
+    }
+
+    const attendeesByHangout = {};
+    (dbAttendees || []).forEach(a => {
+      if (!attendeesByHangout[a.hangout_id]) {
+        attendeesByHangout[a.hangout_id] = [];
+      }
+      attendeesByHangout[a.hangout_id].push(a);
+    });
+
+    return dbHangouts.map(h => formatHangout(h, attendeesByHangout[h.id] || []));
   },
 
   async deleteHangout(hangoutId) {

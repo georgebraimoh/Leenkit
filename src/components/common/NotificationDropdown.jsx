@@ -156,6 +156,21 @@ export default function NotificationDropdown() {
                 ))
               )}
             </div>
+
+            {notifications.length > 0 && (
+              <div className="p-3 border-t border-[#DDE3E0] text-center bg-[#F7F5EF]/60">
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate('/activity');
+                  }}
+                  className="text-xs font-bold text-[#18A999] hover:text-[#087F73] transition-colors cursor-pointer inline-flex items-center gap-1"
+                >
+                  <span>View all Activity</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

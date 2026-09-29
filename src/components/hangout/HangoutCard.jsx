@@ -46,6 +46,11 @@ export default function HangoutCard({ hangout, featured = false }) {
       )
     : null;
 
+  // Formatted price string
+  const formattedPrice = hangout.isPaid
+    ? `${hangout.currency === 'NGN' ? '₦' : hangout.currency === 'USD' ? '$' : hangout.currency === 'EUR' ? '€' : hangout.currency === 'GBP' ? '£' : hangout.currency || '₦'}${Number(hangout.price || 0).toLocaleString()}`
+    : 'Free';
+
   return (
     <Link
       to={`/hangout/${hangout.id}`}
@@ -76,10 +81,19 @@ export default function HangoutCard({ hangout, featured = false }) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-          {/* Category Pill & Capacity */}
+          {/* Category Pill, Price Badge & Capacity */}
           <div className="absolute top-3 left-3 z-10 flex flex-wrap gap-2">
             <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-[#172121]/90 backdrop-blur-xs text-white rounded-full shadow-xs">
               {hangout.category}
+            </span>
+            <span
+              className={`px-3 py-1 text-xs font-bold rounded-full shadow-xs backdrop-blur-xs ${
+                hangout.isPaid
+                  ? 'bg-amber-500/90 text-white'
+                  : 'bg-emerald-600/90 text-white'
+              }`}
+            >
+              {formattedPrice}
             </span>
             {isFull && (
               <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-[#18A999] text-white rounded-full shadow-xs">

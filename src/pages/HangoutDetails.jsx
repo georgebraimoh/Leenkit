@@ -12,7 +12,8 @@ import {
   AlertCircle,
   Share2,
   ShieldAlert,
-  ExternalLink
+  ExternalLink,
+  Tag
 } from 'lucide-react';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
@@ -106,6 +107,8 @@ export default function HangoutDetails() {
 
   const spotsRemaining = Math.max(0, maxAttendees - attendeeIds.length);
   const coverImgSrc = (imgError || !hangout.image) ? DEFAULT_COVER_IMAGE : hangout.image;
+  const currencySymbol = hangout.currency === 'NGN' ? '₦' : hangout.currency === 'USD' ? '$' : hangout.currency === 'EUR' ? '€' : hangout.currency === 'GBP' ? '£' : hangout.currency || '₦';
+  const priceDisplay = hangout.isPaid ? `${currencySymbol}${Number(hangout.price || 0).toLocaleString()}` : 'Free';
 
   return (
     <PageTransition>
@@ -169,9 +172,18 @@ export default function HangoutDetails() {
 
             {/* Category & Status Badges Overlay */}
             <div className="absolute top-5 left-5 right-5 flex items-center justify-between pointer-events-none">
-              <span className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-[#171717] rounded-full shadow-md">
-                {hangout.category || 'Hangout'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-[#171717] rounded-full shadow-md">
+                  {hangout.category || 'Hangout'}
+                </span>
+                <span
+                  className={`px-3.5 py-1.5 text-xs font-bold rounded-full shadow-md ${
+                    hangout.isPaid ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'
+                  }`}
+                >
+                  {priceDisplay}
+                </span>
+              </div>
               {isFull ? (
                 <span className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider bg-rose-500 text-white rounded-full shadow-md">
                   Full Capacity
@@ -196,7 +208,7 @@ export default function HangoutDetails() {
               </h1>
 
               {/* Quick Info Grid */}
-              <div className="p-5 bg-white border border-[#E8E6E1] rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 shadow-xs">
+              <div className="p-5 bg-white border border-[#E8E6E1] rounded-2xl grid grid-cols-1 sm:grid-cols-3 gap-4 shadow-xs">
                 {/* Date & Time */}
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-[#DDF4EF] text-[#18A999] flex items-center justify-center shrink-0">
@@ -206,6 +218,23 @@ export default function HangoutDetails() {
                     <span className="text-[10px] uppercase font-bold tracking-wider text-[#6F6F6F]">Date & Time</span>
                     <p className="text-sm font-bold text-[#171717] font-heading">
                       {formattedDate} {hangout.time ? `· ${hangout.time}` : ''}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Admission Price */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-[#DDF4EF] text-[#18A999] flex items-center justify-center shrink-0">
+                    <Tag className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-[#6F6F6F]">Admission</span>
+                    <p className="text-sm font-bold font-heading">
+                      {hangout.isPaid ? (
+                        <span className="text-amber-600 font-extrabold">{priceDisplay}</span>
+                      ) : (
+                        <span className="text-emerald-600 font-bold">Free</span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -377,7 +406,7 @@ export default function HangoutDetails() {
 
               <div className="pt-4 border-t border-[#E8E6E1] space-y-2 text-xs text-[#6F6F6F]">
                 <p className="flex items-center gap-2 font-medium">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" /> Free to join
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" /> {hangout.isPaid ? `Admission: ${priceDisplay}` : 'Free to join'}
                 </p>
                 <p className="flex items-center gap-2 font-medium">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" /> Instant access to Hangout Space

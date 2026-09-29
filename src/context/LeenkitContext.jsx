@@ -270,6 +270,15 @@ export function LeenkitProvider({ children }) {
     setHangouts(prev => prev.map(h => h.id === id ? { ...h, status: 'cancelled' } : h));
   };
 
+  const completeHangout = async (id) => {
+    try {
+      await hangoutService.markHangoutCompleted(id);
+    } catch (err) {
+      console.warn('Could not persist completion:', err.message);
+    }
+    setHangouts(prev => prev.map(h => h.id === id ? { ...h, status: 'completed' } : h));
+  };
+
   const deleteHangout = async (id) => {
     try {
       await hangoutService.deleteHangout(id);
@@ -318,6 +327,7 @@ export function LeenkitProvider({ children }) {
       leaveHangout,
       createHangout,
       cancelHangout,
+      completeHangout,
       deleteHangout,
       sendMessage,
       loadSpaceMessages,

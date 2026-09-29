@@ -3,6 +3,8 @@ import { supabase } from '../../lib/supabase';
 const DEFAULT_AVATAR =
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
 
+export const CURRENT_GUIDELINES_VERSION = '1.0';
+
 function formatUser(authUser, profile = {}) {
   return {
     id: authUser.id,
@@ -29,6 +31,11 @@ function formatUser(authUser, profile = {}) {
     instagramUrl: profile.instagram_url || '',
     tiktokUrl: profile.tiktok_url || '',
     spotifyUrl: profile.spotify_url || '',
+    hostingGuidelinesAcceptedAt: profile.hosting_guidelines_accepted_at || null,
+    hostingGuidelinesVersion: profile.hosting_guidelines_version || null,
+    isOrganizer: Boolean(profile.is_organizer),
+    isVerifiedOrganizer: Boolean(profile.is_verified_organizer),
+    organizerVerifiedAt: profile.organizer_verified_at || null,
     hostedCount: profile.hosted_count || 0,
     attendedCount: profile.attended_count || 0
   };
@@ -48,6 +55,11 @@ function formatProfile(p) {
     instagramUrl: p.instagram_url || '',
     tiktokUrl: p.tiktok_url || '',
     spotifyUrl: p.spotify_url || '',
+    hostingGuidelinesAcceptedAt: p.hosting_guidelines_accepted_at || null,
+    hostingGuidelinesVersion: p.hosting_guidelines_version || null,
+    isOrganizer: Boolean(p.is_organizer),
+    isVerifiedOrganizer: Boolean(p.is_verified_organizer),
+    organizerVerifiedAt: p.organizer_verified_at || null,
     hostedCount: p.hosted_count || 0,
     attendedCount: p.attended_count || 0
   };
@@ -426,5 +438,25 @@ export const authService = {
     }
 
     return formatUser(authUser, profile || {});
+  },
+
+  async acceptHostingGuidelines(version = CURRENT_GUIDELINES_VERSION) {
+    const { data: profileData, error } = await supabase.rpc('accept_hosting_guidelines', {
+      p_version: version
+    });
+
+    if (error) {
+      throw new Error(`Failed to accept hosting guidelines: ${error.message}`);
+    }
+
+    const {
+      data: { user: authUser }
+    } = await supabase.auth.getUser();
+
+    if (authUser) {
+      return formatUser(authUser, profileData);
+    }
+
+    return formatProfile(profileData);
   }
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Compass, Calendar, Plus, User, LogOut, LogIn, ChevronDown, MapPin, Navigation, Search, ShieldCheck } from 'lucide-react';
+import { Compass, Calendar, Plus, User, LogOut, LogIn, ChevronDown, MapPin, Navigation, Search, ShieldCheck, Sparkles } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import { useLocationContext } from '../../context/LocationContext';
 import Button from '../common/Button';
@@ -41,9 +41,17 @@ export default function Navbar() {
 
   const activePlaceName = activeSearchLocation?.placeName || userLocation?.placeName || 'Anywhere';
 
+  const handleActivityClick = (e) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      openAuthModal('welcome');
+    }
+  };
+
   const navLinks = [
     { path: '/explore', label: 'Explore', icon: Compass },
-    { path: '/my-hangouts', label: 'My Hangouts', icon: Calendar, onClick: handleMyHangoutsClick },
+    { path: '/activity', label: 'Activity', icon: Sparkles, onClick: handleActivityClick },
+    { path: '/my-hangouts', label: 'Your Hangouts', icon: Calendar, onClick: handleMyHangoutsClick },
     { path: '/safety', label: 'Safety', icon: ShieldCheck }
   ];
 

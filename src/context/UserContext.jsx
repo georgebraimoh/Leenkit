@@ -271,6 +271,19 @@ export function UserProvider({ children }) {
     return updatedUser;
   };
 
+  const acceptHostingGuidelines = async (version) => {
+    if (!currentUser?.id) {
+      throw new Error('No authenticated user found.');
+    }
+
+    const updatedUser = await authService.acceptHostingGuidelines(version);
+
+    setCurrentUser(updatedUser);
+    updateUsersList(updatedUser);
+
+    return updatedUser;
+  };
+
   const getUserById = (id) => {
     if (!id) return null;
     const found = users.find(user => user.id === id);
@@ -364,6 +377,7 @@ export function UserProvider({ children }) {
         loginWithFacebook,
         logout,
         updateProfile,
+        acceptHostingGuidelines,
         getUserById,
         fetchAndCacheProfiles,
         isVibingWith,

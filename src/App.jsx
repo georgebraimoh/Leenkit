@@ -26,6 +26,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Safety = lazy(() => import('./pages/Safety'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Activity = lazy(() => import('./pages/Activity'));
 
 function PageFallback() {
   return (
@@ -47,10 +48,12 @@ function AnimatedRoutes() {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/activity" element={<Activity />} />
           <Route path="/hangout/:id" element={<HangoutDetails />} />
           <Route path="/hangout/:id/space" element={<HangoutSpace />} />
           <Route path="/create" element={<CreateHangout />} />
           <Route path="/my-hangouts" element={<MyHangouts />} />
+          <Route path="/your-hangouts" element={<MyHangouts />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/login" element={<Login />} />
