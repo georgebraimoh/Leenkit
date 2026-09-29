@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, X, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
+import { Heart, X, CheckCircle2, Sparkles, AlertCircle, CreditCard, Bookmark } from 'lucide-react';
 import Button from '../common/Button';
 import { hangoutService } from '../../services/hangout/hangoutService';
+import { paymentService } from '../../services/payment/paymentService';
 import { useUser } from '../../context/UserContext';
 
 const CURRENCIES = [
@@ -19,6 +20,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
   const [currency, setCurrency] = useState(defaultCurrency);
   const [amount, setAmount] = useState('5000');
   const [message, setMessage] = useState('');
+  const [mode, setMode] = useState('paystack'); // 'paystack' | 'pledge'
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -55,23 +57,48 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
     }
 
     setIsSubmitting(true);
-    try {
-      const record = await hangoutService.createHangoutSponsorship(currentUser.id, {
-        hangoutId: hangout.id,
-        amount: parsedAmount,
-        currency,
-        message
-      });
 
-      setIsSubmitted(true);
-      if (onSponsorshipSuccess) {
-        onSponsorshipSuccess(record);
+    if (mode === 'pledge') {
+      try {
+        const record = await hangoutService.createHangoutSponsorship(currentUser.id, {
+          hangoutId: hangout.id,
+          amount: parsedAmount,
+          currency,
+          message
+        });
+
+        setIsSubmitted(true);
+        if (onSponsorshipSuccess) {
+          onSponsorshipSuccess(record);
+        }
+      } catch (err) {
+        console.error('Sponsorship error:', err);
+        setErrorMsg(err.message || 'Could not record pledge. Please verify you have joined this Hangout.');
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (err) {
-      console.error('Sponsorship error:', err);
-      setErrorMsg(err.message || 'Could not record sponsorship. Please verify you have joined this Hangout.');
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      // Paystack Payment Mode: Server Authorization Redirect
+      try {
+        const { authorization_url } = await paymentService.initializeTransaction({
+          hangoutId: hangout.id,
+          paymentType: 'sponsorship',
+          amount: parsedAmount,
+          currency,
+          message,
+          callbackUrl: `${window.location.origin}/hangout/${hangout.id}`,
+        });
+
+        if (authorization_url) {
+          window.location.href = authorization_url;
+        } else {
+          throw new Error('Paystack authorization URL missing.');
+        }
+      } catch (err) {
+        console.error('Paystack sponsorship initialization error:', err);
+        setErrorMsg(err.message || 'Could not initialize Paystack payment.');
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -216,6 +243,34 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                 </span>
               </div>
 
+              {/* Sponsorship Mode Selector */}
+              <div className="grid grid-cols-2 gap-2 p-1 bg-[#EEF1EF] rounded-2xl border border-[#DDE3E0]">
+                <button
+                  type="button"
+                  onClick={() => setMode('paystack')}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    mode === 'paystack'
+                      ? 'bg-[#18A999] text-white shadow-xs'
+                      : 'text-[#6F6F6F] hover:text-[#171717]'
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Paystack Online</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('pledge')}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    mode === 'pledge'
+                      ? 'bg-[#172121] text-white shadow-xs'
+                      : 'text-[#6F6F6F] hover:text-[#172121]'
+                  }`}
+                >
+                  <Bookmark className="w-3.5 h-3.5" />
+                  <span>Pledge Only</span>
+                </button>
+              </div>
+
               {/* Submit CTA */}
               <div className="pt-2">
                 <Button
@@ -227,7 +282,13 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                   className="gap-2 shadow-sm"
                 >
                   <Heart className="w-4 h-4 fill-white" />
-                  <span>{isSubmitting ? 'Recording...' : `Sponsor ${formattedCTAAmount}`}</span>
+                  <span>
+                    {isSubmitting
+                      ? 'Initializing...'
+                      : mode === 'paystack'
+                      ? `Pay ${formattedCTAAmount} via Paystack`
+                      : `Pledge ${formattedCTAAmount}`}
+                  </span>
                 </Button>
               </div>
             </form>

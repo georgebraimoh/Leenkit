@@ -25,6 +25,7 @@ import ReportModal from '../components/safety/ReportModal';
 import SafetyReminder from '../components/safety/SafetyReminder';
 import SponsorHangoutModal from '../components/hangout/SponsorHangoutModal';
 import { hangoutService } from '../services/hangout/hangoutService';
+import { paymentService } from '../services/payment/paymentService';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 
@@ -43,6 +44,56 @@ export default function HangoutDetails() {
   const [sponsorshipSummary, setSponsorshipSummary] = useState({ currencies: [], totalSponsorCount: 0 });
   const [isLoadingSponsorships, setIsLoadingSponsorships] = useState(true);
   const [imgError, setImgError] = useState(false);
+  const [paymentNotice, setPaymentNotice] = useState(null);
+  const [payError, setPayError] = useState('');
+
+  const loadSponsorshipSummary = React.useCallback(async () => {
+    if (!id) return;
+    setIsLoadingSponsorships(true);
+    try {
+      const res = await hangoutService.fetchHangoutSponsorshipSummary(id);
+      if (res) {
+        setSponsorshipSummary(res);
+      }
+    } catch (err) {
+      console.warn('Failed to load sponsorship summary:', err);
+    } finally {
+      setIsLoadingSponsorships(false);
+    }
+  }, [id]);
+
+  React.useEffect(() => {
+    loadSponsorshipSummary();
+  }, [loadSponsorshipSummary]);
+
+  // Check URL query parameters for Paystack payment verification return
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reference = urlParams.get('reference') || urlParams.get('trxref');
+    
+    if (reference && id) {
+      // Clear URL query parameters without reloading
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      setPaymentNotice({ type: 'info', message: 'Verifying payment with server...' });
+      paymentService.verifyPayment(reference)
+        .then((res) => {
+          if (res.status === 'successful') {
+            setPaymentNotice({ type: 'success', message: 'Payment verified! Welcome to the Hangout 🎉' });
+            loadSponsorshipSummary();
+          } else if (res.status === 'requires_refund') {
+            setPaymentNotice({ type: 'warning', message: 'Payment received, but full capacity was reached before completion. Your payment has been flagged for host/support refund.' });
+          } else if (res.status === 'pending') {
+            setPaymentNotice({ type: 'info', message: 'Payment is pending server verification. Access will be unlocked automatically once confirmed.' });
+          } else {
+            setPaymentNotice({ type: 'error', message: 'Payment verification failed or was cancelled.' });
+          }
+        })
+        .catch((err) => {
+          setPaymentNotice({ type: 'error', message: err.message || 'Could not verify payment.' });
+        });
+    }
+  }, [id, loadSponsorshipSummary]);
 
   const hangout = getHangoutById(id);
 
@@ -91,12 +142,37 @@ export default function HangoutDetails() {
       return;
     }
 
+    if (!hangout.isPaid) {
+      // Free Hangout: Instant join
+      setIsJoining(true);
+      try {
+        await joinHangout(hangout.id);
+      } catch (err) {
+        console.error('Error joining Hangout:', err);
+      } finally {
+        setIsJoining(false);
+      }
+      return;
+    }
+
+    // Paid Hangout: Redirect to server authorization_url (NO client-side join call)
     setIsJoining(true);
+    setPayError('');
     try {
-      await joinHangout(hangout.id);
+      const { authorization_url } = await paymentService.initializeTransaction({
+        hangoutId: hangout.id,
+        paymentType: 'ticket',
+        callbackUrl: `${window.location.origin}/hangout/${hangout.id}`,
+      });
+
+      if (authorization_url) {
+        window.location.href = authorization_url;
+      } else {
+        throw new Error('Paystack checkout URL missing.');
+      }
     } catch (err) {
-      console.error('Error joining Hangout:', err);
-    } finally {
+      console.error('Payment initialization error:', err);
+      setPayError(err.message || 'Could not initialize payment.');
       setIsJoining(false);
     }
   };
@@ -110,25 +186,6 @@ export default function HangoutDetails() {
       }
     }
   };
-
-  const loadSponsorshipSummary = React.useCallback(async () => {
-    if (!hangout?.id) return;
-    setIsLoadingSponsorships(true);
-    try {
-      const res = await hangoutService.fetchHangoutSponsorshipSummary(hangout.id);
-      if (res) {
-        setSponsorshipSummary(res);
-      }
-    } catch (err) {
-      console.warn('Failed to load sponsorship summary:', err);
-    } finally {
-      setIsLoadingSponsorships(false);
-    }
-  }, [hangout?.id]);
-
-  React.useEffect(() => {
-    loadSponsorshipSummary();
-  }, [loadSponsorshipSummary]);
 
   const spotsRemaining = Math.max(0, maxAttendees - attendeeIds.length);
   const coverImgSrc = (imgError || !hangout.image) ? DEFAULT_COVER_IMAGE : hangout.image;
@@ -192,6 +249,38 @@ export default function HangoutDetails() {
             </button>
           </div>
         </div>
+
+        {/* Payment Notice / Error Alert Banner */}
+        {(paymentNotice || payError) && (
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-4">
+            {payError && (
+              <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-semibold text-rose-700 flex items-center gap-2 shadow-xs">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>{payError}</span>
+              </div>
+            )}
+            {paymentNotice && (
+              <div className={`p-4 border rounded-2xl text-xs font-semibold flex items-center justify-between gap-2 shadow-xs ${
+                paymentNotice.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
+                paymentNotice.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+                paymentNotice.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' :
+                'bg-teal-50 border-teal-200 text-teal-800'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{paymentNotice.message}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPaymentNotice(null)}
+                  className="text-xs opacity-60 hover:opacity-100 font-bold ml-2 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Hero Cover Image Section */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-8">
