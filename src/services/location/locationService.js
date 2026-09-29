@@ -28,8 +28,12 @@ export function calculateDistance(lat1, lon1, lat2, lon2) {
  */
 export function validateGoogleMapsUrl(url) {
   if (!url || typeof url !== 'string') return false;
-  const trimmed = url.trim();
+  let trimmed = url.trim();
   if (!trimmed) return false;
+
+  if (!/^https?:\/\//i.test(trimmed)) {
+    trimmed = 'https://' + trimmed;
+  }
 
   try {
     const parsed = new URL(trimmed);

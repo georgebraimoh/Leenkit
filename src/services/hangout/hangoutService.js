@@ -345,6 +345,105 @@ export const hangoutService = {
     }
 
     return this.formatMessage(data);
+  },
+
+  async createHangoutSponsorship(userId, { hangoutId, amount, currency = 'NGN', message = '' }) {
+    if (!userId) {
+      throw new Error('You must be signed in to sponsor a Hangout.');
+    }
+    if (!hangoutId) {
+      throw new Error('Hangout ID is required.');
+    }
+
+    const validCurrencies = ['NGN', 'USD', 'EUR', 'GBP'];
+    const targetCurrency = validCurrencies.includes(currency) ? currency : 'NGN';
+
+    const numericAmount = Number(amount);
+    if (isNaN(numericAmount) || !Number.isFinite(numericAmount) || numericAmount <= 0) {
+      throw new Error('Please enter a valid sponsorship amount greater than zero.');
+    }
+
+    const payload = {
+      hangout_id: hangoutId,
+      sponsor_id: userId,
+      amount: numericAmount,
+      currency: targetCurrency,
+      message: (message || '').trim().substring(0, 200) || null,
+      status: 'pledged'
+    };
+
+    const { data, error } = await supabase
+      .from('hangout_sponsorships')
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return {
+      id: data.id,
+      hangoutId: data.hangout_id,
+      sponsorId: data.sponsor_id,
+      amount: Number(data.amount),
+      currency: data.currency,
+      message: data.message,
+      status: data.status,
+      createdAt: data.created_at
+    };
+  },
+
+  async fetchHangoutSponsorshipSummary(hangoutId) {
+    if (!hangoutId) {
+      return { currencies: [], totalSponsorCount: 0 };
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('get_hangout_sponsorship_summary', {
+        p_hangout_id: hangoutId
+      });
+
+      if (error) {
+        console.warn('Could not fetch hangout sponsorship summary via RPC:', error.message);
+        return { currencies: [], totalSponsorCount: 0 };
+      }
+
+      if (!Array.isArray(data) || data.length === 0) {
+        return { currencies: [], totalSponsorCount: 0 };
+      }
+
+      const validCurrencies = ['NGN', 'USD', 'EUR', 'GBP'];
+      const normalizedCurrencies = [];
+      let totalSponsorCount = 0;
+
+      for (const row of data) {
+        if (!row) continue;
+
+        const curr = String(row.currency || 'NGN').toUpperCase();
+        if (!validCurrencies.includes(curr)) continue;
+
+        const totalPledged = Number(row.total_pledged ?? row.totalPledged ?? 0);
+        const sponsorCount = Number(row.sponsor_count ?? row.sponsorCount ?? 0);
+
+        if (totalPledged > 0 || sponsorCount > 0) {
+          normalizedCurrencies.push({
+            currency: curr,
+            totalPledged,
+            sponsorCount
+          });
+          totalSponsorCount += sponsorCount;
+        }
+      }
+
+      return {
+        currencies: normalizedCurrencies,
+        totalSponsorCount
+      };
+    } catch (err) {
+      console.warn('Unexpected error fetching sponsorship summary:', err);
+      return { currencies: [], totalSponsorCount: 0 };
+    }
   }
 };
 

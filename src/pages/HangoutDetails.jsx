@@ -13,7 +13,8 @@ import {
   Share2,
   ShieldAlert,
   ExternalLink,
-  Tag
+  Tag,
+  Heart
 } from 'lucide-react';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
@@ -22,6 +23,8 @@ import EmptyState from '../components/common/EmptyState';
 import ShareModal from '../components/common/ShareModal';
 import ReportModal from '../components/safety/ReportModal';
 import SafetyReminder from '../components/safety/SafetyReminder';
+import SponsorHangoutModal from '../components/hangout/SponsorHangoutModal';
+import { hangoutService } from '../services/hangout/hangoutService';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 
@@ -36,6 +39,9 @@ export default function HangoutDetails() {
   const [isJoining, setIsJoining] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [sponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const [sponsorshipSummary, setSponsorshipSummary] = useState({ currencies: [], totalSponsorCount: 0 });
+  const [isLoadingSponsorships, setIsLoadingSponsorships] = useState(true);
   const [imgError, setImgError] = useState(false);
 
   const hangout = getHangoutById(id);
@@ -105,6 +111,25 @@ export default function HangoutDetails() {
     }
   };
 
+  const loadSponsorshipSummary = React.useCallback(async () => {
+    if (!hangout?.id) return;
+    setIsLoadingSponsorships(true);
+    try {
+      const res = await hangoutService.fetchHangoutSponsorshipSummary(hangout.id);
+      if (res) {
+        setSponsorshipSummary(res);
+      }
+    } catch (err) {
+      console.warn('Failed to load sponsorship summary:', err);
+    } finally {
+      setIsLoadingSponsorships(false);
+    }
+  }, [hangout?.id]);
+
+  React.useEffect(() => {
+    loadSponsorshipSummary();
+  }, [loadSponsorshipSummary]);
+
   const spotsRemaining = Math.max(0, maxAttendees - attendeeIds.length);
   const coverImgSrc = (imgError || !hangout.image) ? DEFAULT_COVER_IMAGE : hangout.image;
   const currencySymbol = hangout.currency === 'NGN' ? '₦' : hangout.currency === 'USD' ? '$' : hangout.currency === 'EUR' ? '€' : hangout.currency === 'GBP' ? '£' : hangout.currency || '₦';
@@ -113,7 +138,7 @@ export default function HangoutDetails() {
   return (
     <PageTransition>
       <div className="pb-28 sm:pb-24">
-        {/* Share & Report Modals */}
+        {/* Share, Report & Sponsor Modals */}
         <ShareModal
           isOpen={shareModalOpen}
           onClose={() => setShareModalOpen(false)}
@@ -126,6 +151,15 @@ export default function HangoutDetails() {
           targetType="activity"
           targetId={hangout.id}
           targetTitle={hangout.title}
+        />
+
+        <SponsorHangoutModal
+          isOpen={sponsorModalOpen}
+          onClose={() => setSponsorModalOpen(false)}
+          hangout={hangout}
+          onSponsorshipSuccess={() => {
+            loadSponsorshipSummary();
+          }}
         />
 
         {/* Top Navigation & Actions Bar */}
@@ -266,6 +300,44 @@ export default function HangoutDetails() {
               </div>
             </div>
 
+            {/* Community Sponsorship Summary Banner — Visible only to members & host */}
+            {(attending || isHost) && (isLoadingSponsorships || (sponsorshipSummary.currencies && sponsorshipSummary.currencies.length > 0)) && (
+              <div className="p-4 sm:p-5 bg-[#DDF4EF]/60 border border-[#18A999]/30 rounded-2xl flex items-center justify-between gap-4 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#18A999] text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Heart className="w-5 h-5 fill-white" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-[#087F73]">Community Support</span>
+                    {isLoadingSponsorships ? (
+                      <p className="text-xs font-semibold text-[#6F6F6F] animate-pulse">Loading community support...</p>
+                    ) : (
+                      <div className="space-y-0.5">
+                        {sponsorshipSummary.currencies.map(c => {
+                          const sym = c.currency === 'NGN' ? '₦' : c.currency === 'USD' ? '$' : c.currency === 'EUR' ? '€' : c.currency === 'GBP' ? '£' : c.currency;
+                          const countText = c.sponsorCount === 1 ? '1 person' : `${c.sponsorCount} people`;
+                          return (
+                            <p key={c.currency} className="text-sm font-extrabold text-[#171717]">
+                              {sym}{c.totalPledged.toLocaleString()} pledged · {countText}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => setSponsorModalOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 text-[#18A999] border-[#18A999] hover:bg-[#18A999] hover:text-white transition-colors"
+                >
+                  Sponsor
+                </Button>
+              </div>
+            )}
+
             {/* Description Section */}
             {hangout.description && hangout.description.trim().length > 0 && (
               <div className="space-y-3 pt-2">
@@ -370,6 +442,17 @@ export default function HangoutDetails() {
                       </Button>
                     </Link>
 
+                    <Button
+                      onClick={() => setSponsorModalOpen(true)}
+                      variant="outline"
+                      size="md"
+                      fullWidth
+                      className="gap-2 border-[#18A999] text-[#18A999] hover:bg-[#18A999]/10"
+                    >
+                      <Heart className="w-4 h-4 text-[#18A999]" />
+                      <span>Sponsor Hangout</span>
+                    </Button>
+
                     {!isHost && (
                       <button
                         onClick={handleLeaveClick}
@@ -445,6 +528,18 @@ export default function HangoutDetails() {
             >
               <Share2 className="w-4 h-4 text-[#18A999]" />
             </Button>
+
+            {(attending || isHost) && (
+              <Button
+                onClick={() => setSponsorModalOpen(true)}
+                variant="outline"
+                size="sm"
+                className="p-2 border-[#18A999] text-[#18A999]"
+                title="Sponsor Hangout"
+              >
+                <Heart className="w-4 h-4 text-[#18A999]" />
+              </Button>
+            )}
 
             {attending || isHost ? (
               <Link to={`/hangout/${hangout.id}/space`}>

@@ -5,11 +5,22 @@ import { locationService } from '../../services/location/locationService';
 export default function LocationPicker({
   value,
   onSelectLocation,
+  onChange,
   error
 }) {
+  // Safe helper to invoke either onSelectLocation or onChange callback
+  const notifyLocation = (loc) => {
+    if (typeof onSelectLocation === 'function') {
+      onSelectLocation(loc);
+    }
+    if (typeof onChange === 'function') {
+      onChange(loc);
+    }
+  };
+
   // Extract initial values from prop
-  const initialText = typeof value === 'object' && value ? (value.placeName || value.address || '') : (typeof value === 'string' ? value : '');
-  const initialUrl = typeof value === 'object' && value ? (value.googleMapsUrl || '') : '';
+  const initialText = typeof value === 'object' && value ? (value.locationText || value.placeName || value.address || '') : (typeof value === 'string' ? value : '');
+  const initialUrl = typeof value === 'object' && value ? (value.googleMapsUrl || value.rawGoogleMapsUrl || '') : '';
 
   const [locationText, setLocationText] = useState(initialText);
   const [googleMapsUrl, setGoogleMapsUrl] = useState(initialUrl);
@@ -26,8 +37,8 @@ export default function LocationPicker({
     }
 
     if (value && typeof value === 'object') {
-      setLocationText(value.placeName || value.address || '');
-      setGoogleMapsUrl(value.googleMapsUrl || '');
+      setLocationText(value.locationText || value.placeName || value.address || '');
+      setGoogleMapsUrl(value.googleMapsUrl || value.rawGoogleMapsUrl || '');
     } else if (typeof value === 'string') {
       setLocationText(value);
     } else if (!value) {
@@ -39,13 +50,16 @@ export default function LocationPicker({
   const handleChange = (text, url) => {
     isInternalChangeRef.current = true;
 
-    const trimmedUrl = url.trim();
+    const trimmedUrl = (url || '').trim();
+    const normalizedUrl = trimmedUrl && !/^https?:\/\//i.test(trimmedUrl) ? `https://${trimmedUrl}` : trimmedUrl;
 
     let urlErr = '';
     let isValidUrl = true;
 
-    if (trimmedUrl) {
-      isValidUrl = locationService.validateGoogleMapsUrl(trimmedUrl);
+    if (!trimmedUrl) {
+      isValidUrl = false;
+    } else {
+      isValidUrl = locationService.validateGoogleMapsUrl(normalizedUrl);
       if (!isValidUrl) {
         urlErr = 'Please enter a valid Google Maps link (e.g. https://maps.app.goo.gl/... or https://www.google.com/maps/...)';
       }
@@ -54,21 +68,26 @@ export default function LocationPicker({
     setUrlValidationError(urlErr);
 
     if (!text && !trimmedUrl) {
-      onSelectLocation(null);
+      notifyLocation(null);
       return;
     }
 
-    // Preserve raw input text exactly as typed (spaces, commas, periods, quotes) without trimming while typing
-    onSelectLocation({
-      placeName: text,
-      address: text,
+    const finalUrl = isValidUrl ? normalizedUrl : null;
+    const placeName = text.trim() || (finalUrl ? 'Google Maps Location' : '');
+    const address = text.trim() || (finalUrl ? 'Navigable via Google Maps' : '');
+
+    notifyLocation({
+      placeName,
+      address,
+      locationText: text,
       city: typeof value === 'object' ? value?.city || null : null,
       country: typeof value === 'object' ? value?.country || null : null,
       countryCode: typeof value === 'object' ? value?.countryCode || null : null,
       latitude: typeof value === 'object' ? value?.latitude || null : null,
       longitude: typeof value === 'object' ? value?.longitude || null : null,
-      googleMapsUrl: isValidUrl && trimmedUrl ? trimmedUrl : null,
-      hasUrlError: Boolean(urlErr)
+      googleMapsUrl: finalUrl,
+      rawGoogleMapsUrl: url,
+      hasUrlError: Boolean(urlErr) || !trimmedUrl
     });
   };
 
@@ -86,12 +105,11 @@ export default function LocationPicker({
 
   return (
     <div className="space-y-4 w-full">
-      {/* REQUIRED LOCATION TEXT INPUT */}
+      {/* LOCATION / VENUE NAME TEXT INPUT */}
       <div className="space-y-1.5">
         <label className="text-xs font-bold text-[#172121] uppercase tracking-wider flex items-center gap-1.5">
           <MapPin className="w-3.5 h-3.5 text-[#18A999]" />
-          <span>Location</span>
-          <span className="text-rose-500 font-bold">*</span>
+          <span>Location / Venue Name</span>
         </label>
         
         <input
@@ -103,15 +121,16 @@ export default function LocationPicker({
         />
         
         <p className="text-[11px] text-[#6F6F6F]">
-          Enter the venue, street address, or general location of your Hangout.
+          Enter the venue, street address, or general location name of your Hangout.
         </p>
       </div>
 
-      {/* OPTIONAL GOOGLE MAPS LINK INPUT */}
+      {/* REQUIRED GOOGLE MAPS LINK INPUT */}
       <div className="space-y-1.5 pt-1 border-t border-[#DDE3E0]">
         <label className="text-xs font-bold text-[#172121] uppercase tracking-wider flex items-center gap-1.5 pt-1">
           <LinkIcon className="w-3.5 h-3.5 text-[#18A999]" />
-          <span>Google Maps link (optional)</span>
+          <span>Google Maps link</span>
+          <span className="text-rose-500 font-bold">*</span>
         </label>
 
         <input
@@ -131,7 +150,7 @@ export default function LocationPicker({
           </div>
         ) : (
           <p className="text-[11px] text-[#6F6F6F]">
-            Optional. Add a Google Maps link so attendees can easily find the Hangout.
+            Paste a Google Maps link so attendees can easily navigate to the Hangout spot.
           </p>
         )}
       </div>

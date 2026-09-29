@@ -64,12 +64,12 @@ export default function CreateHangout() {
     if (formData.title.trim().length < 5) errs.title = 'Title should be at least 5 characters';
     
     const loc = formData.location;
-    const locText = typeof loc === 'string' ? loc : (loc?.placeName || loc?.address || '');
+    const mapsUrl = typeof loc === 'object' && loc ? (loc.googleMapsUrl || loc.rawGoogleMapsUrl || '') : (typeof loc === 'string' ? loc : '');
 
-    if (!locText || !locText.trim()) {
-      errs.location = 'Please enter the location of your Hangout';
+    if (!loc || !mapsUrl || !mapsUrl.trim()) {
+      errs.location = 'Please enter a Google Maps link for your Hangout location';
     } else if (loc && typeof loc === 'object' && loc.hasUrlError) {
-      errs.location = 'Please correct or remove the invalid Google Maps link before publishing';
+      errs.location = 'Please enter a valid Google Maps link (e.g. https://maps.app.goo.gl/... or https://www.google.com/maps/...)';
     }
 
     if (!formData.date) errs.date = 'Date is required';
@@ -289,6 +289,7 @@ export default function CreateHangout() {
               {/* Location Picker */}
               <LocationPicker
                 value={formData.location}
+                onSelectLocation={loc => setFormData({ ...formData, location: loc })}
                 onChange={loc => setFormData({ ...formData, location: loc })}
                 error={errors.location}
               />

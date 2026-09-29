@@ -165,7 +165,7 @@ export default function Profile() {
                 </p>
 
                 <p className="text-sm text-[#171717] max-w-xl leading-relaxed pt-1">
-                  "{profileUser.bio}"
+                  "{(profileUser.bio || '').replace(/Joined Qleenq/gi, 'Joined Leenkit')}"
                 </p>
 
                 {/* Social Profiles Display */}
