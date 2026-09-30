@@ -12,7 +12,7 @@ import HostingGuidelinesModal from '../components/common/HostingGuidelinesModal'
 import { CATEGORIES } from '../data/categories';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
-import { hangoutService } from '../services/hangout/hangoutService';
+import { hangoutService, MIN_HANGOUT_CAPACITY, MAX_HANGOUT_CAPACITY } from '../services/hangout/hangoutService';
 import { CURRENT_GUIDELINES_VERSION } from '../services/auth/authService';
 
 const PRESET_IMAGES = [
@@ -75,7 +75,12 @@ export default function CreateHangout() {
     if (!formData.date) errs.date = 'Date is required';
     if (!formData.description.trim()) errs.description = 'Please add a brief description of what people will do';
     if (formData.description.trim().length < 20) errs.description = 'Description should be at least 20 characters';
-    if (!formData.maxAttendees || formData.maxAttendees < 2) errs.maxAttendees = 'Minimum 2 attendees required';
+    const capacity = parseInt(formData.maxAttendees, 10);
+    if (!Number.isFinite(capacity) || capacity < MIN_HANGOUT_CAPACITY) {
+      errs.maxAttendees = `Minimum ${MIN_HANGOUT_CAPACITY} attendees required`;
+    } else if (capacity > MAX_HANGOUT_CAPACITY) {
+      errs.maxAttendees = `Maximum ${MAX_HANGOUT_CAPACITY.toLocaleString()} attendees allowed`;
+    }
 
     if (formData.isPaid) {
       const parsedPrice = parseFloat(formData.price);
@@ -179,6 +184,7 @@ export default function CreateHangout() {
       await doSubmit();
     } catch (err) {
       setCreateError(err.message || 'Could not accept guidelines. Please try again.');
+      throw err;
     } finally {
       setIsAcceptingGuidelines(false);
     }
@@ -330,8 +336,8 @@ export default function CreateHangout() {
                 <FormField label="Max Capacity" required error={errors.maxAttendees}>
                   <input
                     type="number"
-                    min="2"
-                    max="50"
+                    min={MIN_HANGOUT_CAPACITY}
+                    max={MAX_HANGOUT_CAPACITY}
                     value={formData.maxAttendees}
                     onChange={e => setFormData({ ...formData, maxAttendees: e.target.value })}
                     className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"

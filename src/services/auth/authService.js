@@ -5,6 +5,18 @@ const DEFAULT_AVATAR =
 
 export const CURRENT_GUIDELINES_VERSION = '1.0';
 
+function guidelinesAcceptError(error) {
+  const parts = [error?.message, error?.details, error?.hint, error?.code].filter(Boolean);
+  const detail = parts.join(' | ') || 'Unknown error';
+
+  if (import.meta.env.DEV) {
+    console.error('[acceptHostingGuidelines]', error);
+    return new Error(`Failed to accept hosting guidelines: ${detail}`);
+  }
+
+  return new Error(error?.message || 'Failed to accept hosting guidelines');
+}
+
 function formatUser(authUser, profile = {}) {
   return {
     id: authUser.id,
@@ -441,22 +453,55 @@ export const authService = {
   },
 
   async acceptHostingGuidelines(version = CURRENT_GUIDELINES_VERSION) {
+    const {
+      data: { user: authUser },
+      error: authError
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
+      throw new Error('You must be signed in to accept hosting guidelines.');
+    }
+
+    const { data: existingProfile, error: profileLookupError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', authUser.id)
+      .maybeSingle();
+
+    if (profileLookupError) {
+      throw guidelinesAcceptError(profileLookupError);
+    }
+
+    if (!existingProfile) {
+      await getProfile(authUser);
+
+      const { data: createdProfile, error: createdLookupError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
+      if (createdLookupError) {
+        throw guidelinesAcceptError(createdLookupError);
+      }
+
+      if (!createdProfile) {
+        throw new Error('Your profile is not ready yet. Please refresh and try again.');
+      }
+    }
+
     const { data: profileData, error } = await supabase.rpc('accept_hosting_guidelines', {
-      p_version: version
+      p_version: version || CURRENT_GUIDELINES_VERSION
     });
 
     if (error) {
-      throw new Error(`Failed to accept hosting guidelines: ${error.message}`);
+      throw guidelinesAcceptError(error);
     }
 
-    const {
-      data: { user: authUser }
-    } = await supabase.auth.getUser();
-
-    if (authUser) {
-      return formatUser(authUser, profileData);
+    if (!profileData) {
+      throw new Error('Failed to accept hosting guidelines: profile was not updated.');
     }
 
-    return formatProfile(profileData);
+    return formatUser(authUser, profileData);
   }
 };

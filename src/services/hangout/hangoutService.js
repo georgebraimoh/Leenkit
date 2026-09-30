@@ -1,5 +1,8 @@
 import { supabase } from '../../lib/supabase';
 
+export const MIN_HANGOUT_CAPACITY = 2;
+export const MAX_HANGOUT_CAPACITY = 10000;
+
 function formatHangout(dbHangout, attendeesList = []) {
   const attendeeIds = attendeesList.map(a => a.user_id);
 
@@ -115,6 +118,13 @@ export const hangoutService = {
 
     const loc = newHangoutData.location || {};
     const locText = typeof loc === 'string' ? loc : (loc.placeName || loc.address || newHangoutData.locationText || '');
+    const capacity = parseInt(newHangoutData.maxAttendees, 10) || 10;
+
+    if (capacity < MIN_HANGOUT_CAPACITY || capacity > MAX_HANGOUT_CAPACITY) {
+      throw new Error(
+        `Hangout capacity must be between ${MIN_HANGOUT_CAPACITY} and ${MAX_HANGOUT_CAPACITY.toLocaleString()} attendees.`
+      );
+    }
 
     const payload = {
       title: newHangoutData.title.trim(),
@@ -123,7 +133,7 @@ export const hangoutService = {
       host_id: userId,
       date: newHangoutData.date,
       time: newHangoutData.time,
-      max_attendees: parseInt(newHangoutData.maxAttendees, 10) || 10,
+      max_attendees: capacity,
       image: newHangoutData.image,
       status: 'upcoming',
       featured: false,
