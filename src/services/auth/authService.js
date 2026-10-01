@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { TERMS_VERSION, PRIVACY_VERSION } from '../../data/legal';
 
 const DEFAULT_AVATAR =
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
@@ -226,18 +227,14 @@ export const authService = {
       throw new Error('Please complete all required fields.');
     }
 
-    const username = email
-      .split('@')[0]
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '_');
-
+    // The handle_new_user() trigger creates the profile (with a collision-safe
+    // username) from this metadata, so the client never inserts a profile row.
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
         data: {
           name: name.trim(),
-          username,
           avatar: avatar || DEFAULT_AVATAR
         }
       }
@@ -251,29 +248,13 @@ export const authService = {
       throw new Error('Account could not be created. Please try again.');
     }
 
-    const newProfile = {
-      id: data.user.id,
-      name: name.trim(),
-      username,
-      avatar: avatar || DEFAULT_AVATAR,
-      location: 'Abuja',
-      bio: 'Joined LEENKIT to discover real-life Hangouts!',
-      interests: [],
-      hosted_count: 0,
-      attended_count: 0
-    };
-
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .insert(newProfile)
-      .select()
-      .single();
-
-    if (profileError) {
-      throw new Error(profileError.message);
+    // No session means Supabase requires email confirmation before sign-in.
+    if (!data.session) {
+      return { user: null, needsEmailConfirmation: true };
     }
 
-    return formatUser(data.user, profile);
+    const user = await getProfile(data.user);
+    return { user, needsEmailConfirmation: false };
   },
 
   async getCurrentUser() {
@@ -490,7 +471,9 @@ export const authService = {
       }
     }
 
-    const { data: profileData, error } = await supabase.rpc('accept_hosting_guidelines', {
+    // The RPC returns void, so success is "no error"; read the profile back to
+    // confirm the acceptance and refresh local state.
+    const { error } = await supabase.rpc('accept_hosting_guidelines', {
       p_version: version || CURRENT_GUIDELINES_VERSION
     });
 
@@ -498,10 +481,64 @@ export const authService = {
       throw guidelinesAcceptError(error);
     }
 
-    if (!profileData) {
-      throw new Error('Failed to accept hosting guidelines: profile was not updated.');
+    const { data: profileData, error: refreshError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .maybeSingle();
+
+    if (refreshError) {
+      throw guidelinesAcceptError(refreshError);
+    }
+
+    if (
+      !profileData?.hosting_guidelines_accepted_at ||
+      profileData.hosting_guidelines_version !== CURRENT_GUIDELINES_VERSION
+    ) {
+      throw new Error('Failed to accept hosting guidelines: acceptance was not saved.');
     }
 
     return formatUser(authUser, profileData);
+  },
+
+  // Returns true only if the signed-in user has a stored acceptance of the
+  // CURRENT Terms and Privacy Policy versions. Throws on query failure so
+  // callers can fail closed rather than assume acceptance.
+  async hasAcceptedCurrentLegal(userId) {
+    if (!userId) return false;
+
+    const { data, error } = await supabase
+      .from('legal_acceptances')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('terms_version', TERMS_VERSION)
+      .eq('privacy_version', PRIVACY_VERSION)
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return Array.isArray(data) && data.length > 0;
+  },
+
+  // Records acceptance for the signed-in user via the server-side RPC, which
+  // always uses auth.uid() and only accepts the current versions.
+  async recordLegalAcceptance(source) {
+    const { data, error } = await supabase.rpc('record_legal_acceptance', {
+      p_terms_version: TERMS_VERSION,
+      p_privacy_version: PRIVACY_VERSION,
+      p_source: source
+    });
+
+    if (error) {
+      throw new Error(error.message || 'Could not record your acceptance.');
+    }
+
+    if (!data?.accepted_at) {
+      throw new Error('Could not record your acceptance. Please try again.');
+    }
+
+    return data;
   }
 };

@@ -74,7 +74,13 @@ GRANT UPDATE (
 -- 4. accept_hosting_guidelines(): production signature RETURNS void
 --    SECURITY INVOKER, version 1.0 only, own profile only.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.accept_hosting_guidelines(p_version text)
+-- Earlier migrations created this function RETURNING public.profiles.
+-- PostgreSQL cannot change a return type with CREATE OR REPLACE, so drop it
+-- first (no dependent objects; EXECUTE grants are re-applied below). On a
+-- database where the void signature already exists this is a no-op in effect.
+DROP FUNCTION IF EXISTS public.accept_hosting_guidelines(text);
+
+CREATE FUNCTION public.accept_hosting_guidelines(p_version text)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY INVOKER

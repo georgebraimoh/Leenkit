@@ -11,6 +11,7 @@ import Navbar from './components/layout/Navbar';
 import MobileNav from './components/layout/MobileNav';
 import Footer from './components/layout/Footer';
 import AuthModal from './components/auth/AuthModal';
+import LegalAcceptanceGate from './components/auth/LegalAcceptanceGate';
 import ScrollToTop from './components/common/ScrollToTop';
 
 // Route-level Code Splitting / Lazy Loading
@@ -25,6 +26,9 @@ const EditProfile = lazy(() => import('./pages/EditProfile'));
 const Login = lazy(() => import('./pages/Login'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Safety = lazy(() => import('./pages/Safety'));
+const Faq = lazy(() => import('./pages/Faq'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Activity = lazy(() => import('./pages/Activity'));
 
@@ -60,6 +64,9 @@ function AnimatedRoutes() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/safety" element={<Safety />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<Explore />} />
         </Routes>
       </Suspense>
@@ -97,6 +104,7 @@ export default function App() {
                   <Footer />
                   <MobileNav />
                   <GlobalAuthModal />
+                  <LegalAcceptanceGate />
                 </div>
               </BrowserRouter>
             </MotionConfig>

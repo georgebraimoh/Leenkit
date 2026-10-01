@@ -28,6 +28,7 @@ import { hangoutService } from '../services/hangout/hangoutService';
 import { paymentService } from '../services/payment/paymentService';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
+import { LEGAL_CONTACT_EMAIL } from '../data/legal';
 
 const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80";
 
@@ -82,7 +83,7 @@ export default function HangoutDetails() {
             setPaymentNotice({ type: 'success', message: 'Payment verified! Welcome to the Hangout 🎉' });
             loadSponsorshipSummary();
           } else if (res.status === 'requires_refund') {
-            setPaymentNotice({ type: 'warning', message: 'Payment received, but full capacity was reached before completion. Your payment has been flagged for host/support refund.' });
+            setPaymentNotice({ type: 'warning', message: `Your payment was received, but this Hangout reached full capacity before your spot could be confirmed, so you have not been added as an attendee. Please keep your payment reference (${reference}) and contact ${LEGAL_CONTACT_EMAIL} about this payment.` });
           } else if (res.status === 'pending') {
             setPaymentNotice({ type: 'info', message: 'Payment is pending server verification. Access will be unlocked automatically once confirmed.' });
           } else {

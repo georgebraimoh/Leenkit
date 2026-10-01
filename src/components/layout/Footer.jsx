@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MapPin, Heart, Globe, Compass, Plus, ShieldCheck } from 'lucide-react';
+import { MapPin, Heart, Globe, Compass, Plus, ShieldCheck, HelpCircle, FileText, Lock } from 'lucide-react';
 import leenkitIcon from '../../assets/Leenkit icon.png';
 
 export default function Footer() {
@@ -64,6 +64,33 @@ export default function Footer() {
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-[#087F73]" />
                   <span className="font-semibold text-[#172121]">Safety & Trust Guide</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/faq"
+                  className="hover:text-[#18A999] transition-colors flex items-center gap-1.5 link-nudge"
+                >
+                  <HelpCircle className="w-3.5 h-3.5 text-[#18A999]" />
+                  <span>FAQ</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/terms"
+                  className="hover:text-[#18A999] transition-colors flex items-center gap-1.5 link-nudge"
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#18A999]" />
+                  <span>Terms & Conditions</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/privacy"
+                  className="hover:text-[#18A999] transition-colors flex items-center gap-1.5 link-nudge"
+                >
+                  <Lock className="w-3.5 h-3.5 text-[#18A999]" />
+                  <span>Privacy Policy</span>
                 </Link>
               </li>
             </ul>

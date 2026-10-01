@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import FormField from '../common/FormField';
 import Button from '../common/Button';
+import LegalConsentCheckbox from './LegalConsentCheckbox';
 import { User, Mail, Lock, AlertCircle, Camera } from 'lucide-react';
 
 const AVATAR_OPTIONS = [
@@ -17,10 +18,13 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
   const [password, setPassword] = useState('');
   const [avatar, setAvatar] = useState(AVATAR_OPTIONS[0]);
   const [validationError, setValidationError] = useState('');
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [legalError, setLegalError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setValidationError('');
+    setLegalError('');
 
     if (!name.trim() || !email.trim() || !password) {
       setValidationError('Please complete all required fields.');
@@ -32,7 +36,12 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
       return;
     }
 
-    onSubmit({ name: name.trim(), email: email.trim(), password, avatar });
+    if (!acceptedLegal) {
+      setLegalError('Please agree to the Terms & Conditions and Privacy Policy to create an account.');
+      return;
+    }
+
+    onSubmit({ name: name.trim(), email: email.trim(), password, avatar, acceptedLegal });
   };
 
   return (
@@ -109,6 +118,16 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
           />
         </div>
       </FormField>
+
+      <LegalConsentCheckbox
+        checked={acceptedLegal}
+        onChange={(value) => {
+          setAcceptedLegal(value);
+          if (value) setLegalError('');
+        }}
+        error={legalError}
+        disabled={isLoading}
+      />
 
       <Button
         type="submit"

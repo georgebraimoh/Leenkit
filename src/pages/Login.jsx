@@ -4,6 +4,7 @@ import PageTransition from '../components/layout/PageTransition';
 import LoginForm from '../components/auth/LoginForm';
 import SignUpForm from '../components/auth/SignUpForm';
 import { useUser } from '../context/UserContext';
+import { EMAIL_CONFIRMATION_NOTICE } from '../data/legal';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [authNotice, setAuthNotice] = useState('');
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -51,11 +53,16 @@ export default function Login() {
     }
   };
 
-  const handleEmailSignUp = async ({ name, email, password, avatar }) => {
+  const handleEmailSignUp = async ({ name, email, password, avatar, acceptedLegal }) => {
     setIsLoading(true);
     setAuthError('');
     try {
-      await registerWithEmail({ name, email, password, avatar });
+      const result = await registerWithEmail({ name, email, password, avatar, acceptedLegal });
+      if (result?.needsEmailConfirmation) {
+        setAuthNotice(EMAIL_CONFIRMATION_NOTICE);
+        setIsSignUp(false);
+        return;
+      }
       navigate('/onboarding');
     } catch (e) {
       setAuthError(e.message || "Failed to create account.");
@@ -108,6 +115,18 @@ export default function Login() {
               </svg>
               <span>Continue with Facebook</span>
             </button>
+
+            <p className="text-[11px] text-center text-[#3D4948] leading-relaxed">
+              New accounts must agree to the{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#087F73] underline underline-offset-2 hover:text-[#18A999]">
+                Terms &amp; Conditions
+              </a>{' '}
+              and{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#087F73] underline underline-offset-2 hover:text-[#18A999]">
+                Privacy Policy
+              </a>{' '}
+              before using LEENKIT.
+            </p>
           </div>
 
           <div className="relative my-4">
@@ -118,6 +137,12 @@ export default function Login() {
               <span className="bg-white px-3 text-[#3D4948] font-semibold">Or with email</span>
             </div>
           </div>
+
+          {authNotice && !isSignUp && (
+            <div role="status" className="p-3 bg-[#DDF4EF] border border-[#18A999]/30 rounded-2xl text-xs font-medium text-[#087F73]">
+              {authNotice}
+            </div>
+          )}
 
           {/* Email Form */}
           {isSignUp ? (

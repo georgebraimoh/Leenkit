@@ -6,12 +6,14 @@ import SignUpForm from './SignUpForm';
 import { useUser } from '../../context/UserContext';
 import { Mail, Sparkles } from 'lucide-react';
 import leenkitIcon from '../../assets/Leenkit icon.png';
+import { EMAIL_CONFIRMATION_NOTICE } from '../../data/legal';
 
 export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) {
   const { loginWithGoogle, loginWithFacebook, loginWithEmail, registerWithEmail } = useUser();
   const [view, setView] = useState(initialView); // 'welcome', 'login', 'signup'
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [authNotice, setAuthNotice] = useState('');
 
   if (!isOpen) return null;
 
@@ -54,11 +56,16 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
     }
   };
 
-  const handleEmailSignUp = async ({ name, email, password, avatar }) => {
+  const handleEmailSignUp = async ({ name, email, password, avatar, acceptedLegal }) => {
     setIsLoading(true);
     setAuthError('');
     try {
-      await registerWithEmail({ name, email, password, avatar });
+      const result = await registerWithEmail({ name, email, password, avatar, acceptedLegal });
+      if (result?.needsEmailConfirmation) {
+        setAuthNotice(EMAIL_CONFIRMATION_NOTICE);
+        setView('login');
+        return;
+      }
       onClose();
     } catch (e) {
       setAuthError(e.message || "Failed to create account.");
@@ -126,6 +133,18 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
               <span>Continue with Email</span>
             </button>
 
+            <p className="text-[11px] text-[#3D4948] leading-relaxed px-2">
+              New accounts must agree to the{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#087F73] underline underline-offset-2 hover:text-[#18A999]">
+                Terms &amp; Conditions
+              </a>{' '}
+              and{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#087F73] underline underline-offset-2 hover:text-[#18A999]">
+                Privacy Policy
+              </a>{' '}
+              before using LEENKIT.
+            </p>
+
             <div className="pt-4 border-t border-[#DDE3E0] text-xs text-[#3D4948]">
               Already have an account?{' '}
               <button
@@ -136,6 +155,12 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
                 Sign in
               </button>
             </div>
+          </div>
+        )}
+
+        {authNotice && view === 'login' && (
+          <div role="status" className="p-3 bg-[#DDF4EF] border border-[#18A999]/30 rounded-2xl text-xs font-medium text-[#087F73] text-left">
+            {authNotice}
           </div>
         )}
 

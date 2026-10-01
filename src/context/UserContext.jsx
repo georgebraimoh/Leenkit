@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth/authService';
 import { vibeService } from '../services/vibe/vibeService';
 import { notificationService } from '../services/notification/notificationService';
@@ -23,6 +23,45 @@ export function UserProvider({ children }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalInitialView, setAuthModalInitialView] = useState('welcome');
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  // Terms & Privacy acceptance for the signed-in user.
+  // status: 'checking' | 'accepted' | 'required' | 'error'
+  const [legalAcceptance, setLegalAcceptance] = useState({ userId: null, status: 'checking', error: '' });
+  const legalCheckSeq = useRef(0);
+  const signupInProgress = useRef(false);
+
+  // Check whether the signed-in user has accepted the current legal versions.
+  // Fails closed: a query error never counts as acceptance.
+  const checkLegalAcceptance = async (userId) => {
+    const seq = ++legalCheckSeq.current;
+    setLegalAcceptance({ userId, status: 'checking', error: '' });
+
+    try {
+      const accepted = await authService.hasAcceptedCurrentLegal(userId);
+      if (seq !== legalCheckSeq.current) return;
+      // While an email signup is recording acceptance, don't flash the gate.
+      if (!accepted && signupInProgress.current) return;
+      setLegalAcceptance({ userId, status: accepted ? 'accepted' : 'required', error: '' });
+    } catch (e) {
+      if (seq !== legalCheckSeq.current) return;
+      console.warn('Could not check Terms/Privacy acceptance:', e.message);
+      setLegalAcceptance({
+        userId,
+        status: 'error',
+        error: 'We could not confirm your acceptance of the Terms & Conditions and Privacy Policy.'
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      checkLegalAcceptance(currentUser.id);
+    } else {
+      legalCheckSeq.current++;
+      setLegalAcceptance({ userId: null, status: 'checking', error: '' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id]);
 
   // Load user's Vibing list from Supabase whenever authenticated user changes
   useEffect(() => {
@@ -232,13 +271,74 @@ export function UserProvider({ children }) {
   };
 
   const registerWithEmail = async (data) => {
-    const user = await authService.registerWithEmail(data);
+    // Enforced here as well as in the form: no account without acceptance.
+    if (data?.acceptedLegal !== true) {
+      throw new Error('Please agree to the Terms & Conditions and Privacy Policy to create an account.');
+    }
 
+    const { acceptedLegal: _acceptedLegal, ...registration } = data;
+    signupInProgress.current = true;
+
+    let result;
+    try {
+      result = await authService.registerWithEmail(registration);
+    } catch (e) {
+      signupInProgress.current = false;
+      // The auth account may exist even if a later step failed; make sure a
+      // signed-in user still gets a definitive acceptance check.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session?.user?.id) {
+        checkLegalAcceptance(sessionData.session.user.id);
+      }
+      throw e;
+    }
+
+    // Email confirmation required: no session yet, so acceptance cannot be
+    // recorded now. The legal gate asks for it on first sign-in.
+    if (result.needsEmailConfirmation) {
+      signupInProgress.current = false;
+      return { user: null, needsEmailConfirmation: true };
+    }
+
+    const { user } = result;
     setCurrentUser(user);
     setIsAuthenticated(true);
     updateUsersList(user);
 
-    return user;
+    // Record acceptance only after the account exists. If this fails the
+    // account is real but unaccepted, so the in-app gate asks again.
+    try {
+      await authService.recordLegalAcceptance('signup');
+      legalCheckSeq.current++; // supersede any check that started before the insert
+      setLegalAcceptance({ userId: user.id, status: 'accepted', error: '' });
+    } catch (e) {
+      console.warn('Could not record Terms/Privacy acceptance at signup:', e.message);
+      legalCheckSeq.current++;
+      setLegalAcceptance({
+        userId: user.id,
+        status: 'required',
+        error: 'Your account was created, but we could not save your acceptance. Please confirm again to continue.'
+      });
+    } finally {
+      signupInProgress.current = false;
+    }
+
+    return { user, needsEmailConfirmation: false };
+  };
+
+  const acceptLegalTerms = async () => {
+    if (!currentUser?.id) {
+      throw new Error('No authenticated user found.');
+    }
+
+    const userId = currentUser.id;
+    await authService.recordLegalAcceptance('in_app');
+    legalCheckSeq.current++;
+    setLegalAcceptance({ userId, status: 'accepted', error: '' });
+  };
+
+  const retryLegalCheck = () => {
+    if (currentUser?.id) checkLegalAcceptance(currentUser.id);
   };
 
   const loginWithGoogle = async () => {
@@ -378,6 +478,9 @@ export function UserProvider({ children }) {
         logout,
         updateProfile,
         acceptHostingGuidelines,
+        legalAcceptance,
+        acceptLegalTerms,
+        retryLegalCheck,
         getUserById,
         fetchAndCacheProfiles,
         isVibingWith,

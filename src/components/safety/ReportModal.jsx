@@ -19,32 +19,58 @@ const REPORT_REASONS = [
 
 export default function ReportModal({ isOpen, onClose, targetType = 'activity', targetId, targetTitle }) {
   const { showToast } = useToast();
-  const { currentUser } = useUser();
+  const { currentUser, openAuthModal } = useUser();
 
   const [reason, setReason] = useState(REPORT_REASONS[0]);
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  if (!currentUser?.id) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="Report Concern">
+        <div className="space-y-4 pt-2">
+          <p className="text-sm text-[#3D4948] leading-relaxed">
+            Please sign in to submit a report. If you are in immediate danger, contact local emergency services.
+          </p>
+          <div className="flex gap-3">
+            <Button onClick={onClose} variant="outline" size="md" className="w-1/3">
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                onClose();
+                openAuthModal('welcome');
+              }}
+              variant="primary"
+              size="md"
+              className="w-2/3"
+            >
+              Sign in
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError('');
 
-    setTimeout(() => {
-      safetyService.submitReport({
-        targetType,
-        targetId,
-        targetTitle,
-        reason,
-        description,
-        reporterId: currentUser?.id || 'guest'
-      });
-
-      setIsSubmitting(false);
-      showToast("Report submitted. Our trust & safety team will review this shortly.", "success");
+    try {
+      await safetyService.submitReport({ targetType, targetId, reason, description });
+      showToast('Your report has been submitted.', 'success');
+      setDescription('');
       onClose();
-    }, 400);
+    } catch (err) {
+      setSubmitError(err.message || 'Your report could not be submitted. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -53,9 +79,15 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
         <div className="p-3.5 bg-[#DDF4EF]/40 border border-[#18A999]/30 rounded-2xl flex items-center gap-3">
           <ShieldAlert className="w-5 h-5 text-[#18A999] shrink-0" />
           <p className="text-xs text-[#171717]">
-            Reporting <strong className="font-bold">"{targetTitle || targetType}"</strong>. Reports are anonymous and handled discreetly by our safety team.
+            Reporting <strong className="font-bold">"{targetTitle || targetType}"</strong>. Your report is sent to LEENKIT and is not shown to the person or Hangout you are reporting.
           </p>
         </div>
+
+        {submitError && (
+          <p role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-medium text-rose-600">
+            {submitError}
+          </p>
+        )}
 
         <FormField label="What is the issue?" required>
           <div className="space-y-2 pt-1">
@@ -82,9 +114,10 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
           </div>
         </FormField>
 
-        <FormField label="Additional Details (Optional)" helpText="Provide any helpful context for our moderation team.">
+        <FormField label="Additional Details (Optional)" helpText="Add any context that explains the concern. Avoid sharing unnecessary personal information.">
           <textarea
             rows="3"
+            maxLength={2000}
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Describe what happened..."
