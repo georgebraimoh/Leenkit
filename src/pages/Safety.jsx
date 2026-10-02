@@ -1,6 +1,6 @@
 import React from 'react';
 import PageTransition from '../components/layout/PageTransition';
-import { ShieldCheck, CheckCircle2, AlertTriangle, PhoneCall, ArrowRight } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../components/common/Button';
 

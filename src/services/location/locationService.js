@@ -64,7 +64,7 @@ export function validateGoogleMapsUrl(url) {
     }
 
     return true;
-  } catch (err) {
+  } catch {
     return false;
   }
 }

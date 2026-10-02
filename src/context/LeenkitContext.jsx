@@ -256,10 +256,3 @@ export function LeenkitProvider({ children }) {
 export function useLeenkit() {
   return useContext(LeenkitContext);
 }
-
-// Backward-compatible aliases
-export const QleenqContext = LeenkitContext;
-export const QleenqProvider = LeenkitProvider;
-export const useQleenq = useLeenkit;
-export const LeenQProvider = LeenkitProvider;
-export const useLeenQ = useLeenkit;

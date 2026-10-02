@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Compass, Calendar, Plus, User, LogOut, LogIn, ChevronDown, MapPin, Navigation, Search, ShieldCheck, Sparkles, Wallet, ShieldAlert } from 'lucide-react';
+import { Compass, Calendar, Plus, User, LogOut, LogIn, ChevronDown, MapPin, ShieldCheck, Sparkles, Wallet, ShieldAlert } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import { useLocationContext } from '../../context/LocationContext';
 import Button from '../common/Button';

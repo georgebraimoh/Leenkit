@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MapPin, Heart, Globe, Compass, Plus, ShieldCheck, HelpCircle, FileText, Lock } from 'lucide-react';
+import { Heart, Globe, Compass, Plus, ShieldCheck, HelpCircle, FileText, Lock } from 'lucide-react';
 import leenkitIcon from '../../assets/Leenkit icon.png';
 
 export default function Footer() {

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Users, Info, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, MapPin, Info, ExternalLink } from 'lucide-react';
 import AvatarStack from '../common/AvatarStack';
 import { formatEventDate, formatEventTime } from '../../utils/format';
 
 const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=400&q=80";
 
 export default function SpaceHeader({ hangout }) {
-  const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
 
   if (!hangout) return null;

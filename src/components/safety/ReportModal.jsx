@@ -5,7 +5,7 @@ import FormField from '../common/FormField';
 import { useToast } from '../common/Toast';
 import { useUser } from '../../context/UserContext';
 import { safetyService } from '../../services/safety/safetyService';
-import { ShieldAlert, CheckCircle } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 
 const REPORT_REASONS = [
   "Suspicious behavior",

@@ -26,3 +26,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.cursor/
+
+# Supabase CLI local state (machine-specific cache, linked project ref)
+supabase/.temp/
+supabase/.branches/
+
+# Local development scratch scripts and one-off generators
+scratch/
+generate_pdf.*

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Button from './Button';
-import { Compass, CalendarX, AlertCircle } from 'lucide-react';
+import { Compass } from 'lucide-react';
 
 export default function EmptyState({
   icon: Icon = Compass,

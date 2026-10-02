@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../common/Modal';
-import Button from '../common/Button';
 import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
 import { useUser } from '../../context/UserContext';
-import { Mail, Sparkles } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import leenkitIcon from '../../assets/Leenkit icon.png';
 import { EMAIL_CONFIRMATION_NOTICE } from '../../data/legal';
 
