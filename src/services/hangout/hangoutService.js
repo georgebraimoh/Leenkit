@@ -3,7 +3,11 @@ import { supabase } from '../../lib/supabase';
 export const MIN_HANGOUT_CAPACITY = 2;
 export const MAX_HANGOUT_CAPACITY = 10000;
 
+const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80';
+
 function formatHangout(dbHangout, attendeesList = []) {
+  // Attendee rows are only visible to members of the Hangout (RLS); everyone
+  // else gets the public attendee_count.
   const attendeeIds = attendeesList.map(a => a.user_id);
 
   // Ensure host is always in attendeeIds if not already present
@@ -14,7 +18,7 @@ function formatHangout(dbHangout, attendeesList = []) {
   return {
     id: dbHangout.id,
     title: dbHangout.title,
-    category: dbHangout.category,
+    category: dbHangout.category || 'Other',
     location: {
       placeName: dbHangout.place_name || 'Meeting Location',
       address: dbHangout.address || dbHangout.place_name || '',
@@ -33,7 +37,11 @@ function formatHangout(dbHangout, attendeesList = []) {
     hostId: dbHangout.host_id,
     maxAttendees: dbHangout.max_attendees || 10,
     attendeeIds,
-    image: dbHangout.image || "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80",
+    attendeeCount: Math.max(
+      Number.isFinite(dbHangout.attendee_count) ? dbHangout.attendee_count : 0,
+      attendeeIds.length
+    ),
+    image: dbHangout.image || DEFAULT_COVER_IMAGE,
     status: dbHangout.status || 'upcoming',
     featured: dbHangout.featured || false,
     isPopular: dbHangout.is_popular || false,
@@ -94,9 +102,11 @@ export const hangoutService = {
 
     const { data: dbAttendees, error: attendeesError } = await supabase
       .from('hangout_attendees')
-      .select('*');
+      .select('hangout_id, user_id');
 
-    if (attendeesError) {
+    // Signed-out visitors cannot read attendee rows (privacy); counts come
+    // from hangouts.attendee_count instead.
+    if (attendeesError && attendeesError.code !== '42501') {
       console.warn('Could not fetch attendees from Supabase:', attendeesError.message);
     }
 
@@ -109,6 +119,26 @@ export const hangoutService = {
     });
 
     return dbHangouts.map(h => formatHangout(h, attendeesByHangout[h.id] || []));
+  },
+
+  async fetchHangoutById(hangoutId) {
+    if (!hangoutId) return null;
+
+    const { data: dbHangout, error } = await supabase
+      .from('hangouts')
+      .select('*')
+      .eq('id', hangoutId)
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!dbHangout) return null;
+
+    const { data: dbAttendees } = await supabase
+      .from('hangout_attendees')
+      .select('hangout_id, user_id')
+      .eq('hangout_id', hangoutId);
+
+    return formatHangout(dbHangout, dbAttendees || []);
   },
 
   async createHangout(userId, newHangoutData) {
@@ -127,21 +157,18 @@ export const hangoutService = {
     }
 
     const payload = {
-      title: newHangoutData.title.trim(),
+      title: newHangoutData.title.trim().slice(0, 120),
       category: newHangoutData.category,
-      description: newHangoutData.description.trim(),
+      description: newHangoutData.description.trim().slice(0, 5000),
       host_id: userId,
       date: newHangoutData.date,
       time: newHangoutData.time,
       max_attendees: capacity,
       image: newHangoutData.image,
-      status: 'upcoming',
-      featured: false,
-      is_popular: false,
       is_paid: Boolean(newHangoutData.isPaid),
       price: newHangoutData.isPaid && newHangoutData.price ? parseFloat(newHangoutData.price) : null,
       currency: newHangoutData.isPaid ? (newHangoutData.currency || 'NGN') : 'NGN',
-      place_name: (locText || 'Meeting Location').trim(),
+      place_name: (locText || 'Meeting Location').trim().slice(0, 200),
       address: (locText || '').trim(),
       city: loc.city || null,
       country: loc.country || null,
@@ -161,19 +188,9 @@ export const hangoutService = {
       throw new Error(createError.message);
     }
 
-    // Automatically insert creator into hangout_attendees
-    const { error: attendeeError } = await supabase
-      .from('hangout_attendees')
-      .insert({
-        hangout_id: createdHangout.id,
-        user_id: userId
-      });
-
-    if (attendeeError) {
-      console.warn('Auto-join host record notice:', attendeeError.message);
-    }
-
-    return formatHangout(createdHangout, [{ user_id: userId }]);
+    // The database adds the host as the first attendee and posts the
+    // Space's opening notice (hangouts_after_insert trigger).
+    return formatHangout({ ...createdHangout, attendee_count: 1 }, [{ user_id: userId }]);
   },
 
   async joinHangout(userId, hangoutId) {
@@ -186,7 +203,8 @@ export const hangoutService = {
         user_id: userId
       });
 
-    if (error && !error.message.includes('unique constraint')) {
+    // 23505 = already joined; anything else (full, closed, paid) is surfaced.
+    if (error && error.code !== '23505') {
       throw new Error(error.message);
     }
   },
@@ -294,7 +312,7 @@ export const hangoutService = {
       id: dbMessage.id,
       userId: dbMessage.user_id,
       userName: dbMessage.user_name || 'LEENKIT User',
-      userAvatar: dbMessage.user_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      userAvatar: dbMessage.user_avatar || null,
       text: dbMessage.text || '',
       timestamp: formattedTime,
       createdAt: dbMessage.created_at,
@@ -302,24 +320,26 @@ export const hangoutService = {
     };
   },
 
-  async fetchSpaceMessages(hangoutId) {
+  // Latest `limit` messages, oldest first.
+  async fetchSpaceMessages(hangoutId, limit = 200) {
     if (!hangoutId) return [];
 
     const { data, error } = await supabase
       .from('hangout_messages')
       .select('*')
       .eq('hangout_id', hangoutId)
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
     if (error) {
-      console.warn('Could not fetch space messages from Supabase:', error.message);
-      return [];
+      throw new Error(error.message);
     }
 
-    return (data || []).map(this.formatMessage).filter(Boolean);
+    return (data || []).reverse().map(this.formatMessage).filter(Boolean);
   },
 
-  async sendSpaceMessage({ hangoutId, userId, userName, userAvatar, text, type = 'user' }) {
+  // Sender name/avatar are filled in by the database from the profile.
+  async sendSpaceMessage({ hangoutId, userId, text }) {
     if (!hangoutId || !userId) {
       throw new Error('Hangout ID and User ID are required to send a message.');
     }
@@ -329,13 +349,14 @@ export const hangoutService = {
       throw new Error('Message content cannot be empty.');
     }
 
+    if (trimmedText.length > 2000) {
+      throw new Error('Messages can be up to 2,000 characters.');
+    }
+
     const payload = {
       hangout_id: hangoutId,
       user_id: userId,
-      user_name: userName || 'LEENKIT User',
-      user_avatar: userAvatar || null,
-      text: trimmedText,
-      type: type || 'user'
+      text: trimmedText
     };
 
     const { data, error } = await supabase
@@ -345,12 +366,6 @@ export const hangoutService = {
       .single();
 
     if (error) {
-      console.error('[sendSpaceMessage Error]', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      });
       throw new Error(error.message);
     }
 
@@ -378,8 +393,7 @@ export const hangoutService = {
       sponsor_id: userId,
       amount: numericAmount,
       currency: targetCurrency,
-      message: (message || '').trim().substring(0, 200) || null,
-      status: 'pledged'
+      message: (message || '').trim().substring(0, 200) || null
     };
 
     const { data, error } = await supabase
@@ -433,12 +447,14 @@ export const hangoutService = {
         const curr = String(row.currency || 'NGN').toUpperCase();
         if (!validCurrencies.includes(curr)) continue;
 
-        const totalPledged = Number(row.total_pledged ?? row.totalPledged ?? 0);
-        const sponsorCount = Number(row.sponsor_count ?? row.sponsorCount ?? 0);
+        const totalPaid = Number(row.total_paid ?? 0);
+        const totalPledged = Number(row.total_pledged ?? 0);
+        const sponsorCount = Number(row.sponsor_count ?? 0);
 
-        if (totalPledged > 0 || sponsorCount > 0) {
+        if (totalPaid > 0 || totalPledged > 0) {
           normalizedCurrencies.push({
             currency: curr,
+            totalPaid,
             totalPledged,
             sponsorCount
           });

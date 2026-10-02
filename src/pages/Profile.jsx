@@ -10,6 +10,8 @@ import { InstagramIcon, TikTokIcon, SpotifyIcon } from '../components/common/Soc
 import { useUser } from '../context/UserContext';
 import { useLeenkit } from '../context/LeenkitContext';
 import { authService } from '../services/auth/authService';
+import Avatar from '../components/common/Avatar';
+import { isOpenHangout, isPastHangout, sortByEventDate } from '../utils/format';
 
 export default function Profile() {
   const { username } = useParams();
@@ -110,8 +112,17 @@ export default function Profile() {
   };
 
   // Calculate activities & vibing profiles
-  const hosted = hangouts.filter(h => h.hostId === profileUser.id);
-  const attended = hangouts.filter(h => h.attendeeIds && h.attendeeIds.includes(profileUser.id));
+  // Public: only open, upcoming Hangouts they host. Where someone is GOING is
+  // private (shown on your own profile only).
+  const hostedAll = hangouts.filter(h => h.hostId === profileUser.id && h.status !== 'cancelled');
+  const hosted = sortByEventDate(hostedAll.filter(isOpenHangout));
+  const attended = isOwnProfile
+    ? hangouts.filter(h =>
+        h.hostId !== profileUser.id &&
+        (h.attendeeIds || []).includes(profileUser.id) &&
+        h.status !== 'cancelled' &&
+        (h.status === 'completed' || isPastHangout(h)))
+    : [];
   const vibingProfiles = vibingIds.map(id => getUserById(id)).filter(Boolean);
 
   const hasSocialLinks = Boolean(profileUser.instagramUrl || profileUser.tiktokUrl || profileUser.spotifyUrl);
@@ -141,14 +152,18 @@ export default function Profile() {
           <span className="accent-orb -right-8 -top-8 w-24 h-24 bg-[#18A999]/6" />
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <img
-                src={profileUser.avatar}
-                alt={profileUser.name}
-                title={`View ${profileUser.name}'s profile picture`}
-                aria-label={`View ${profileUser.name}'s profile picture`}
-                onClick={() => setIsViewerOpen(true)}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-[#EEF1EF] shadow-md shrink-0 cursor-pointer hover:scale-105 hover:border-[#18A999]/40 transition-all duration-200"
-              />
+              {profileUser.avatar ? (
+                <button
+                  type="button"
+                  onClick={() => setIsViewerOpen(true)}
+                  aria-label={`View ${profileUser.name}'s profile picture`}
+                  className="rounded-full shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]"
+                >
+                  <Avatar src={profileUser.avatar} name={profileUser.name} size="2xl" className="border-4 border-[#EEF1EF] shadow-md hover:scale-105 transition-all duration-200" />
+                </button>
+              ) : (
+                <Avatar src={null} name={profileUser.name} size="2xl" className="border-4 border-[#EEF1EF] shadow-md" />
+              )}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#172121]">
@@ -156,17 +171,23 @@ export default function Profile() {
                   </h1>
                 </div>
 
-                <p className="text-sm font-semibold text-[#18A999]">
-                  {profileUser.title || "Community Member"}
+                <p className="text-sm font-semibold text-[#087F73] flex items-center gap-1">
+                  {profileUser.isVerifiedOrganizer && <ShieldCheck className="w-4 h-4" aria-hidden="true" />}
+                  {profileUser.isVerifiedOrganizer ? 'Verified Organizer' : profileUser.isOrganizer ? 'Host' : 'Member'}
+                  {profileUser.username && <span className="text-[#6F6F6F] font-medium">· @{profileUser.username}</span>}
                 </p>
 
-                <p className="text-xs text-[#6F6F6F] flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#18A999]" /> {profileUser.location}
-                </p>
+                {profileUser.location && (
+                  <p className="text-xs text-[#6F6F6F] flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#18A999]" aria-hidden="true" /> {profileUser.location}
+                  </p>
+                )}
 
-                <p className="text-sm text-[#171717] max-w-xl leading-relaxed pt-1">
-                  "{(profileUser.bio || '').replace(/Joined Qleenq/gi, 'Joined LEENKIT')}"
-                </p>
+                {profileUser.bio && (
+                  <p className="text-sm text-[#171717] max-w-xl leading-relaxed pt-1 break-words">
+                    {profileUser.bio.replace(/Joined Qleenq/gi, 'Joined LEENKIT')}
+                  </p>
+                )}
 
                 {/* Social Profiles Display */}
                 {hasSocialLinks && (
@@ -240,9 +261,12 @@ export default function Profile() {
                 </Link>
 
                 <Button
-                  onClick={() => {
-                    logout();
-                    navigate('/explore');
+                  onClick={async () => {
+                    try {
+                      await logout();
+                    } finally {
+                      navigate('/explore');
+                    }
                   }}
                   variant="ghost"
                   size="md"
@@ -283,7 +307,7 @@ export default function Profile() {
                   className="gap-1.5 text-[#6F6F6F] hover:text-rose-600 hover:border-rose-200"
                 >
                   <ShieldAlert className="w-4 h-4" />
-                  <span>Report member</span>
+                  <span>Report</span>
                 </Button>
               </div>
             )}
@@ -306,20 +330,17 @@ export default function Profile() {
             </div>
           )}
 
-          {/* Clean Stats Row */}
           <div className="pt-6 mt-6 border-t border-[#E8E6E1] grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             <div className="p-3 bg-[#EEF1EF] rounded-2xl">
-              <span className="text-2xl font-extrabold font-heading text-[#172121]">{hosted.length}</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F6F6F] block mt-0.5">Hosted</span>
+              <span className="text-2xl font-extrabold font-heading text-[#172121]">{hostedAll.length}</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F] block mt-0.5">Hosted</span>
             </div>
-            <div className="p-3 bg-[#EEF1EF] rounded-2xl">
-              <span className="text-2xl font-extrabold font-heading text-[#172121]">{attended.length}</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F6F6F] block mt-0.5">Attended</span>
-            </div>
-            <div className="p-3 bg-[#DDF4EF] rounded-2xl col-span-2">
-              <span className="text-xs font-bold text-[#087F73] block">Active Member</span>
-              <span className="text-[10px] text-[#087F73]/80 block mt-0.5">Joined real-life Hangouts through LEENKIT.</span>
-            </div>
+            {isOwnProfile && (
+              <div className="p-3 bg-[#EEF1EF] rounded-2xl">
+                <span className="text-2xl font-extrabold font-heading text-[#172121]">{attended.length}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F] block mt-0.5">Attended</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -349,14 +370,10 @@ export default function Profile() {
                     className="p-4 bg-white border border-[#E8E6E1] rounded-2xl flex items-center justify-between hover:border-[#D6D2C9] hover:shadow-sm transition-all pressable"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <img
-                        src={u.avatar}
-                        alt={u.name}
-                        className="w-12 h-12 rounded-full object-cover shrink-0 border border-[#E8E6E1]"
-                      />
+                      <Avatar src={u.avatar} name={u.name} size="lg" className="border border-[#E8E6E1]" />
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-[#171717] truncate">{u.name}</p>
-                        <p className="text-xs text-[#6F6F6F] truncate">@{u.username} · {u.location}</p>
+                        <p className="text-xs text-[#6F6F6F] truncate">{u.username ? `@${u.username}` : ''}{u.location ? ` · ${u.location}` : ''}</p>
                       </div>
                     </div>
                     <span className="px-2.5 py-1 bg-[#DDF4EF] text-[#087F73] text-[10px] font-extrabold uppercase rounded-full border border-[#18A999]/30 shrink-0 ml-2">
@@ -375,7 +392,7 @@ export default function Profile() {
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-[#18A999]" />
               <h2 className="text-2xl font-bold font-heading text-[#171717]">
-                Hosted by {profileUser.name.split(' ')[0]}
+                Upcoming from {(profileUser.name || '').split(' ')[0]}
               </h2>
             </div>
 
@@ -393,7 +410,7 @@ export default function Profile() {
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-[#18A999]" />
               <h2 className="text-2xl font-bold font-heading text-[#171717]">
-                Hangouts Attended ({attended.length})
+                Hangouts you attended ({attended.length})
               </h2>
             </div>
 

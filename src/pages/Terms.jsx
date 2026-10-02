@@ -148,13 +148,19 @@ export default function Terms() {
           <section id="terms-payments" className="scroll-mt-24 space-y-3">
             <h2 className="text-xl font-bold font-heading text-[#172121]">7. Tickets, Payments & Sponsorships</h2>
             <p>
-              Hangouts may be free or may list a ticket or entry price. LEENKIT may facilitate relevant ticket payments and optional sponsorships through the Service and third-party payment providers.
+              Hangouts may be free or paid. Paid tickets and online sponsorships are processed by Paystack in Nigerian Naira (NGN). The buyer pays the price shown; LEENKIT does not add a booking fee for buyers.
             </p>
             <p>
-              Review the specific Hangout’s payment and ticket information before you complete a purchase or sponsorship. Prices, currencies, and whether payment is collected in-app or elsewhere can vary by Hangout.
+              <strong>Platform fee for Organizers.</strong> For each paid ticket and each online sponsorship, LEENKIT keeps a platform fee of 10% of the amount paid, with a minimum of ₦200 per payment. LEENKIT pays Paystack’s card processing fees out of its share. The remainder is paid to the Organizer’s verified bank account through Paystack, normally on Paystack’s next settlement cycle. LEENKIT may change the fee for future payments with notice in the app; it never changes for a payment already made.
             </p>
             <p>
-              Please review the ticket and refund information shown for a Hangout before purchasing. LEENKIT’s refund policy is still being finalised; until it is published, these Terms do not promise a refund, processing timeline, fee schedule, or payment guarantee.
+              <strong>Payout accounts.</strong> To sell tickets or receive online sponsorships, an Organizer must add a Nigerian bank account in their own name, which LEENKIT verifies through Paystack. Organizers are responsible for any taxes on what they earn.
+            </p>
+            <p>
+              <strong>Refunds.</strong> If a Hangout is cancelled, or LEENKIT cannot confirm a buyer’s spot (for example, it filled up while they were paying), LEENKIT refunds the ticket to the original payment method. Leaving a Hangout you paid for does not automatically entitle you to a refund. LEENKIT may recover refunded amounts from an Organizer’s future payouts when a refund is caused by the Organizer, such as a cancellation.
+            </p>
+            <p>
+              <strong>Pledges</strong> are promises recorded in the app with no payment. LEENKIT is not involved in settling pledges.
             </p>
           </section>
 
@@ -213,6 +219,9 @@ export default function Terms() {
             <h2 className="text-xl font-bold font-heading text-[#172121]">11. Moderation & Enforcement</h2>
             <p>
               LEENKIT may remove content, restrict accounts, remove Hangouts, suspend or terminate accounts, and take other reasonable action when users violate these Terms, the Hosting Guidelines, or create risks for the community or the platform.
+            </p>
+            <p>
+              You can delete your account at any time from Edit Profile. Deleting your account cancels Hangouts you are hosting and removes you from Hangouts you joined; refunds for cancelled paid Hangouts are handled as described in section 7.
             </p>
             <p>
               You can flag concerning Hangouts, profiles, or behavior using the Report option in the Service. LEENKIT does not promise that a report will lead to any particular outcome or response time.

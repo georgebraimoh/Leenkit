@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Users, Info, ExternalLink } from 'lucide-react';
 import AvatarStack from '../common/AvatarStack';
+import { formatEventDate, formatEventTime } from '../../utils/format';
 
 const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=400&q=80";
 
@@ -11,7 +12,7 @@ export default function SpaceHeader({ hangout }) {
 
   if (!hangout) return null;
 
-  const formattedDate = hangout.date ? new Date(hangout.date).toLocaleDateString('en-US', {
+  const formattedDate = hangout.date ? formatEventDate(hangout.date, {
     weekday: 'short',
     month: 'short',
     day: 'numeric'
@@ -23,6 +24,7 @@ export default function SpaceHeader({ hangout }) {
 
   const gMapsUrl = hangout.googleMapsUrl || (typeof hangout.location === 'object' ? hangout.location.googleMapsUrl : null);
   const attendeeIds = hangout.attendeeIds || [];
+  const attendeeCount = hangout.attendeeCount ?? attendeeIds.length;
   const coverImgSrc = (imgError || !hangout.image) ? DEFAULT_COVER_IMAGE : hangout.image;
 
   return (
@@ -84,10 +86,10 @@ export default function SpaceHeader({ hangout }) {
             </Link>
 
             <p className="text-xs text-[#3D4948] flex items-center gap-2 truncate">
-              <span>{formattedDate} {hangout.time ? `· ${hangout.time}` : ''}</span>
+              <span>{formattedDate} {hangout.time ? `· ${formatEventTime(hangout.time)}` : ''}</span>
               <span>•</span>
               <span className="font-semibold text-[#172121]">
-                {attendeeIds.length} {attendeeIds.length === 1 ? 'person' : 'people'} in this Hangout
+                {attendeeCount} {attendeeCount === 1 ? 'person' : 'people'} going
               </span>
             </p>
           </div>

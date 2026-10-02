@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getFeeSettings, platformFee } from "../_shared/http.ts";
 
-const ALLOWED_CURRENCIES = ["NGN", "USD", "EUR", "GBP"];
+// Payouts settle to Nigerian bank accounts, so online payments are NGN only.
+const ALLOWED_CURRENCIES = ["NGN"];
 
 function getAllowedOrigins(): string[] {
   const envOrigins = Deno.env.get("ALLOWED_ORIGINS");
@@ -13,7 +15,9 @@ function getAllowedOrigins(): string[] {
       .filter(Boolean);
   }
 
+  console.error("ALLOWED_ORIGINS secret is not set; falling back to the production site and localhost.");
   return [
+    "https://leenkit.netlify.app",
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
@@ -90,7 +94,7 @@ serve(async (req) => {
     // Fetch authoritative Hangout record from DB (ignore ticket prices sent by browser)
     const { data: hangout, error: hangoutError } = await supabaseAdmin
       .from("hangouts")
-      .select("id, title, is_paid, price, currency, max_attendees")
+      .select("id, title, is_paid, price, currency, max_attendees, attendee_count, status, date, host_id")
       .eq("id", hangout_id)
       .single();
 
@@ -100,6 +104,37 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const json = (payload: unknown, status: number) =>
+      new Response(JSON.stringify(payload), {
+        status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+
+    // S6: only upcoming, not-yet-past Hangouts can take payments.
+    const today = new Date();
+    today.setUTCDate(today.getUTCDate() - 1);
+    const yesterday = today.toISOString().slice(0, 10);
+    if (hangout.status !== "upcoming" || (hangout.date && hangout.date < yesterday)) {
+      return json({ error: "This Hangout is no longer open." }, 400);
+    }
+
+    // Money goes to the host's Paystack subaccount; LEENKIT keeps its fee.
+    const { data: payout } = await supabaseAdmin
+      .from("host_payout_accounts")
+      .select("paystack_subaccount_code")
+      .eq("user_id", hangout.host_id)
+      .maybeSingle();
+
+    if (!payout?.paystack_subaccount_code) {
+      return json({
+        error: payment_type === "ticket"
+          ? "The host hasn't finished setting up payouts, so tickets can't be sold yet."
+          : "The host hasn't set up payouts yet. You can pledge instead.",
+      }, 409);
+    }
+
+    const feeSettings = await getFeeSettings(supabaseAdmin);
 
     let finalAmount: number;
     let finalCurrency: string;
@@ -112,24 +147,55 @@ serve(async (req) => {
         });
       }
 
-      // Check capacity
-      const { count: attendeeCount } = await supabaseAdmin
-        .from("hangout_attendees")
-        .select("id", { count: "exact", head: true })
-        .eq("hangout_id", hangout_id);
+      if (hangout.host_id === user.id) {
+        return json({ error: "You are hosting this Hangout." }, 400);
+      }
 
-      if ((attendeeCount || 0) >= hangout.max_attendees) {
-        return new Response(JSON.stringify({ error: "This Hangout is at full capacity." }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      // Already attending? Never charge twice.
+      const { data: existingAttendance } = await supabaseAdmin
+        .from("hangout_attendees")
+        .select("id")
+        .eq("hangout_id", hangout_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existingAttendance) {
+        return json({ error: "You are already attending this Hangout." }, 409);
+      }
+
+      if ((hangout.attendee_count || 0) >= hangout.max_attendees) {
+        return json({ error: "This Hangout is at full capacity." }, 400);
+      }
+
+      // Reuse a recent unpaid checkout instead of opening a second one.
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      const { data: pendingTicket } = await supabaseAdmin
+        .from("payments")
+        .select("reference, paystack_access_code")
+        .eq("hangout_id", hangout_id)
+        .eq("user_id", user.id)
+        .eq("payment_type", "ticket")
+        .eq("status", "pending")
+        .gte("created_at", thirtyMinutesAgo)
+        .not("paystack_access_code", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (pendingTicket?.paystack_access_code) {
+        return json({
+          authorization_url: `https://checkout.paystack.com/${pendingTicket.paystack_access_code}`,
+          access_code: pendingTicket.paystack_access_code,
+          reference: pendingTicket.reference,
+          reused: true,
+        }, 200);
       }
 
       finalAmount = Number(hangout.price);
       finalCurrency = (hangout.currency || "NGN").toUpperCase();
     } else if (payment_type === "sponsorship") {
       const parsedAmount = Number(amount);
-      if (isNaN(parsedAmount) || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      if (isNaN(parsedAmount) || !Number.isFinite(parsedAmount) || parsedAmount <= 0 || parsedAmount > 10000000) {
         return new Response(JSON.stringify({ error: "Invalid sponsorship amount." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -149,7 +215,11 @@ serve(async (req) => {
         });
       }
 
-      finalAmount = parsedAmount;
+      if (parsedAmount < feeSettings.min_payment_ngn) {
+        return json({ error: `The minimum sponsorship is NGN ${feeSettings.min_payment_ngn.toLocaleString()}.` }, 400);
+      }
+
+      finalAmount = Math.round(parsedAmount * 100) / 100;
       finalCurrency = String(currency).toUpperCase();
     } else {
       return new Response(JSON.stringify({ error: "Invalid payment_type" }), {
@@ -167,16 +237,22 @@ serve(async (req) => {
 
     // Subunit calculation (kobo / cents)
     const amountInSubunits = Math.round(finalAmount * 100);
+    const fee = platformFee(finalAmount, feeSettings);
+    const hostAmount = Math.round((finalAmount - fee) * 100) / 100;
     const reference = `LK_${payment_type === "ticket" ? "TKT" : "SPN"}_${crypto.randomUUID().replace(/-/g, "").substring(0, 16)}`;
 
     // Create pending payment record
     const { error: insertPayError } = await supabaseAdmin.from("payments").insert({
       user_id: user.id,
       hangout_id,
+      host_id: hangout.host_id,
       payment_type,
       reference,
       amount: finalAmount,
       currency: finalCurrency,
+      platform_fee: fee,
+      host_amount: hostAmount,
+      paystack_subaccount_code: payout.paystack_subaccount_code,
       status: "pending",
       metadata: {
         message: message ? String(message).substring(0, 200) : null,
@@ -218,6 +294,11 @@ serve(async (req) => {
         hangout_id,
         payment_type,
       },
+      // Split: host's subaccount gets the rest; LEENKIT (main account) gets
+      // exactly `transaction_charge` and pays Paystack's processing fee.
+      subaccount: payout.paystack_subaccount_code,
+      transaction_charge: Math.round(fee * 100),
+      bearer: "account",
     };
 
     if (sanitizedCallbackUrl) {

@@ -7,8 +7,8 @@ export default function HangoutGrid({ hangouts = [], onResetFilters }) {
   if (hangouts.length === 0) {
     return (
       <EmptyState
-        title="No activities found"
-        description="Try adjusting your category or location filters to explore more activities around the world."
+        title="No Hangouts match"
+        description="Try another category or area, or clear your filters to see every upcoming Hangout."
         actionLabel="Clear all filters"
         onAction={onResetFilters}
       />

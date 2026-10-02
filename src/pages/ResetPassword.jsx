@@ -60,8 +60,8 @@ export default function ResetPassword() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setErrorMessage('Password must be at least 6 characters.');
+    if (newPassword.length < 8) {
+      setErrorMessage('Password must be at least 8 characters.');
       return;
     }
 
@@ -200,7 +200,7 @@ export default function ResetPassword() {
                 variant="primary"
                 size="lg"
                 fullWidth
-                disabled={isLoading || !newPassword || !confirmPassword || newPassword.length < 6}
+                disabled={isLoading || !newPassword || !confirmPassword || newPassword.length < 8}
                 className="mt-2"
               >
                 {isLoading ? 'Updating password...' : 'Update Password'}

@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import AvatarStack from '../common/AvatarStack';
 import { useUser } from '../../context/UserContext';
 import { useLeenkit } from '../../context/LeenkitContext';
+import Avatar from '../common/Avatar';
 
 function getRelativeTime(timestamp) {
   if (!timestamp) return '';
@@ -31,7 +32,7 @@ export default function ActivityCard({ notification }) {
   const timeAgo = getRelativeTime(notification.createdAt);
 
   const actorName = actor?.name || 'A LEENKIT member';
-  const actorAvatar = actor?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+  const actorAvatar = actor?.avatar || null;
 
   const hangoutTitle = hangout?.title || notification.title || 'LEENKIT Hangout';
   const attendeeIds = hangout?.attendeeIds || [];
@@ -49,6 +50,9 @@ export default function ActivityCard({ notification }) {
     typeLabel = '🤝 NEW PERSON JOINED';
     primaryActionText = 'View Hangout';
     primaryActionPath = notification.hangoutId ? `/hangout/${notification.hangoutId}` : '#';
+  } else if (notification.type === 'hangout_cancelled') {
+    typeLabel = 'HANGOUT CANCELLED';
+    primaryActionText = 'View Hangout';
   } else if (notification.type === 'vibe' || notification.type === 'vibe_hangout') {
     typeLabel = '✨ NEW VIBE';
     primaryActionText = notification.hangoutId ? 'View Hangout' : 'View Profile';
@@ -85,11 +89,7 @@ export default function ActivityCard({ notification }) {
     >
       {/* Header Row: 32-36px Avatar, Actor Name, Activity Label, Timestamp */}
       <div className="flex items-center gap-3">
-        <img
-          src={actorAvatar}
-          alt={actorName}
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-[#DDE3E0] shrink-0"
-        />
+        <Avatar src={actorAvatar} name={actorName} size="md" className="border border-[#DDE3E0]" />
 
         <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0 flex-wrap">

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import LoginForm from './LoginForm';
@@ -9,11 +10,22 @@ import leenkitIcon from '../../assets/Leenkit icon.png';
 import { EMAIL_CONFIRMATION_NOTICE } from '../../data/legal';
 
 export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) {
-  const { loginWithGoogle, loginWithFacebook, loginWithEmail, registerWithEmail } = useUser();
+  const { loginWithGoogle, loginWithEmail, registerWithEmail } = useUser();
+  const navigate = useNavigate();
   const [view, setView] = useState(initialView); // 'welcome', 'login', 'signup'
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [authNotice, setAuthNotice] = useState('');
+
+  // Open on the requested view every time, with no stale errors.
+  useEffect(() => {
+    if (isOpen) {
+      setView(initialView);
+      setAuthError('');
+      setAuthNotice('');
+      setIsLoading(false);
+    }
+  }, [isOpen, initialView]);
 
   if (!isOpen) return null;
 
@@ -25,19 +37,6 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
       onClose();
     } catch (e) {
       setAuthError(e.message || "Failed to sign in with Google.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleFacebookSignIn = async () => {
-    setIsLoading(true);
-    setAuthError('');
-    try {
-      await loginWithFacebook();
-      onClose();
-    } catch (e) {
-      setAuthError(e.message || "Failed to sign in with Facebook.");
     } finally {
       setIsLoading(false);
     }
@@ -67,6 +66,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
         return;
       }
       onClose();
+      navigate('/onboarding');
     } catch (e) {
       setAuthError(e.message || "Failed to create account.");
     } finally {
@@ -110,18 +110,6 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
               </svg>
               <span>Continue with Google</span>
-            </button>
-
-            {/* Facebook OAuth Button */}
-            <button
-              onClick={handleFacebookSignIn}
-              disabled={isLoading}
-              className="pressable w-full py-3 px-4 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-full text-xs font-semibold flex items-center justify-center gap-3 transition-all shadow-xs cursor-pointer disabled:opacity-50"
-            >
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-              <span>Continue with Facebook</span>
             </button>
 
             {/* Email Button */}

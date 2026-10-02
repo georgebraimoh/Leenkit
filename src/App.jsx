@@ -13,6 +13,7 @@ import Footer from './components/layout/Footer';
 import AuthModal from './components/auth/AuthModal';
 import LegalAcceptanceGate from './components/auth/LegalAcceptanceGate';
 import ScrollToTop from './components/common/ScrollToTop';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Route-level Code Splitting / Lazy Loading
 const Home = lazy(() => import('./pages/Home'));
@@ -31,6 +32,9 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Activity = lazy(() => import('./pages/Activity'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const PayoutSettings = lazy(() => import('./pages/PayoutSettings'));
+const Admin = lazy(() => import('./pages/Admin'));
 
 function PageFallback() {
   return (
@@ -47,6 +51,7 @@ function AnimatedRoutes() {
   const location = useLocation();
 
   return (
+    <ErrorBoundary key={location.pathname}>
     <AnimatePresence mode="wait">
       <Suspense fallback={<PageFallback />}>
         <Routes location={location} key={location.pathname}>
@@ -67,10 +72,24 @@ function AnimatedRoutes() {
           <Route path="/faq" element={<Faq />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
-          <Route path="*" element={<Explore />} />
+          <Route path="/payouts" element={<PayoutSettings />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
     </AnimatePresence>
+    </ErrorBoundary>
+  );
+}
+
+function SuspendedBanner() {
+  const { currentUser } = useUser();
+  if (!currentUser?.suspendedAt) return null;
+  return (
+    <div role="alert" className="bg-rose-700 text-white text-sm px-4 py-2.5 text-center">
+      Your account is suspended, so you can't host, join or post right now.
+      {currentUser.suspensionReason ? ` Reason: ${currentUser.suspensionReason}.` : ''} Contact LEENKIT support to appeal.
+    </div>
   );
 }
 
@@ -87,6 +106,7 @@ function GlobalAuthModal() {
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <ToastProvider>
       <UserProvider>
         <LocationProvider>
@@ -96,8 +116,9 @@ export default function App() {
                 <ScrollToTop />
                 <div className="min-h-screen flex flex-col justify-between bg-[#F7F5EF] font-sans selection:bg-[#18A999]/20 selection:text-[#18A999]">
                   <div>
+                    <SuspendedBanner />
                     <Navbar />
-                    <main>
+                    <main id="main">
                       <AnimatedRoutes />
                     </main>
                   </div>
@@ -112,5 +133,6 @@ export default function App() {
         </LocationProvider>
       </UserProvider>
     </ToastProvider>
+    </ErrorBoundary>
   );
 }

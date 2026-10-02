@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth/authService';
 import { vibeService } from '../services/vibe/vibeService';
 import { notificationService } from '../services/notification/notificationService';
@@ -10,13 +10,11 @@ export function UserProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  const [users, setUsers] = useState(() => {
-    try {
-      localStorage.removeItem('leenkit_all_users');
-      localStorage.removeItem('leenq_all_users');
-    } catch (e) {}
-    return [];
-  });
+  const [users, setUsers] = useState([]);
+  const usersRef = useRef(users);
+  usersRef.current = users;
+  // Profile ids already requested, so each one is fetched at most once.
+  const requestedProfileIds = useRef(new Set());
 
   const [vibingIds, setVibingIds] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -122,23 +120,6 @@ export function UserProvider({ children }) {
   useEffect(() => {
     let mounted = true;
 
-    const loadAllProfiles = async () => {
-      try {
-        const allProfiles = await authService.fetchProfilesAll();
-        if (mounted && allProfiles && allProfiles.length > 0) {
-          setUsers(prev => {
-            const map = new Map(prev.map(u => [u.id, u]));
-            allProfiles.forEach(u => map.set(u.id, u));
-            return Array.from(map.values());
-          });
-        }
-      } catch (e) {
-        console.warn('Could not load initial profiles:', e);
-      }
-    };
-
-    loadAllProfiles();
-
     const loadCurrentUser = async () => {
       try {
         const user = await authService.getCurrentUser();
@@ -218,10 +199,14 @@ export function UserProvider({ children }) {
     };
   }, []);
 
-  const fetchAndCacheProfiles = async (ids) => {
+  // Stable identity: consumers can depend on it without re-running effects.
+  const fetchAndCacheProfiles = useCallback(async (ids) => {
     if (!ids || (Array.isArray(ids) && ids.length === 0)) return;
-    const missing = (Array.isArray(ids) ? ids : [ids]).filter(id => id && !users.some(u => u.id === id));
+    const known = new Set(usersRef.current.map(u => u.id));
+    const missing = Array.from(new Set(Array.isArray(ids) ? ids : [ids]))
+      .filter(id => id && !known.has(id) && !requestedProfileIds.current.has(id));
     if (missing.length === 0) return;
+    missing.forEach(id => requestedProfileIds.current.add(id));
 
     try {
       const fetched = await authService.fetchProfiles(missing);
@@ -233,9 +218,10 @@ export function UserProvider({ children }) {
         });
       }
     } catch (e) {
+      missing.forEach(id => requestedProfileIds.current.delete(id));
       console.warn('Could not fetch profiles by IDs:', e.message);
     }
-  };
+  }, []);
 
   const openAuthModal = (view = 'welcome') => {
     setAuthModalInitialView(view);
@@ -391,14 +377,17 @@ export function UserProvider({ children }) {
 
     if (currentUser?.id === id) return currentUser;
 
-    fetchAndCacheProfiles([id]);
+    // Deduplicated: fetched at most once per id, outside the render pass.
+    if (!requestedProfileIds.current.has(id)) {
+      queueMicrotask(() => fetchAndCacheProfiles([id]));
+    }
 
     return {
       id,
       name: 'LEENKIT Member',
-      avatar:
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      location: 'Abuja'
+      username: null,
+      avatar: null,
+      location: ''
     };
   };
 

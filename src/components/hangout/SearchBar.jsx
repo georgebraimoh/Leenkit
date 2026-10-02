@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 
-export default function SearchBar({ value, onChange, placeholder = "Search activities, places, or keywords worldwide..." }) {
+export default function SearchBar({ value, onChange, placeholder = "Search Hangouts by name, place or keyword" }) {
   const [isFocused, setIsFocused] = useState(false);
 
   return (
@@ -15,7 +15,8 @@ export default function SearchBar({ value, onChange, placeholder = "Search activ
         <Search className={`w-5 h-5 transition-colors ${isFocused ? 'text-[#18A999]' : ''}`} />
       </div>
       <input
-        type="text"
+        type="search"
+        aria-label="Search Hangouts"
         value={value}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
@@ -30,6 +31,8 @@ export default function SearchBar({ value, onChange, placeholder = "Search activ
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             whileTap={{ scale: 0.9 }}
+            type="button"
+            aria-label="Clear search"
             onClick={() => onChange('')}
             className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#6F6F6F] hover:text-[#171717] cursor-pointer"
           >

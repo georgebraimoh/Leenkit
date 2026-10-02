@@ -74,6 +74,7 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
           </div>
           <input
             type="email"
+            autoComplete="email"
             value={email}
             onChange={e => {
               setEmail(e.target.value);
@@ -93,6 +94,7 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
           </div>
           <input
             type={showPassword ? 'text' : 'password'}
+            autoComplete="current-password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder="Enter your password"
@@ -102,6 +104,7 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6F6F6F] hover:text-[#171717] cursor-pointer"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

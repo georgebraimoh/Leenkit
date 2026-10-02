@@ -1,27 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import ProfileImageViewer from '../common/ProfileImageViewer';
+import Avatar from '../common/Avatar';
 
 export default function ChatMessage({ message, isOwnMessage }) {
-  const [imgError, setImgError] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   if (message.type === 'system') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.15 }}
-        className="my-3 text-center"
-      >
+      <div className="my-3 text-center" role="status">
         <span className="inline-block px-3.5 py-1 text-xs font-medium bg-[#E8F0E8] text-[#2D5A27] rounded-full border border-[#D5E4D5] shadow-xs">
           {message.text}
         </span>
-      </motion.div>
+      </div>
     );
   }
 
-  const initials = message.userName ? message.userName.substring(0, 2).toUpperCase() : 'QU';
+  const avatar = <Avatar src={message.userAvatar} name={message.userName} size="md" className="border border-[#E8E6E1] shadow-xs" />;
 
   return (
     <>
@@ -31,29 +26,22 @@ export default function ChatMessage({ message, isOwnMessage }) {
         transition={{ duration: 0.15 }}
         className={`flex items-start gap-2.5 my-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}
       >
-        {/* Avatar or Initials Badge */}
-        {message.userAvatar && !imgError ? (
-          <img
-            src={message.userAvatar}
-            alt={message.userName}
-            title={`View ${message.userName}'s profile picture`}
-            aria-label={`View ${message.userName}'s profile picture`}
-            onError={() => setImgError(true)}
+        {message.userAvatar ? (
+          <button
+            type="button"
             onClick={() => setIsViewerOpen(true)}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover shrink-0 border border-[#E8E6E1] shadow-xs cursor-pointer hover:scale-105 hover:ring-2 hover:ring-[#18A999] transition-all"
-          />
-        ) : (
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#18A999] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-            {initials}
-          </div>
-        )}
+            aria-label={`View ${message.userName}'s profile picture`}
+            className="rounded-full shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]"
+          >
+            {avatar}
+          </button>
+        ) : avatar}
 
-        {/* Message Content Bubble */}
         <div className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] space-y-1 ${isOwnMessage ? 'items-end text-right' : ''}`}>
           <div className={`flex items-center gap-2 px-1 ${isOwnMessage ? 'justify-end' : ''}`}>
-            <span className="text-xs font-bold text-[#171717]">{message.userName}</span>
+            <span className="text-xs font-bold text-[#171717]">{isOwnMessage ? 'You' : message.userName}</span>
             {message.timestamp && (
-              <span className="text-[10px] text-[#6F6F6F]">{message.timestamp}</span>
+              <time dateTime={message.createdAt} className="text-xs text-[#6F6F6F]">{message.timestamp}</time>
             )}
           </div>
 
@@ -69,7 +57,7 @@ export default function ChatMessage({ message, isOwnMessage }) {
         </div>
       </motion.div>
 
-      {message.userAvatar && !imgError && (
+      {message.userAvatar && (
         <ProfileImageViewer
           isOpen={isViewerOpen}
           onClose={() => setIsViewerOpen(false)}

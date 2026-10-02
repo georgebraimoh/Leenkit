@@ -134,7 +134,10 @@ export default function Privacy() {
               LEENKIT keeps a record of each payment, including the reference, amount, currency, status, payment type, related Hangout, your email address, the Hangout title, any sponsorship message, and relevant timestamps. LEENKIT also stores the payment confirmation notices that Paystack sends. These notices may include transaction details and limited payment-method information provided by Paystack.
             </p>
             <p>
-              Some Hangouts list a price that is settled directly with the Organizer at the venue. LEENKIT does not process those payments.
+              LEENKIT also records the platform fee and the Organizer’s share for each payment, so Organizers can see what they earned.
+            </p>
+            <p>
+              <strong>Organizer payouts.</strong> If you set up payouts, you give us your bank and account number. We send them to Paystack to verify the account and create a payout (“subaccount”) record in your name. LEENKIT stores only the bank name, the verified account name, the last four digits of the account number and Paystack’s reference for it; Paystack holds the full details.
             </p>
           </Section>
 
@@ -236,7 +239,7 @@ export default function Privacy() {
               <li>You can view and edit your profile details at any time from Edit Profile.</li>
               <li>You can choose what you post in Hangouts, Hangout Spaces, and your profile.</li>
               <li>
-                LEENKIT does not currently offer in-app account deletion, and a formal account deletion process has not yet been finalised.
+                You can delete your account at any time from Edit Profile → Delete account. We remove your profile, photos, messages, follows, notifications and payout details. If you have bought or sold tickets or sponsorships, we keep the payment records (amount, date, Hangout and reference) for accounting and legal obligations, but they are no longer linked to your name, username or email.
               </li>
             </ul>
             <p>

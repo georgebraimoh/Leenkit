@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Compass, Calendar, Plus, User, Sparkles } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
+import Avatar from '../common/Avatar';
 
 export default function MobileNav() {
   const { currentUser } = useUser();
@@ -11,9 +12,9 @@ export default function MobileNav() {
   const isSpacePage = location.pathname.endsWith('/space');
   if (isSpacePage) return null;
 
-  const profilePath = currentUser
+  const profilePath = currentUser?.username
     ? `/profile/${currentUser.username}`
-    : '/login';
+    : currentUser ? '/edit-profile' : '/login';
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-[#DDE3E0] px-4 py-2 shadow-lg">
@@ -80,7 +81,7 @@ export default function MobileNav() {
               }`}
             >
               <Calendar className="w-5 h-5" />
-              <span>Your Hangouts</span>
+              <span>Hangouts</span>
 
               {isActive && (
                 <motion.div
@@ -123,14 +124,11 @@ export default function MobileNav() {
               }`}
             >
               {currentUser ? (
-                <img
+                <Avatar
                   src={currentUser.avatar}
-                  alt={currentUser.name}
-                  className={`w-5 h-5 rounded-full object-cover border ${
-                    location.pathname.startsWith('/profile')
-                      ? 'border-[#18A999] ring-2 ring-[#18A999]/20'
-                      : 'border-stone-300'
-                  }`}
+                  name={currentUser.name}
+                  size="xs"
+                  className={`border ${location.pathname.startsWith('/profile') ? 'border-[#18A999] ring-2 ring-[#18A999]/20' : 'border-stone-300'}`}
                 />
               ) : (
                 <User className="w-5 h-5" />

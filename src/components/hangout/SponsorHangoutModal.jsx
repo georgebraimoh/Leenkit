@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, X, CheckCircle2, Sparkles, AlertCircle, CreditCard, Bookmark } from 'lucide-react';
+import { Heart, CheckCircle2, AlertCircle, CreditCard, Bookmark } from 'lucide-react';
+import Modal from '../common/Modal';
 import Button from '../common/Button';
 import { hangoutService } from '../../services/hangout/hangoutService';
 import { paymentService } from '../../services/payment/paymentService';
 import { useUser } from '../../context/UserContext';
 
+// Sponsorships are paid out to Nigerian bank accounts, so NGN only.
 const CURRENCIES = [
-  { code: 'NGN', symbol: '₦' },
-  { code: 'USD', symbol: '$' },
-  { code: 'EUR', symbol: '€' },
-  { code: 'GBP', symbol: '£' }
+  { code: 'NGN', symbol: '₦' }
 ];
+const MIN_SPONSORSHIP_NGN = 1000;
 
 export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponsorshipSuccess }) {
   const { currentUser } = useUser();
 
-  const defaultCurrency = hangout?.currency || 'NGN';
-  const [currency, setCurrency] = useState(defaultCurrency);
+  const [currency, setCurrency] = useState('NGN');
   const [amount, setAmount] = useState('5000');
   const [message, setMessage] = useState('');
   const [mode, setMode] = useState('paystack'); // 'paystack' | 'pledge'
@@ -53,6 +51,14 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
     const parsedAmount = Number(amount);
     if (!amount || isNaN(parsedAmount) || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       setErrorMsg('Please enter a valid sponsorship amount greater than zero.');
+      return;
+    }
+    if (mode === 'paystack' && parsedAmount < MIN_SPONSORSHIP_NGN) {
+      setErrorMsg(`The minimum sponsorship is ₦${MIN_SPONSORSHIP_NGN.toLocaleString()}.`);
+      return;
+    }
+    if (parsedAmount > 10000000) {
+      setErrorMsg('That amount is too large.');
       return;
     }
 
@@ -109,24 +115,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="relative bg-white border border-[#DDE3E0] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6"
-        >
-          {/* Close Button */}
-          <button
-            onClick={handleResetAndClose}
-            className="absolute top-5 right-5 p-2 text-[#6F6F6F] hover:text-[#171717] hover:bg-[#EEF1EF] rounded-full transition-colors cursor-pointer"
-            title="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
+    <Modal isOpen={isOpen} onClose={handleResetAndClose} title={isSubmitted ? undefined : 'Sponsor this Hangout'} maxWidth="max-w-md">
           {isSubmitted ? (
             /* Success State: Sponsorship Recorded */
             <div className="text-center space-y-5 py-4">
@@ -136,10 +125,10 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
 
               <div className="space-y-2">
                 <h3 className="text-2xl font-extrabold font-heading text-[#172121]">
-                  Sponsorship recorded 🎉
+                  Pledge recorded
                 </h3>
                 <p className="text-sm text-[#6F6F6F] leading-relaxed max-w-xs mx-auto">
-                  Your sponsorship of <strong className="text-[#172121]">{currentSymbol}{numericAmount.toLocaleString()}</strong> has been recorded. No payment has been made. Payment will be available when sponsorship payments launch.
+                  You pledged <strong className="text-[#172121]">{currentSymbol}{numericAmount.toLocaleString()}</strong>. No money has moved: a pledge is a promise you settle with the host yourself. It shows as "pledged (unpaid)" to people going. To pay now, choose Paystack instead.
                 </p>
               </div>
 
@@ -152,20 +141,9 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
           ) : (
             /* Form State: Enter Amount & Optional Message */
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Header */}
-              <div className="space-y-1 pr-6">
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-[#DDF4EF] text-[#18A999] rounded-full">
-                    Community Sponsorship
-                  </span>
-                </div>
-                <h3 className="text-2xl font-extrabold font-heading text-[#172121] tracking-tight">
-                  Sponsor this Hangout
-                </h3>
-                <p className="text-xs text-[#6F6F6F]">
-                  Help make this Hangout better for everyone.
-                </p>
-              </div>
+              <p className="text-xs text-[#6F6F6F] -mt-2">
+                Help cover snacks, gear or the venue. Paystack payments go to the host (LEENKIT keeps 10% and covers card fees). Pledges are promises with no payment.
+              </p>
 
               {errorMsg && (
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 flex items-start gap-2">
@@ -293,8 +271,6 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
               </div>
             </form>
           )}
-        </motion.div>
-      </div>
-    </AnimatePresence>
+    </Modal>
   );
 }

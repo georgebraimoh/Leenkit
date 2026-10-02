@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
 import FormField from '../components/common/FormField';
@@ -8,14 +8,9 @@ import { InstagramIcon, TikTokIcon, SpotifyIcon } from '../components/common/Soc
 import { useUser } from '../context/UserContext';
 import { authService } from '../services/auth/authService';
 import { validateAllSocialUrls } from '../utils/socialUrlValidator';
+import Avatar from '../components/common/Avatar';
+import DeleteAccountSection from '../components/auth/DeleteAccountSection';
 
-const AVATAR_PRESETS = [
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80"
-];
 
 const INTEREST_OPTIONS = [
   "Tech", "Music", "Photography", "Football", "Coffee", "Creative", "Food",
@@ -31,7 +26,7 @@ export default function EditProfile() {
     title: currentUser?.title || '',
     location: currentUser?.location || 'Wuse 2, Abuja',
     bio: currentUser?.bio || '',
-    avatar: currentUser?.avatar || AVATAR_PRESETS[0],
+    avatar: currentUser?.avatar || '',
     interests: currentUser?.interests || [],
     instagramUrl: currentUser?.instagramUrl || '',
     tiktokUrl: currentUser?.tiktokUrl || '',
@@ -193,17 +188,11 @@ export default function EditProfile() {
           )}
 
           {/* Avatar Selector & Custom Upload */}
-          <FormField label="Profile Picture" helpText="Select a preset avatar or upload a custom photo from your device (JPG, PNG, WEBP max 5 MB).">
+          <FormField label="Profile Picture" helpText="A clear photo of you helps people recognise you at the venue. JPG, PNG or WEBP, max 5 MB.">
             <div className="space-y-4 pt-1">
               {/* Active Avatar Preview & Device Upload Button */}
               <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-[#18A999] shadow-sm shrink-0">
-                  <img
-                    src={customAvatarPreview || formData.avatar}
-                    alt="Current avatar preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <Avatar src={customAvatarPreview || formData.avatar || null} name={formData.name} size="xl" className="border-2 border-[#18A999] shadow-sm" />
 
                 <div className="space-y-1">
                   <label className="px-3.5 py-2 bg-[#EEF1EF] border border-[#DDE3E0] hover:border-[#18A999] hover:text-[#18A999] rounded-xl text-xs font-semibold text-[#172121] inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs">
@@ -236,30 +225,15 @@ export default function EditProfile() {
                 </div>
               )}
 
-              {/* Presets Row */}
-              <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-[#6F6F6F]">Or select a preset avatar:</p>
-                <div className="flex items-center gap-3">
-                  {AVATAR_PRESETS.map((url, idx) => {
-                    const isSelected = !customAvatarFile && formData.avatar === url;
-                    return (
-                      <button
-                        type="button"
-                        key={idx}
-                        onClick={() => {
-                          handleClearCustomAvatar();
-                          setFormData({ ...formData, avatar: url });
-                        }}
-                        className={`relative w-12 h-12 rounded-full overflow-hidden border-2 transition-all cursor-pointer ${
-                          isSelected ? 'border-[#18A999] ring-2 ring-[#18A999]/30 scale-105' : 'border-transparent opacity-70 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={url} alt="Avatar option" className="w-full h-full object-cover" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              {!customAvatarFile && formData.avatar && (
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, avatar: '' })}
+                  className="text-xs font-semibold text-[#3D4948] hover:text-rose-700 underline underline-offset-2 cursor-pointer"
+                >
+                  Remove photo (show initials instead)
+                </button>
+              )}
             </div>
           </FormField>
 
@@ -268,6 +242,7 @@ export default function EditProfile() {
             <FormField label="Full Name" required>
               <input
                 type="text"
+                maxLength={80}
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
@@ -459,6 +434,16 @@ export default function EditProfile() {
             </Button>
           </div>
         </form>
+
+        <section className="p-6 bg-white border border-[#DDE3E0] rounded-3xl flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold font-heading text-[#172121]">Payouts</h2>
+            <p className="text-sm text-[#3D4948]">Add a bank account to sell tickets and receive sponsorships.</p>
+          </div>
+          <Link to="/payouts"><Button variant="outline" size="md">Manage payouts</Button></Link>
+        </section>
+
+        <DeleteAccountSection />
       </div>
     </PageTransition>
   );

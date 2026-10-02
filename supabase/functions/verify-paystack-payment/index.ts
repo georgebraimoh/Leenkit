@@ -11,7 +11,9 @@ function getAllowedOrigins(): string[] {
       .filter(Boolean);
   }
 
+  console.error("ALLOWED_ORIGINS secret is not set; falling back to the production site and localhost.");
   return [
+    "https://leenkit.netlify.app",
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
@@ -100,35 +102,19 @@ serve(async (req) => {
       const psData = await psRes.json();
 
       if (psRes.ok && psData.status && psData.data?.status === "success") {
-        const expectedSubunits = Math.round(Number(payment.amount) * 100);
-        if (Number(psData.data.amount) === expectedSubunits && psData.data.currency.toUpperCase() === payment.currency.toUpperCase()) {
-          if (payment.payment_type === "ticket") {
-            const { error: attErr } = await supabaseAdmin.from("hangout_attendees").insert({
-              hangout_id: payment.hangout_id,
-              user_id: user.id,
-            });
-            
-            if (attErr && (attErr.message.includes("LEENKIT_CAPACITY_EXCEEDED") || attErr.code === "P0001")) {
-              await supabaseAdmin.from("payments").update({ status: "requires_refund" }).eq("id", payment.id);
-              payment.status = "requires_refund";
-            } else {
-              await supabaseAdmin.from("payments").update({ status: "successful", paid_at: new Date().toISOString() }).eq("id", payment.id);
-              payment.status = "successful";
-            }
-          } else if (payment.payment_type === "sponsorship") {
-            await supabaseAdmin.from("hangout_sponsorships").insert({
-              hangout_id: payment.hangout_id,
-              sponsor_id: user.id,
-              amount: payment.amount,
-              currency: payment.currency,
-              message: payment.metadata?.message || null,
-              status: "paid",
-              payment_id: payment.id,
-            });
-            await supabaseAdmin.from("payments").update({ status: "successful", paid_at: new Date().toISOString() }).eq("id", payment.id);
-            payment.status = "successful";
-          }
+        // Same atomic, idempotent settlement the webhook uses (S7).
+        const { data: settled, error: settleError } = await supabaseAdmin.rpc("settle_payment", {
+          p_reference: reference,
+          p_amount_subunits: Number(psData.data.amount),
+          p_currency: String(psData.data.currency || ""),
+          p_paid_at: psData.data.paid_at || new Date().toISOString(),
+        });
+
+        if (settleError) {
+          throw new Error(`Payment settlement failed: ${settleError.message}`);
         }
+
+        payment.status = settled === "not_found" ? payment.status : settled;
       }
     }
 

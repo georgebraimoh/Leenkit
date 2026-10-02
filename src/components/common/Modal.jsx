@@ -1,49 +1,98 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
-export default function Modal({ isOpen, onClose, title, children }) {
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+// Accessible dialog: labelled, focus-trapped, Escape to close, scrolls inside
+// the viewport on small phones, and returns focus to where it came from.
+export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) {
+  const titleId = useId();
+  const panelRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const previouslyFocused = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const focusTimer = setTimeout(() => {
+      const first = panelRef.current?.querySelector(FOCUSABLE);
+      (first || panelRef.current)?.focus();
+    }, 30);
+
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onCloseRef.current?.();
+        return;
+      }
+      if (e.key !== 'Tab' || !panelRef.current) return;
+      const focusable = panelRef.current.querySelectorAll(FOCUSABLE);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    }
+
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.body.style.overflow = 'unset';
+      clearTimeout(focusTimer);
+      document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+        previouslyFocused.focus();
+      }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
+            aria-hidden="true"
             className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs"
           />
+
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
+            tabIndex={-1}
+            initial={{ opacity: 0, scale: 0.97, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: "spring", duration: 0.35, bounce: 0.15 }}
-            className="relative w-full max-w-lg bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-[#E8E6E1] z-10 overflow-hidden"
+            exit={{ opacity: 0, scale: 0.97, y: 15 }}
+            transition={{ type: 'spring', duration: 0.35, bounce: 0.15 }}
+            className={`relative w-full ${maxWidth} max-h-[92vh] overflow-y-auto overscroll-contain bg-white rounded-t-3xl sm:rounded-3xl p-6 md:p-8 shadow-2xl border border-[#E8E6E1] z-10 focus:outline-none`}
           >
-            <div className="flex items-center justify-between mb-4">
-              {title && <h3 className="text-xl font-bold font-heading text-[#171717]">{title}</h3>}
+            <div className="flex items-start justify-between gap-4 mb-4">
+              {title ? (
+                <h2 id={titleId} className="text-xl font-bold font-heading text-[#171717]">{title}</h2>
+              ) : <span />}
               <button
+                type="button"
                 onClick={onClose}
-                className="p-2 rounded-full text-[#6F6F6F] hover:bg-[#F7F6F2] hover:text-[#171717] transition-colors pressable"
+                aria-label="Close"
+                className="p-2 -mr-2 -mt-1 rounded-full text-[#6F6F6F] hover:bg-[#F7F6F2] hover:text-[#171717] transition-colors pressable cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
+
             {children}
           </motion.div>
         </div>

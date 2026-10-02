@@ -2,21 +2,13 @@ import React, { useState } from 'react';
 import FormField from '../common/FormField';
 import Button from '../common/Button';
 import LegalConsentCheckbox from './LegalConsentCheckbox';
-import { User, Mail, Lock, AlertCircle, Camera } from 'lucide-react';
+import { User, Mail, Lock, AlertCircle } from 'lucide-react';
 
-const AVATAR_OPTIONS = [
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=400&q=80",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80"
-];
 
 export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [avatar, setAvatar] = useState(AVATAR_OPTIONS[0]);
   const [validationError, setValidationError] = useState('');
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [legalError, setLegalError] = useState('');
@@ -31,8 +23,13 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
       return;
     }
 
-    if (password.length < 6) {
-      setValidationError('Password must be at least 6 characters.');
+    if (name.trim().length > 80) {
+      setValidationError('Name can be up to 80 characters.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setValidationError('Password must be at least 8 characters.');
       return;
     }
 
@@ -41,7 +38,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
       return;
     }
 
-    onSubmit({ name: name.trim(), email: email.trim(), password, avatar, acceptedLegal });
+    onSubmit({ name: name.trim(), email: email.trim(), password, acceptedLegal });
   };
 
   return (
@@ -53,24 +50,6 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
         </div>
       )}
 
-      {/* Profile Picture Selector */}
-      <FormField label="Choose Profile Picture (Optional)">
-        <div className="flex items-center gap-3 pt-1">
-          {AVATAR_OPTIONS.map((imgUrl, idx) => (
-            <button
-              type="button"
-              key={idx}
-              onClick={() => setAvatar(imgUrl)}
-              className={`w-11 h-11 rounded-full overflow-hidden border-2 transition-all cursor-pointer ${
-                avatar === imgUrl ? 'border-[#18A999] ring-2 ring-[#18A999]/30 scale-105' : 'border-transparent opacity-70 hover:opacity-100'
-              }`}
-            >
-              <img src={imgUrl} alt="Avatar option" className="w-full h-full object-cover" />
-            </button>
-          ))}
-        </div>
-      </FormField>
-
       <FormField label="Full Name" required>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#6F6F6F]">
@@ -78,6 +57,8 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
           </div>
           <input
             type="text"
+            autoComplete="name"
+            maxLength={80}
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="e.g. Alex Danjuma"
@@ -94,6 +75,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
           </div>
           <input
             type="email"
+            autoComplete="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="name@example.com"
@@ -103,13 +85,14 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
         </div>
       </FormField>
 
-      <FormField label="Password" required helpText="At least 6 characters.">
+      <FormField label="Password" required helpText="At least 8 characters.">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#6F6F6F]">
             <Lock className="w-4 h-4" />
           </div>
           <input
             type="password"
+            autoComplete="new-password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder="Create a secure password"
@@ -134,10 +117,10 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
         variant="primary"
         size="lg"
         fullWidth
-        disabled={isLoading || !name.trim() || !email.trim() || password.length < 6}
+        disabled={isLoading || !name.trim() || !email.trim() || password.length < 8}
         className="mt-2"
       >
-        {isLoading ? 'Creating account...' : 'Continue to onboarding'}
+        {isLoading ? 'Creating account...' : 'Create account'}
       </Button>
 
       <div className="text-center pt-2">

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Calendar, Clock, MapPin, Users, Image as ImageIcon, CheckCircle, ArrowRight, MessageSquare, Upload, X, Share2, Tag, DollarSign, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { MapPin, CheckCircle, ArrowRight, MessageSquare, Upload, Share2, Tag, AlertCircle } from 'lucide-react';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
 import FormField from '../components/common/FormField';
@@ -14,6 +14,8 @@ import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 import { hangoutService, MIN_HANGOUT_CAPACITY, MAX_HANGOUT_CAPACITY } from '../services/hangout/hangoutService';
 import { CURRENT_GUIDELINES_VERSION } from '../services/auth/authService';
+import { todayISO, formatEventDate, formatEventTime, formatMoney } from '../utils/format';
+import { payoutService, estimateFee } from '../services/account/accountService';
 
 const PRESET_IMAGES = [
   { label: "Photowalk / Outdoor", url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80" },
@@ -28,7 +30,7 @@ const PRESET_IMAGES = [
 export default function CreateHangout() {
   const navigate = useNavigate();
   const { createHangout } = useLeenkit();
-  const { currentUser, acceptHostingGuidelines } = useUser();
+  const { currentUser, acceptHostingGuidelines, isAuthenticated, isAuthLoading, openAuthModal } = useUser();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -55,13 +57,27 @@ export default function CreateHangout() {
   const [createError, setCreateError] = useState('');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   
+  const [payoutAccount, setPayoutAccount] = useState(undefined); // undefined = loading
+  const [feeSettings, setFeeSettings] = useState({ percent: 10, minNgn: 200, minPaymentNgn: 1000 });
+
+  useEffect(() => {
+    payoutService.getFeeSettings().then(setFeeSettings).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser?.id) { setPayoutAccount(null); return; }
+    payoutService.getMyAccount(currentUser.id).then(setPayoutAccount).catch(() => setPayoutAccount(null));
+  }, [currentUser?.id]);
+
   const [isGuidelinesModalOpen, setIsGuidelinesModalOpen] = useState(false);
   const [isAcceptingGuidelines, setIsAcceptingGuidelines] = useState(false);
 
   const validate = () => {
     const errs = {};
-    if (!formData.title.trim()) errs.title = 'Hangout title is required';
-    if (formData.title.trim().length < 5) errs.title = 'Title should be at least 5 characters';
+    const title = formData.title.trim();
+    if (!title) errs.title = 'Hangout title is required';
+    else if (title.length < 5) errs.title = 'Title should be at least 5 characters';
+    else if (title.length > 120) errs.title = 'Title can be up to 120 characters';
     
     const loc = formData.location;
     const mapsUrl = typeof loc === 'object' && loc ? (loc.googleMapsUrl || loc.rawGoogleMapsUrl || '') : (typeof loc === 'string' ? loc : '');
@@ -73,8 +89,12 @@ export default function CreateHangout() {
     }
 
     if (!formData.date) errs.date = 'Date is required';
-    if (!formData.description.trim()) errs.description = 'Please add a brief description of what people will do';
-    if (formData.description.trim().length < 20) errs.description = 'Description should be at least 20 characters';
+    else if (formData.date < todayISO()) errs.date = 'Pick today or a future date';
+    if (!formData.time) errs.time = 'Start time is required';
+    const description = formData.description.trim();
+    if (!description) errs.description = 'Please add a brief description of what people will do';
+    else if (description.length < 20) errs.description = 'Description should be at least 20 characters';
+    else if (description.length > 5000) errs.description = 'Description can be up to 5,000 characters';
     const capacity = parseInt(formData.maxAttendees, 10);
     if (!Number.isFinite(capacity) || capacity < MIN_HANGOUT_CAPACITY) {
       errs.maxAttendees = `Minimum ${MIN_HANGOUT_CAPACITY} attendees required`;
@@ -84,8 +104,12 @@ export default function CreateHangout() {
 
     if (formData.isPaid) {
       const parsedPrice = parseFloat(formData.price);
-      if (isNaN(parsedPrice) || parsedPrice <= 0) {
-        errs.price = 'Paid Hangouts require a valid ticket price greater than 0';
+      if (!payoutAccount) {
+        errs.price = 'Add your bank account in Payouts before selling tickets';
+      } else if (isNaN(parsedPrice) || parsedPrice < feeSettings.minPaymentNgn) {
+        errs.price = `Ticket price must be at least ${formatMoney(feeSettings.minPaymentNgn, 'NGN')}`;
+      } else if (parsedPrice > 10000000) {
+        errs.price = 'Ticket price is too high';
       }
     }
 
@@ -160,7 +184,15 @@ export default function CreateHangout() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!isAuthenticated) {
+      openAuthModal('welcome');
+      return;
+    }
+    if (!validate()) {
+      setCreateError('Please fix the highlighted fields.');
+      return;
+    }
+    setCreateError('');
 
     // Check if user has accepted current Hosting Guidelines version
     const hasAcceptedGuidelines =
@@ -216,12 +248,19 @@ export default function CreateHangout() {
             Host a Hangout
           </h1>
           <p className="text-sm text-[#3D4948] max-w-xl">
-            Create a real-life Hangout at a public coordinate. Anyone can join, discover your event, and connect in person.
+            Pick a public venue, set a time and a guest limit. People can find your Hangout, join, and chat before meeting up.
           </p>
         </div>
 
+        {!isAuthLoading && !isAuthenticated && (
+          <div className="p-4 bg-[#DDF4EF] border border-[#18A999]/30 rounded-2xl text-sm text-[#087F73] flex flex-wrap items-center justify-between gap-3">
+            <span>Sign in to publish a Hangout. You can fill in the details first.</span>
+            <Button type="button" variant="primary" size="sm" onClick={() => openAuthModal('welcome')}>Sign in</Button>
+          </div>
+        )}
+
         {createError && (
-          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-semibold text-rose-600 flex items-center gap-2">
+          <div role="alert" className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-semibold text-rose-700 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{createError}</span>
           </div>
@@ -253,7 +292,7 @@ export default function CreateHangout() {
               <h4 className="font-bold text-[#171717] font-heading">{createdActivity.title}</h4>
               <p className="text-xs text-[#6F6F6F] flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-[#18A999] shrink-0" />
-                <span>{createdActivity.location?.placeName || 'Venue'} · {createdActivity.date} at {createdActivity.time}</span>
+                <span>{createdActivity.location?.placeName || 'Venue'} · {formatEventDate(createdActivity.date)}{createdActivity.time ? ` at ${formatEventTime(createdActivity.time)}` : ''}</span>
               </p>
             </div>
 
@@ -285,6 +324,7 @@ export default function CreateHangout() {
               <FormField label="Hangout Title" required error={errors.title}>
                 <input
                   type="text"
+                  maxLength={120}
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   placeholder="e.g. Saturday Morning Coffee & Photowalk"
@@ -318,13 +358,14 @@ export default function CreateHangout() {
                 <FormField label="Date" required error={errors.date}>
                   <input
                     type="date"
+                    min={todayISO()}
                     value={formData.date}
                     onChange={e => setFormData({ ...formData, date: e.target.value })}
                     className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                   />
                 </FormField>
 
-                <FormField label="Time" required>
+                <FormField label="Time" required error={errors.time}>
                   <input
                     type="time"
                     value={formData.time}
@@ -375,7 +416,7 @@ export default function CreateHangout() {
 
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, isPaid: true })}
+                    onClick={() => setFormData({ ...formData, isPaid: true, currency: 'NGN' })}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                       formData.isPaid
                         ? 'bg-[#18A999] text-white border-[#18A999] shadow-xs'
@@ -385,6 +426,16 @@ export default function CreateHangout() {
                     Paid Hangout
                   </button>
                 </div>
+
+                {formData.isPaid && payoutAccount === null && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex flex-wrap items-center justify-between gap-2">
+                    <span>To sell tickets, add the bank account your money should go to.</span>
+                    <Link to="/payouts" className="font-bold underline">Set up payouts</Link>
+                  </div>
+                )}
+                {formData.isPaid && payoutAccount && (
+                  <p className="text-xs text-[#3D4948]">Payouts go to {payoutAccount.bankName} •••• {payoutAccount.accountLast4}.</p>
+                )}
 
                 {/* Paid Input Fields */}
                 {formData.isPaid && (
@@ -397,13 +448,11 @@ export default function CreateHangout() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField label="Ticket Price" required error={errors.price}>
                         <div className="relative flex items-center">
-                          <span className="absolute left-3.5 text-xs font-bold text-[#3D4948]">
-                            {formData.currency === 'NGN' ? '₦' : formData.currency === 'USD' ? '$' : formData.currency === 'EUR' ? '€' : '£'}
-                          </span>
+                          <span className="absolute left-3.5 text-xs font-bold text-[#3D4948]">₦</span>
                           <input
                             type="number"
-                            min="0.01"
-                            step="0.01"
+                            min={feeSettings.minPaymentNgn}
+                            step="50"
                             value={formData.price}
                             onChange={e => setFormData({ ...formData, price: e.target.value })}
                             placeholder="5000"
@@ -412,22 +461,17 @@ export default function CreateHangout() {
                         </div>
                       </FormField>
 
-                      <FormField label="Currency" required>
-                        <select
-                          value={formData.currency}
-                          onChange={e => setFormData({ ...formData, currency: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-white border border-[#DDE3E0] rounded-xl text-sm focus:outline-none focus:border-[#18A999]"
-                        >
-                          <option value="NGN">NGN (₦)</option>
-                          <option value="USD">USD ($)</option>
-                          <option value="EUR">EUR (€)</option>
-                          <option value="GBP">GBP (£)</option>
-                        </select>
+                      <FormField label="Currency">
+                        <p className="px-4 py-2.5 bg-white border border-[#DDE3E0] rounded-xl text-sm font-semibold text-[#172121]">NGN (₦)</p>
                       </FormField>
                     </div>
 
                     <p className="text-[11px] text-[#3D4948] bg-white p-3 rounded-xl border border-[#DDE3E0]">
-                      ℹ️ <strong>Note:</strong> LEENKIT displays ticket prices for attendee expectations. Online payment processing is not enabled yet; entry fees are settled directly at the venue.
+                      <strong>How tickets work:</strong> attendees pay online through Paystack and the money goes to your bank account, usually the next business day. LEENKIT keeps {feeSettings.percent}% (min {formatMoney(feeSettings.minNgn, 'NGN')}) and covers Paystack's card fees.
+                      {Number(formData.price) >= feeSettings.minPaymentNgn && (
+                        <> You receive <strong>{formatMoney(estimateFee(formData.price, feeSettings).hostAmount, 'NGN')}</strong> per ticket.</>
+                      )}
+                      {' '}The price can't change once a ticket is sold.
                     </p>
                   </motion.div>
                 )}
@@ -437,6 +481,7 @@ export default function CreateHangout() {
               <FormField label="Description" required error={errors.description} helpText="Describe what attendees will do, what to bring, and exact meeting spot.">
                 <textarea
                   rows="4"
+                  maxLength={5000}
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Provide details about the meeting point, activities, vibes..."
@@ -518,7 +563,7 @@ export default function CreateHangout() {
               </FormField>
 
               {/* Safety Reminder Card */}
-              <SafetyReminder />
+              <SafetyReminder mode="host" />
             </div>
 
             {/* Action Buttons */}

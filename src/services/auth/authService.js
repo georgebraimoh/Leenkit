@@ -1,8 +1,8 @@
 import { supabase } from '../../lib/supabase';
 import { TERMS_VERSION, PRIVACY_VERSION } from '../../data/legal';
 
-const DEFAULT_AVATAR =
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+// No stock photo: members without a picture are shown with their initials.
+const DEFAULT_AVATAR = null;
 
 export const CURRENT_GUIDELINES_VERSION = '1.0';
 
@@ -38,7 +38,7 @@ function formatUser(authUser, profile = {}) {
       authUser.user_metadata?.picture ||
       authUser.user_metadata?.avatar ||
       DEFAULT_AVATAR,
-    location: profile.location || 'Abuja',
+    location: profile.location || '',
     bio: profile.bio || '',
     interests: profile.interests || [],
     instagramUrl: profile.instagram_url || '',
@@ -50,7 +50,11 @@ function formatUser(authUser, profile = {}) {
     isVerifiedOrganizer: Boolean(profile.is_verified_organizer),
     organizerVerifiedAt: profile.organizer_verified_at || null,
     hostedCount: profile.hosted_count || 0,
-    attendedCount: profile.attended_count || 0
+    attendedCount: profile.attended_count || 0,
+    isAdmin: Boolean(profile.is_admin),
+    suspendedAt: profile.suspended_at || null,
+    suspensionReason: profile.suspension_reason || null,
+    deletedAt: profile.deleted_at || null
   };
 }
 
@@ -58,11 +62,11 @@ function formatProfile(p) {
   if (!p) return null;
   return {
     id: p.id,
-    name: p.name || 'LEENKIT Member',
+    name: p.deleted_at ? 'Deleted member' : (p.name || 'LEENKIT Member'),
     email: p.email || '',
     username: p.username || `user_${p.id.slice(0, 8)}`,
     avatar: p.avatar || DEFAULT_AVATAR,
-    location: p.location || 'Abuja',
+    location: p.location || '',
     bio: p.bio || '',
     interests: p.interests || [],
     instagramUrl: p.instagram_url || '',
@@ -74,7 +78,10 @@ function formatProfile(p) {
     isVerifiedOrganizer: Boolean(p.is_verified_organizer),
     organizerVerifiedAt: p.organizer_verified_at || null,
     hostedCount: p.hosted_count || 0,
-    attendedCount: p.attended_count || 0
+    attendedCount: p.attended_count || 0,
+    isAdmin: Boolean(p.is_admin),
+    suspendedAt: p.suspended_at || null,
+    deletedAt: p.deleted_at || null
   };
 }
 
@@ -93,48 +100,9 @@ async function getProfile(authUser) {
     return formatUser(authUser, profile);
   }
 
-  // Auto-create a profile row for new OAuth users if one does not exist
-  const name =
-    authUser.user_metadata?.full_name ||
-    authUser.user_metadata?.name ||
-    authUser.email?.split('@')[0] ||
-    'LEENKIT User';
-
-  const username =
-    authUser.user_metadata?.username ||
-    authUser.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '_') ||
-    `user_${authUser.id.slice(0, 8)}`;
-
-  const avatar =
-    authUser.user_metadata?.avatar_url ||
-    authUser.user_metadata?.picture ||
-    authUser.user_metadata?.avatar ||
-    DEFAULT_AVATAR;
-
-  const newProfile = {
-    id: authUser.id,
-    name,
-    username,
-    avatar,
-    location: 'Abuja',
-    bio: 'Joined LEENKIT to discover real-life Hangouts!',
-    interests: [],
-    hosted_count: 0,
-    attended_count: 0
-  };
-
-  const { data: createdProfile, error: createError } = await supabase
-    .from('profiles')
-    .insert(newProfile)
-    .select()
-    .single();
-
-  if (createError) {
-    console.warn('Could not auto-create profile row:', createError.message);
-    return formatUser(authUser, newProfile);
-  }
-
-  return formatUser(authUser, createdProfile);
+  // The handle_new_user() trigger creates every profile. If the row is not
+  // there yet (trigger lag), show the auth data without writing anything.
+  return formatUser(authUser, {});
 }
 
 export const authService = {
@@ -235,7 +203,7 @@ export const authService = {
       options: {
         data: {
           name: name.trim(),
-          avatar: avatar || DEFAULT_AVATAR
+          ...(avatar ? { avatar } : {})
         }
       }
     });
@@ -264,6 +232,10 @@ export const authService = {
     } = await supabase.auth.getUser();
 
     if (error) {
+      // Signed-out visitors have no session; that is not an error.
+      if (error.name === 'AuthSessionMissingError' || /session missing/i.test(error.message || '')) {
+        return null;
+      }
       throw new Error(error.message);
     }
 
@@ -301,8 +273,8 @@ export const authService = {
       throw new Error('Please enter a new password.');
     }
 
-    if (newPassword.length < 6) {
-      throw new Error('Password must be at least 6 characters.');
+    if (newPassword.length < 8) {
+      throw new Error('Password must be at least 8 characters.');
     }
 
     const { data, error } = await supabase.auth.updateUser({
@@ -345,8 +317,6 @@ export const authService = {
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
     const filePath = `${activeUserId}/${fileName}`;
 
-    console.log('[Storage Upload] Uploading to "profile-images" at path:', filePath);
-
     const { data, error } = await supabase.storage
       .from('profile-images')
       .upload(filePath, file, {
@@ -355,17 +325,6 @@ export const authService = {
       });
 
     if (error) {
-      console.error('[Storage Upload Diagnostics]', {
-        message: error.message,
-        name: error.name,
-        status: error.status,
-        statusCode: error.statusCode,
-        errorData: error.error,
-        filePath,
-        bucket: 'profile-images',
-        activeUserId
-      });
-
       if (error.message?.includes('Failed to fetch') || error.name === 'TypeError') {
         throw new Error(
           'Profile picture upload network error (Failed to fetch). Please verify connection to Supabase storage or sign in again.'
@@ -454,21 +413,7 @@ export const authService = {
     }
 
     if (!existingProfile) {
-      await getProfile(authUser);
-
-      const { data: createdProfile, error: createdLookupError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', authUser.id)
-        .maybeSingle();
-
-      if (createdLookupError) {
-        throw guidelinesAcceptError(createdLookupError);
-      }
-
-      if (!createdProfile) {
-        throw new Error('Your profile is not ready yet. Please refresh and try again.');
-      }
+      throw new Error('Your profile is not ready yet. Please refresh and try again.');
     }
 
     // The RPC returns void, so success is "no error"; read the profile back to

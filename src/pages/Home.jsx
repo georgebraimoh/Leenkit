@@ -1,10 +1,9 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Compass, Plus, MapPin, Sparkles, Calendar, ArrowRight, Shield, Users, Globe, Navigation } from 'lucide-react';
+import { MapPin, Sparkles, ArrowRight, Shield, Users, Globe } from 'lucide-react';
 import Button from '../components/common/Button';
 import HangoutCard from '../components/hangout/HangoutCard';
-import AvatarStack from '../components/common/AvatarStack';
 import EmptyState from '../components/common/EmptyState';
 import LocationAutocomplete from '../components/common/LocationAutocomplete';
 import PageTransition from '../components/layout/PageTransition';
@@ -12,13 +11,14 @@ import { useLeenkit } from '../context/LeenkitContext';
 import { useLocationContext } from '../context/LocationContext';
 import { CATEGORIES } from '../data/categories';
 import SafetySection from '../components/safety/SafetySection';
+import { isOpenHangout, sortByEventDate } from '../utils/format';
 
 export default function Home() {
-  const { hangouts } = useLeenkit();
+  const { hangouts, isHangoutsLoading } = useLeenkit();
   const { setSearchLocation, activeSearchLocation } = useLocationContext();
   const navigate = useNavigate();
 
-  const upcomingHangouts = hangouts.filter(h => h.status === 'upcoming');
+  const upcomingHangouts = sortByEventDate(hangouts.filter(isOpenHangout));
   const globalHighlights = upcomingHangouts.slice(0, 4);
 
   const handleSelectLocation = (placeObj) => {
@@ -112,13 +112,13 @@ export default function Home() {
                   }}
                   className="pt-2 max-w-xl space-y-2"
                 >
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#3D4948]">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#3D4948]">
                     Where do you want to explore?
-                  </label>
+                  </p>
                   <LocationAutocomplete
                     value={activeSearchLocation}
                     onSelectLocation={handleSelectLocation}
-                    placeholder="Search a place, landmark, venue, or address..."
+                    label="Where do you want to explore?"
                   />
                 </motion.div>
 
@@ -146,22 +146,16 @@ export default function Home() {
                   </Link>
                 </motion.div>
 
-                {/* Social Proof badge */}
-                <div className="pt-6 border-t border-[#DDE3E0] flex items-center gap-4">
-                  <div className="flex -space-x-2">
-                    <img className="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" alt="User" />
-                    <img className="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80" alt="User" />
-                    <img className="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80" alt="User" />
-                  </div>
+                <div className="pt-6 border-t border-[#DDE3E0]">
                   <p className="text-xs text-[#3D4948]">
-                    <strong className="text-[#172121]">Location-first discovery</strong> attached to real-world coordinates everywhere.
+                    <strong className="text-[#172121]">Free to join or host.</strong> Every Hangout has a real venue, a host you can see, and a group chat for the people going.
                   </p>
                 </div>
               </motion.div>
 
               {/* Hero Editorial Overlapping Cards Visual */}
               <div className="lg:col-span-5 relative">
-                <div className="relative mx-auto max-w-md lg:max-w-none">
+                <div className="relative mx-auto max-w-md lg:max-w-none" aria-hidden="true">
                   {/* Card 1: Jabi Lake Kayaking */}
                   <motion.div
                     initial={{ rotate: -3, y: 0 }}
@@ -186,7 +180,7 @@ export default function Home() {
                       </div>
                       <h3 className="text-lg font-bold font-heading text-[#172121]">Jabi Lake Sunset Kayaking</h3>
                       <div className="flex items-center justify-between pt-2 border-t border-[#DDE3E0]">
-                        <AvatarStack attendeeIds={[]} size="sm" />
+                        <span className="text-xs font-semibold text-[#3D4948]">Example Hangout</span>
                         <span className="text-xs font-semibold text-[#3D4948]">Mon · 5:00 PM</span>
                       </div>
                     </div>
@@ -203,7 +197,7 @@ export default function Home() {
                       Photography
                     </span>
                     <h4 className="font-heading font-bold text-sm text-white mt-2">Shoreditch Vintage Walk</h4>
-                    <p className="text-xs text-stone-400 mt-1">London · 12 going</p>
+                    <p className="text-xs text-stone-400 mt-1">Example Hangout</p>
                   </motion.div>
                 </div>
               </div>
@@ -223,7 +217,7 @@ export default function Home() {
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Live Hangouts</span>
               <h2 className="text-3xl md:text-4xl font-bold font-heading text-[#172121] mt-1">
-                Hangouts happening near real places
+                Coming up soon
               </h2>
             </div>
             <Link to="/explore" className="text-sm font-semibold text-[#18A999] hover:underline flex items-center gap-1 link-nudge">
@@ -233,7 +227,11 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {globalHighlights.length === 0 ? (
+            {isHangoutsLoading ? (
+              [0, 1, 2, 3].map(i => (
+                <div key={i} className="h-72 bg-white border border-[#E8E6E1] rounded-3xl animate-pulse" aria-hidden="true" />
+              ))
+            ) : globalHighlights.length === 0 ? (
               <div className="col-span-full py-6 text-center">
                 <EmptyState
                   title="No Hangouts yet"
@@ -309,7 +307,7 @@ export default function Home() {
               </h2>
 
               <p className="text-stone-300 text-base md:text-lg leading-relaxed">
-                LEENKIT works wherever people are — from major cities to local neighborhood parks, coffee houses, and sports fields. Discover real-life Hangouts attached to real-world coordinates.
+                LEENKIT works wherever people are — from major cities to local neighborhood parks, coffee houses, and sports fields. Every Hangout links to a real venue on Google Maps.
               </p>
 
               <div className="pt-4 flex flex-wrap items-center gap-6 text-xs text-stone-400">
@@ -317,7 +315,7 @@ export default function Home() {
                   <Shield className="w-4 h-4 text-[#18A999]" /> Real-Life Gatherings
                 </span>
                 <span className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-[#18A999]" /> Location-First Architecture
+                  <Globe className="w-4 h-4 text-[#18A999]" /> Real Venues, Real People
                 </span>
                 <span className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#18A999]" /> Temporary Hangout Spaces

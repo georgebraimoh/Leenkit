@@ -6,8 +6,8 @@ import { Compass, CalendarX, AlertCircle } from 'lucide-react';
 export default function EmptyState({
   icon: Icon = Compass,
   title = "Nothing planned yet",
-  description = "Find something worth showing up for around Abuja.",
-  actionLabel = "Explore activities",
+  description = "Find something worth showing up for.",
+  actionLabel = "Explore Hangouts",
   onAction,
   className = ""
 }) {

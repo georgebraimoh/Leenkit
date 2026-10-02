@@ -3,6 +3,7 @@ import Modal from './Modal';
 import Button from './Button';
 import { useToast } from './Toast';
 import { Copy, Check, Share2, Send, MapPin } from 'lucide-react';
+import { formatEventDate } from '../../utils/format';
 
 const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=400&q=80";
 
@@ -18,7 +19,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
     : (hangout.location || 'Location TBD');
 
   const formattedDate = hangout.date
-    ? new Date(hangout.date).toLocaleDateString('en-US', {
+    ? formatEventDate(hangout.date, {
         weekday: 'short',
         month: 'short',
         day: 'numeric'

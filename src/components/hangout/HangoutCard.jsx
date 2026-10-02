@@ -1,16 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Clock, Navigation, CheckCircle, ChevronRight } from 'lucide-react';
+import { MapPin, Calendar, CheckCircle, ChevronRight } from 'lucide-react';
 import AvatarStack from '../common/AvatarStack';
+import Avatar from '../common/Avatar';
 import { useUser } from '../../context/UserContext';
 import { useLeenkit } from '../../context/LeenkitContext';
-import { useLocationContext } from '../../context/LocationContext';
+import { formatEventDate, formatEventTime, formatMoney, closedReason } from '../../utils/format';
 
 export default function HangoutCard({ hangout, featured = false }) {
   const { getUserById } = useUser();
   const { isAttending } = useLeenkit();
-  const { getDistanceFromActive } = useLocationContext();
 
   // Host resolution
   const host = getUserById(hangout.hostId);
@@ -19,7 +19,7 @@ export default function HangoutCard({ hangout, featured = false }) {
 
   // Formatted date string
   const formattedDate = hangout.date
-    ? new Date(hangout.date).toLocaleDateString('en-US', {
+    ? formatEventDate(hangout.date, {
         weekday: 'short',
         month: 'short',
         day: 'numeric'
@@ -27,7 +27,8 @@ export default function HangoutCard({ hangout, featured = false }) {
     : '';
 
   // Attendee calculation & state
-  const attendeeCount = (hangout.attendeeIds || []).length;
+  const attendeeCount = hangout.attendeeCount ?? (hangout.attendeeIds || []).length;
+  const closed = closedReason(hangout);
   const maxCapacity = hangout.maxAttendees || 10;
   const isFull = attendeeCount >= maxCapacity;
   const isAttendingHangout = isAttending ? isAttending(hangout.id) : false;
@@ -38,18 +39,8 @@ export default function HangoutCard({ hangout, featured = false }) {
       ? (hangout.location.placeName || hangout.location.address || hangout.city || 'Location TBD')
       : (hangout.location || hangout.address || 'Location TBD');
 
-  // Optional distance calculation
-  const distanceKm = getDistanceFromActive
-    ? getDistanceFromActive(
-        typeof hangout.location === 'object' ? hangout.location.latitude : null,
-        typeof hangout.location === 'object' ? hangout.location.longitude : null
-      )
-    : null;
-
   // Formatted price string
-  const formattedPrice = hangout.isPaid
-    ? `${hangout.currency === 'NGN' ? '₦' : hangout.currency === 'USD' ? '$' : hangout.currency === 'EUR' ? '€' : hangout.currency === 'GBP' ? '£' : hangout.currency || '₦'}${Number(hangout.price || 0).toLocaleString()}`
-    : 'Free';
+  const formattedPrice = hangout.isPaid ? formatMoney(hangout.price, hangout.currency) : 'Free';
 
   return (
     <Link
@@ -74,17 +65,18 @@ export default function HangoutCard({ hangout, featured = false }) {
         <div className={`relative overflow-hidden bg-[#EEF1EF] ${featured ? 'h-56 md:h-full' : 'h-48 sm:h-52'}`}>
           <img
             src={hangout.image || 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80'}
-            alt={hangout.title || 'Hangout Cover'}
+            alt=""
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+            className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out ${closed ? 'grayscale' : ''}`}
+           
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
           {/* Category Pill, Price Badge & Capacity */}
           <div className="absolute top-3 left-3 z-10 flex flex-wrap gap-2">
             <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-[#172121]/90 backdrop-blur-xs text-white rounded-full shadow-xs">
-              {hangout.category}
+              {hangout.category || 'Hangout'}
             </span>
             <span
               className={`px-3 py-1 text-xs font-bold rounded-full shadow-xs backdrop-blur-xs ${
@@ -95,20 +87,17 @@ export default function HangoutCard({ hangout, featured = false }) {
             >
               {formattedPrice}
             </span>
-            {isFull && (
+            {closed && (
+              <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-stone-800 text-white rounded-full shadow-xs">
+                {closed}
+              </span>
+            )}
+            {!closed && isFull && (
               <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-[#18A999] text-white rounded-full shadow-xs">
                 Full
               </span>
             )}
           </div>
-
-          {/* Distance Badge if available */}
-          {distanceKm !== null && (
-            <div className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-xs text-[#172121] text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs border border-[#DDE3E0]">
-              <Navigation className="w-3 h-3 text-[#18A999] fill-[#18A999]" />
-              <span>{distanceKm} km away</span>
-            </div>
-          )}
         </div>
 
         {/* Content Body */}
@@ -116,11 +105,7 @@ export default function HangoutCard({ hangout, featured = false }) {
           <div className="space-y-2.5">
             {/* Host Profile Info */}
             <div className="flex items-center gap-2 text-xs font-medium text-[#3D4948]">
-              <img
-                src={hostAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
-                alt={hostName}
-                className="w-5 h-5 rounded-full object-cover border border-[#DDE3E0] shrink-0"
-              />
+              <Avatar src={hostAvatar} name={hostName} size="xs" className="border border-[#DDE3E0]" />
               <span className="truncate">
                 Hosted by <strong className="text-[#172121] font-semibold">{hostName}</strong>
               </span>
@@ -140,7 +125,7 @@ export default function HangoutCard({ hangout, featured = false }) {
             {/* Date & Time */}
             <div className="flex items-center gap-1.5 text-xs font-medium text-[#3D4948]">
               <Calendar className="w-3.5 h-3.5 text-[#18A999] shrink-0" />
-              <span>{formattedDate}{hangout.time ? ` · ${hangout.time}` : ''}</span>
+              <span>{formattedDate}{hangout.time ? ` · ${formatEventTime(hangout.time)}` : ''}</span>
             </div>
           </div>
 
@@ -160,13 +145,17 @@ export default function HangoutCard({ hangout, featured = false }) {
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Joined</span>
                 </span>
+              ) : closed ? (
+                <span className="px-3 py-1.5 bg-[#EEF1EF] text-[#3D4948] border border-[#DDE3E0] text-xs font-bold rounded-xl">
+                  {closed}
+                </span>
               ) : isFull ? (
                 <span className="px-3 py-1.5 bg-[#EEF1EF] text-[#3D4948] border border-[#DDE3E0] text-xs font-bold rounded-xl">
                   Full
                 </span>
               ) : (
                 <span className="px-3.5 py-1.5 bg-[#18A999] group-hover:bg-[#087F73] text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1">
-                  <span>Join Hangout</span>
+                  <span>{hangout.isPaid ? 'Get ticket' : 'Join'}</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               )}

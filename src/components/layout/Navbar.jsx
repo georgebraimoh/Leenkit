@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Compass, Calendar, Plus, User, LogOut, LogIn, ChevronDown, MapPin, Navigation, Search, ShieldCheck, Sparkles } from 'lucide-react';
+import { Compass, Calendar, Plus, User, LogOut, LogIn, ChevronDown, MapPin, Navigation, Search, ShieldCheck, Sparkles, Wallet, ShieldAlert } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import { useLocationContext } from '../../context/LocationContext';
 import Button from '../common/Button';
 import NotificationDropdown from '../common/NotificationDropdown';
 import leenkitIcon from '../../assets/Leenkit icon.png';
+import Avatar from '../common/Avatar';
 
 export default function Navbar() {
   const { currentUser, isAuthenticated, openAuthModal, logout } = useUser();
-  const { activeSearchLocation, userLocation } = useLocationContext();
+  const { activeSearchLocation } = useLocationContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,7 +40,7 @@ export default function Navbar() {
     }
   };
 
-  const activePlaceName = activeSearchLocation?.placeName || userLocation?.placeName || 'Anywhere';
+  const activePlaceName = activeSearchLocation?.placeName || 'Anywhere';
 
   const handleActivityClick = (e) => {
     if (!isAuthenticated) {
@@ -145,13 +146,11 @@ export default function Navbar() {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setDropdownOpen(!dropdownOpen)}
+                aria-label="Account menu"
+                aria-expanded={dropdownOpen}
                 className="flex items-center gap-2 p-1 rounded-full hover:bg-white transition-colors border border-transparent hover:border-[#DDE3E0] cursor-pointer"
               >
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
-                  className="w-9 h-9 rounded-full object-cover border border-[#DDE3E0] shadow-xs"
-                />
+                <Avatar src={currentUser.avatar} name={currentUser.name} size="lg" className="w-9 h-9 border border-[#DDE3E0] shadow-xs" />
                 <ChevronDown className={`w-3.5 h-3.5 text-[#3D4948] transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
               </motion.button>
 
@@ -171,13 +170,33 @@ export default function Navbar() {
                     </div>
 
                     <Link
-                      to={`/profile/${currentUser.username}`}
+                      to={currentUser.username ? `/profile/${currentUser.username}` : '/edit-profile'}
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 hover:bg-[#DDF4EF]/50 text-[#172121] font-semibold transition-colors"
                     >
                       <User className="w-4 h-4 text-[#18A999]" />
                       <span>My Profile</span>
                     </Link>
+
+                    <Link
+                      to="/payouts"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 hover:bg-[#DDF4EF]/50 text-[#172121] font-semibold transition-colors"
+                    >
+                      <Wallet className="w-4 h-4 text-[#18A999]" aria-hidden="true" />
+                      <span>Payouts</span>
+                    </Link>
+
+                    {currentUser.isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 hover:bg-[#DDF4EF]/50 text-[#172121] font-semibold transition-colors"
+                      >
+                        <ShieldAlert className="w-4 h-4 text-rose-600" aria-hidden="true" />
+                        <span>Admin</span>
+                      </Link>
+                    )}
 
                     <Link
                       to="/safety"
