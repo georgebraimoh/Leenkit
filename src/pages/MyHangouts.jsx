@@ -129,7 +129,7 @@ export default function MyHangouts() {
             <Calendar className="w-8 h-8" aria-hidden="true" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold font-heading text-[#171717]">Your Hangouts</h1>
+            <h1 className="text-2xl font-bold font-heading text-[#111111]">Your Hangouts</h1>
             <p className="text-sm text-[#6F6F6F]">Sign in to see the Hangouts you're going to and the ones you host.</p>
           </div>
           <Button onClick={() => openAuthModal('login')} variant="primary" size="lg" fullWidth>
@@ -185,7 +185,7 @@ export default function MyHangouts() {
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#172121] tracking-tight">Your Hangouts</h1>
+            <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#111111] tracking-tight">Your Hangouts</h1>
             <p className="text-sm text-[#6F6F6F] max-w-2xl">Hangouts you're going to, and the ones you host.</p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -210,18 +210,18 @@ export default function MyHangouts() {
             { label: 'Total hosted', value: hosted.length, icon: CheckCircle2 },
             { label: 'Guests hosted', value: totalAttendeesReached, icon: Users }
           ].map(stat => (
-            <div key={stat.label} className="p-5 bg-white border border-[#DDE3E0] rounded-2xl shadow-xs space-y-3">
+            <div key={stat.label} className="p-5 bg-white border-2 border-ink rounded-2xl shadow-xs space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F]">{stat.label}</span>
                 <stat.icon className="w-4 h-4 text-[#18A999]" aria-hidden="true" />
               </div>
-              <p className="text-3xl font-extrabold font-heading text-[#171717]">{stat.value}</p>
+              <p className="text-3xl font-extrabold font-heading text-[#111111]">{stat.value}</p>
             </div>
           ))}
         </div>
 
         <div className="space-y-6">
-          <div className="flex items-center gap-2 border-b border-[#DDE3E0] pb-2 overflow-x-auto" role="tablist" aria-label="Your Hangouts">
+          <div className="flex items-center gap-2 border-b-2 border-ink pb-2 overflow-x-auto" role="tablist" aria-label="Your Hangouts">
             {TABS.map(tab => (
               <button
                 key={tab.id}
@@ -230,7 +230,7 @@ export default function MyHangouts() {
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer flex items-center gap-2 shrink-0 ${
-                  activeTab === tab.id ? 'bg-[#171717] text-white shadow-xs' : 'text-[#3D4948] hover:text-[#171717] hover:bg-white'
+                  activeTab === tab.id ? 'bg-[#111111] text-white shadow-xs' : 'text-[#3D4948] hover:text-[#111111] hover:bg-white'
                 }`}
               >
                 <tab.icon className="w-4 h-4" aria-hidden="true" />
@@ -250,7 +250,7 @@ export default function MyHangouts() {
               }
               description={
                 activeTab === 'going' ? 'Find something happening near you.' :
-                activeTab === 'upcoming' ? 'Host a Hangout and bring people together.' :
+                activeTab === 'upcoming' ? 'Host one and bring people together.' :
                 'They will show up here.'
               }
               actionLabel={activeTab === 'going' ? 'Explore Hangouts' : activeTab === 'upcoming' ? 'Host a Hangout' : null}
@@ -270,7 +270,7 @@ export default function MyHangouts() {
                 return (
                   <article
                     key={hangout.id}
-                    className="bg-white border border-[#DDE3E0] rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                    className="bg-white border-2 border-ink rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
                   >
                     <div className="relative h-44 bg-[#EEF1EF] overflow-hidden">
                       <img
@@ -281,7 +281,7 @@ export default function MyHangouts() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                       <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-                        <span className="px-3 py-1 text-xs font-bold bg-white/95 text-[#172121] rounded-full shadow-xs">
+                        <span className="px-3 py-1 text-xs font-bold bg-white/95 text-[#111111] rounded-full shadow-xs">
                           {isHost ? 'Hosting' : 'Going'}
                         </span>
                         <span className={`px-3 py-1 text-xs font-bold rounded-full shadow-xs ${hangout.isPaid ? 'bg-amber-500/90 text-white' : 'bg-emerald-600/90 text-white'}`}>
@@ -297,7 +297,7 @@ export default function MyHangouts() {
 
                     <div className="p-5 flex-1 space-y-4 flex flex-col justify-between">
                       <div className="space-y-2.5">
-                        <h2 className="text-lg font-bold font-heading text-[#171717] line-clamp-2 leading-snug">{hangout.title}</h2>
+                        <h2 className="text-lg font-bold font-heading text-[#111111] line-clamp-2 leading-snug">{hangout.title}</h2>
                         <div className="flex items-center gap-1.5 text-xs text-[#3D4948]">
                           <MapPin className="w-3.5 h-3.5 text-[#18A999] shrink-0" aria-hidden="true" />
                           <span className="truncate">{locationText}</span>
@@ -309,15 +309,15 @@ export default function MyHangouts() {
                             {hangout.time ? ` · ${formatEventTime(hangout.time)}` : ''}
                           </span>
                         </div>
-                        <div className="pt-2 flex items-center gap-2 border-t border-[#E8E6E1]">
+                        <div className="pt-2 flex items-center gap-2 border-t-2 border-ink">
                           <AvatarStack attendeeIds={hangout.attendeeIds || []} maxVisible={3} size="sm" />
                           <span className="text-xs text-[#3D4948] font-medium">
-                            <strong className="text-[#171717] font-bold">{attendeeCount}</strong> / {hangout.maxAttendees || 10} going
+                            <strong className="text-[#111111] font-bold">{attendeeCount}</strong> / {hangout.maxAttendees || 10} going
                           </span>
                         </div>
                       </div>
 
-                      <div className="pt-3 border-t border-[#DDE3E0] space-y-2">
+                      <div className="pt-3 border-t-2 border-ink space-y-2">
                         <div className="grid grid-cols-2 gap-2">
                           <Link to={`/hangout/${hangout.id}`} className="block">
                             <Button variant="outline" size="sm" fullWidth className="gap-1.5 text-xs">
@@ -338,7 +338,7 @@ export default function MyHangouts() {
                             <button
                               type="button"
                               onClick={() => setShareHangout(hangout)}
-                              className="px-3 py-1.5 bg-[#EEF1EF] hover:bg-[#DDF4EF] text-[#171717] text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                              className="px-3 py-1.5 bg-[#EEF1EF] hover:bg-[#DDF4EF] text-[#111111] text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
                             >
                               <Share2 className="w-3.5 h-3.5 text-[#18A999]" aria-hidden="true" />
                               <span>Share</span>

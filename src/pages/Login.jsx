@@ -79,14 +79,14 @@ export default function Login() {
   return (
     <PageTransition>
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full bg-white border border-[#DDE3E0] rounded-3xl p-8 shadow-xl space-y-6">
+        <div className="max-w-md w-full bg-white border-2 border-ink rounded-3xl p-8 shadow-xl space-y-6">
           <div className="text-center space-y-2">
             <Link to="/" className="inline-flex items-center gap-2 group">
               <div className="w-10 h-10 rounded-2xl bg-[#18A999] flex items-center justify-center text-white font-heading font-extrabold text-xl shadow-md">
                 L
               </div>
             </Link>
-            <h1 className="text-2xl font-bold font-heading text-[#172121]">
+            <h1 className="text-2xl font-bold font-heading text-[#111111]">
               {isSignUp ? 'Create your account' : 'Welcome back to LEENKIT'}
             </h1>
             <p className="text-xs text-[#3D4948]">
@@ -99,7 +99,7 @@ export default function Login() {
             <button
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-white border border-[#DDE3E0] hover:bg-[#EEF1EF] hover:border-[#18A999]/30 rounded-full text-xs font-semibold text-[#172121] flex items-center justify-center gap-3 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              className="w-full py-3 px-4 bg-white border-2 border-ink hover:bg-[#EEF1EF] hover:border-[#18A999]/30 rounded-full text-xs font-semibold text-[#111111] flex items-center justify-center gap-3 transition-all shadow-xs cursor-pointer disabled:opacity-50"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -136,7 +136,7 @@ export default function Login() {
 
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#DDE3E0]" />
+              <div className="w-full border-t-2 border-ink" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-3 text-[#3D4948] font-semibold">Or with email</span>

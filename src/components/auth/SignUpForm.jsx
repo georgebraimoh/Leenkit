@@ -63,7 +63,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
             onChange={e => setName(e.target.value)}
             placeholder="e.g. Alex Danjuma"
             disabled={isLoading}
-            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
         </div>
       </FormField>
@@ -80,7 +80,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
             onChange={e => setEmail(e.target.value)}
             placeholder="name@example.com"
             disabled={isLoading}
-            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
         </div>
       </FormField>
@@ -97,7 +97,7 @@ export default function SignUpForm({ onSubmit, onToggleSignIn, isLoading, error 
             onChange={e => setPassword(e.target.value)}
             placeholder="Create a secure password"
             disabled={isLoading}
-            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
         </div>
       </FormField>

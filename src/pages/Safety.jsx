@@ -12,13 +12,13 @@ export default function Safety() {
         <div className="text-center space-y-4 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DDF4EF] text-[#087F73] text-xs font-semibold">
             <ShieldCheck className="w-4 h-4 text-[#087F73]" />
-            <span>Community Trust & Safety Guide</span>
+            <span>Safety guide</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#172121]">
+          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#111111]">
             Have fun. Stay smart.
           </h1>
           <p className="text-base text-[#3D4948] leading-relaxed">
-            LEENKIT helps people discover, create, join, and share real-life Hangouts. These simple recommendations can help you make thoughtful decisions when meeting people offline.
+            Simple tips for meeting people offline.
           </p>
         </div>
 
@@ -36,17 +36,17 @@ export default function Safety() {
         {/* 3 Core Timeline Sections */}
         <div className="space-y-8">
           {/* 1. BEFORE THE HANGOUT */}
-          <div className="bg-white border border-[#DDE3E0] rounded-3xl p-6 md:p-8 space-y-4 shadow-xs">
+          <div className="bg-white border-2 border-ink rounded-3xl p-6 md:p-8 space-y-4 shadow-xs">
             <div className="flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-[#DDF4EF] text-[#18A999] font-bold flex items-center justify-center text-xs">
                 1
               </span>
-              <h2 className="text-2xl font-bold font-heading text-[#172121]">
+              <h2 className="text-2xl font-bold font-heading text-[#111111]">
                 Before the hangout
               </h2>
             </div>
 
-            <ul className="space-y-3 pt-2 text-sm text-[#172121]">
+            <ul className="space-y-3 pt-2 text-sm text-[#111111]">
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#18A999] shrink-0 mt-1" />
                 <span><strong>Check the Hangout details:</strong> Review the Hangout description, venue, and participant count.</span>
@@ -71,17 +71,17 @@ export default function Safety() {
           </div>
 
           {/* 2. DURING THE HANGOUT */}
-          <div className="bg-white border border-[#DDE3E0] rounded-3xl p-6 md:p-8 space-y-4 shadow-xs">
+          <div className="bg-white border-2 border-ink rounded-3xl p-6 md:p-8 space-y-4 shadow-xs">
             <div className="flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-[#DDF4EF] text-[#18A999] font-bold flex items-center justify-center text-xs">
                 2
               </span>
-              <h2 className="text-2xl font-bold font-heading text-[#172121]">
+              <h2 className="text-2xl font-bold font-heading text-[#111111]">
                 During the hangout
               </h2>
             </div>
 
-            <ul className="space-y-3 pt-2 text-sm text-[#172121]">
+            <ul className="space-y-3 pt-2 text-sm text-[#111111]">
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#18A999] shrink-0 mt-1" />
                 <span><strong>Stay aware of surroundings:</strong> Remain observant of public spaces and exit paths.</span>
@@ -102,17 +102,17 @@ export default function Safety() {
           </div>
 
           {/* 3. AFTER THE HANGOUT */}
-          <div className="bg-white border border-[#DDE3E0] rounded-3xl p-6 md:p-8 space-y-4 shadow-xs">
+          <div className="bg-white border-2 border-ink rounded-3xl p-6 md:p-8 space-y-4 shadow-xs">
             <div className="flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-[#DDF4EF] text-[#18A999] font-bold flex items-center justify-center text-xs">
                 3
               </span>
-              <h2 className="text-2xl font-bold font-heading text-[#172121]">
+              <h2 className="text-2xl font-bold font-heading text-[#111111]">
                 After the hangout
               </h2>
             </div>
 
-            <ul className="space-y-3 pt-2 text-sm text-[#172121]">
+            <ul className="space-y-3 pt-2 text-sm text-[#111111]">
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-[#18A999] shrink-0 mt-1" />
                 <span><strong>Confirm safety with your contact:</strong> Let your trusted contact know you returned safely.</span>

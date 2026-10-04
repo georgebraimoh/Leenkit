@@ -64,7 +64,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
     <Modal isOpen={isOpen} onClose={onClose} title="Share Hangout">
       <div className="space-y-6 pt-2">
         {/* Hangout Summary Card */}
-        <div className="p-4 bg-[#EEF1EF] rounded-2xl flex items-center gap-4 border border-[#DDE3E0]">
+        <div className="p-4 bg-[#EEF1EF] rounded-2xl flex items-center gap-4 border-2 border-ink">
           <img
             src={coverSrc}
             alt={hangout.title}
@@ -75,7 +75,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
             <span className="text-[10px] uppercase font-bold text-[#18A999] tracking-wider block">
               {hangout.category || 'Hangout'}
             </span>
-            <h4 className="font-heading font-bold text-sm text-[#172121] truncate">
+            <h4 className="font-heading font-bold text-sm text-[#111111] truncate">
               {hangout.title}
             </h4>
             <p className="text-xs text-[#3D4948] truncate flex items-center gap-1">
@@ -115,7 +115,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
         </div>
 
         {/* Share Link Copy Section */}
-        <div className="pt-2 border-t border-[#DDE3E0] space-y-1.5">
+        <div className="pt-2 border-t-2 border-ink space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-[#3D4948] block">
             Hangout Share Link
           </label>
@@ -124,7 +124,7 @@ export default function ShareModal({ isOpen, onClose, hangout }) {
               type="text"
               readOnly
               value={shareUrl}
-              className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-xs text-[#172121] font-mono focus:outline-none select-all"
+              className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-xs text-[#111111] font-mono focus:outline-none select-all"
             />
             <Button
               onClick={handleCopy}

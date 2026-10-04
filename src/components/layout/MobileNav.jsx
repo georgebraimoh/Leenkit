@@ -1,152 +1,77 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Compass, Calendar, Plus, User, Sparkles } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import Avatar from '../common/Avatar';
+import { HomeIcon, SparklesIcon, CalendarIcon, PersonIcon, PlusIcon } from '../common/NavIcons';
+
+// iOS-style tab bar: icon over a small label; the active tab uses the
+// filled icon and the brand colour.
+const tabClass = (active) =>
+  `flex flex-col items-center gap-0.5 min-w-[56px] py-0.5 text-[10px] font-semibold transition-colors ${
+    active ? 'text-[#18A999]' : 'text-[#6F6F6F]'
+  }`;
 
 export default function MobileNav() {
   const { currentUser } = useUser();
   const location = useLocation();
 
-  const isSpacePage = location.pathname.endsWith('/space');
-  if (isSpacePage) return null;
+  if (location.pathname.endsWith('/space')) return null;
 
   const profilePath = currentUser?.username
     ? `/profile/${currentUser.username}`
     : currentUser ? '/edit-profile' : '/login';
+  const onProfile = location.pathname.startsWith('/profile');
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-[#DDE3E0] px-4 py-2 shadow-lg">
-      <div className="flex items-center justify-around">
-        <NavLink
-          to="/explore"
-          className="flex flex-col items-center gap-1 relative"
-        >
+    <nav aria-label="Main" className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t-2 border-ink px-2 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))]">
+      <div className="flex items-end justify-around">
+        <NavLink to="/" end className={({ isActive }) => tabClass(isActive)}>
           {({ isActive }) => (
-            <motion.div
-              whileTap={{ scale: 0.92 }}
-              className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
-                isActive ? 'text-[#18A999]' : 'text-[#3D4948]'
-              }`}
-            >
-              <Compass className="w-5 h-5" />
-              <span>Explore</span>
-
-              {isActive && (
-                <motion.div
-                  layoutId="mobileActiveDot"
-                  className="w-1.5 h-1.5 rounded-full bg-[#18A999] absolute -bottom-1"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-            </motion.div>
+            <>
+              <span className={isActive ? 'animate-tab-pop' : ''}><HomeIcon filled={isActive} /></span>
+              <span>Home</span>
+            </>
           )}
         </NavLink>
 
-        <NavLink
-          to="/activity"
-          className="flex flex-col items-center gap-1 relative"
-        >
+        <NavLink to="/activity" className={({ isActive }) => tabClass(isActive)}>
           {({ isActive }) => (
-            <motion.div
-              whileTap={{ scale: 0.92 }}
-              className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
-                isActive ? 'text-[#18A999]' : 'text-[#3D4948]'
-              }`}
-            >
-              <Sparkles className="w-5 h-5" />
+            <>
+              <span className={isActive ? 'animate-tab-pop' : ''}><SparklesIcon filled={isActive} /></span>
               <span>Activity</span>
-
-              {isActive && (
-                <motion.div
-                  layoutId="mobileActiveDot"
-                  className="w-1.5 h-1.5 rounded-full bg-[#18A999] absolute -bottom-1"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-            </motion.div>
+            </>
           )}
         </NavLink>
 
-        <NavLink
-          to="/my-hangouts"
-          className="flex flex-col items-center gap-1 relative"
-        >
-          {({ isActive }) => (
-            <motion.div
-              whileTap={{ scale: 0.92 }}
-              className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
-                isActive ? 'text-[#18A999]' : 'text-[#3D4948]'
-              }`}
-            >
-              <Calendar className="w-5 h-5" />
-              <span>Hangouts</span>
-
-              {isActive && (
-                <motion.div
-                  layoutId="mobileActiveDot"
-                  className="w-1.5 h-1.5 rounded-full bg-[#18A999] absolute -bottom-1"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-            </motion.div>
-          )}
-        </NavLink>
-
-        {/* Floating Create Button */}
-        <NavLink
-          to="/create"
-          className="flex flex-col items-center justify-center -mt-6"
-        >
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.92 }}
-            className="w-12 h-12 rounded-full bg-[#18A999] text-white flex items-center justify-center shadow-lg shadow-[#18A999]/30 border-2 border-white"
-          >
-            <Plus className="w-6 h-6" />
-          </motion.div>
-
-          <span className="text-[10px] font-semibold text-[#172121] mt-0.5">
-            Host
+        <NavLink to="/create" aria-label="Host a Hangout" className="-mt-6 flex flex-col items-center">
+          <span className="pressable w-14 h-14 rounded-2xl bg-[#18A999] text-white border-2 border-ink shadow-sm flex items-center justify-center">
+            <PlusIcon className="w-7 h-7" />
           </span>
         </NavLink>
 
-        <NavLink
-          to={profilePath}
-          className="flex flex-col items-center gap-1 relative"
-        >
+        <NavLink to="/my-hangouts" className={({ isActive }) => tabClass(isActive)}>
           {({ isActive }) => (
-            <motion.div
-              whileTap={{ scale: 0.92 }}
-              className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
-                isActive ? 'text-[#18A999]' : 'text-[#3D4948]'
-              }`}
-            >
-              {currentUser ? (
-                <Avatar
-                  src={currentUser.avatar}
-                  name={currentUser.name}
-                  size="xs"
-                  className={`border ${location.pathname.startsWith('/profile') ? 'border-[#18A999] ring-2 ring-[#18A999]/20' : 'border-stone-300'}`}
-                />
-              ) : (
-                <User className="w-5 h-5" />
-              )}
-
-              <span>Profile</span>
-
-              {location.pathname.startsWith('/profile') && (
-                <motion.div
-                  layoutId="mobileActiveDot"
-                  className="w-1.5 h-1.5 rounded-full bg-[#18A999] absolute -bottom-1"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-            </motion.div>
+            <>
+              <span className={isActive ? 'animate-tab-pop' : ''}><CalendarIcon filled={isActive} /></span>
+              <span>Hangouts</span>
+            </>
           )}
         </NavLink>
+
+        <NavLink to={profilePath} className={() => tabClass(onProfile)}>
+          {currentUser ? (
+            <Avatar
+              src={currentUser.avatar}
+              name={currentUser.name}
+              size="xs"
+              className={`w-6 h-6 ${onProfile ? 'ring-2 ring-[#18A999]' : ''}`}
+            />
+          ) : (
+            <PersonIcon filled={onProfile} />
+          )}
+          <span>Profile</span>
+        </NavLink>
       </div>
-    </div>
+    </nav>
   );
 }

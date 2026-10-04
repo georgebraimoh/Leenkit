@@ -22,7 +22,7 @@ export default function LegalConsentCheckbox({ checked, onChange, error, disable
           aria-required="true"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          className="mt-0.5 w-4 h-4 shrink-0 rounded border-[#DDE3E0] accent-[#18A999] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]/40 focus-visible:ring-offset-2 disabled:opacity-50"
+          className="mt-0.5 w-4 h-4 shrink-0 rounded border-ink accent-[#18A999] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]/40 focus-visible:ring-offset-2 disabled:opacity-50"
         />
         <label htmlFor={inputId} className="text-xs text-[#3D4948] leading-relaxed cursor-pointer">
           I have read and agree to the{' '}

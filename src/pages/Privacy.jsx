@@ -29,7 +29,7 @@ const linkClass = 'font-semibold text-[#087F73] hover:text-[#18A999] underline u
 function Section({ id, number, title, children }) {
   return (
     <section id={`privacy-${id}`} className="scroll-mt-24 space-y-3">
-      <h2 className="text-xl font-bold font-heading text-[#172121]">
+      <h2 className="text-xl font-bold font-heading text-[#111111]">
         {number}. {title}
       </h2>
       {children}
@@ -56,7 +56,7 @@ export default function Privacy() {
             <Lock className="w-4 h-4" aria-hidden="true" />
             <span>Your privacy</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#172121]">
+          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#111111]">
             Privacy Policy
           </h1>
           <p className="text-base text-[#3D4948] leading-relaxed">
@@ -65,12 +65,12 @@ export default function Privacy() {
           <p className="text-xs font-semibold text-[#687473]">Last updated: {PRIVACY_LAST_UPDATED}</p>
         </header>
 
-        <p className="text-xs sm:text-sm text-[#3D4948] leading-relaxed bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl px-4 py-3">
+        <p className="text-xs sm:text-sm text-[#3D4948] leading-relaxed bg-[#EEF1EF] border-2 border-ink rounded-2xl px-4 py-3">
           This Privacy Policy describes how the current version of LEENKIT works. It should be reviewed against the legal requirements that apply to LEENKIT and its users before being treated as final legal advice.
         </p>
 
-        <nav aria-label="Privacy Policy sections" className="bg-white border border-[#DDE3E0] rounded-3xl p-5 sm:p-6">
-          <h2 className="text-sm font-bold font-heading text-[#172121] mb-3">Contents</h2>
+        <nav aria-label="Privacy Policy sections" className="bg-white border-2 border-ink rounded-3xl p-5 sm:p-6">
+          <h2 className="text-sm font-bold font-heading text-[#111111] mb-3">Contents</h2>
           <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm text-[#3D4948]">
             {SECTIONS.map((s) => (
               <li key={s.id}>
@@ -82,7 +82,7 @@ export default function Privacy() {
           </ol>
         </nav>
 
-        <div className="bg-white border border-[#DDE3E0] rounded-3xl p-5 sm:p-8 space-y-10 text-sm text-[#3D4948] leading-relaxed">
+        <div className="bg-white border-2 border-ink rounded-3xl p-5 sm:p-8 space-y-10 text-sm text-[#3D4948] leading-relaxed">
           <Section {...section('introduction')}>
             <p>
               LEENKIT is a platform for discovering, creating, joining, and sharing real-life Hangouts. This Privacy Policy explains how LEENKIT handles personal information when you use the LEENKIT website and related services (the “Service”). It should be read together with the{' '}
@@ -94,28 +94,28 @@ export default function Privacy() {
             <p>Depending on how you use LEENKIT, we collect:</p>
             <ul className="list-disc pl-5 space-y-1.5">
               <li>
-                <strong className="text-[#172121]">Account information:</strong> your name, email address, and password when you sign up with email. Passwords are handled by our authentication provider; LEENKIT does not store them in its own profile records. A public username is created automatically from your name, with a short suffix added if that username is already taken. Usernames for some earlier accounts were based on the first part of the account’s email address.
+                <strong className="text-[#111111]">Account information:</strong> your name, email address, and password when you sign up with email. Passwords are handled by our authentication provider; LEENKIT does not store them in its own profile records. A public username is created automatically from your name, with a short suffix added if that username is already taken. Usernames for some earlier accounts were based on the first part of the account’s email address.
               </li>
               <li>
-                <strong className="text-[#172121]">Profile information:</strong> your profile photo (a preset image or a photo you upload), location, bio, interests, and any Instagram, TikTok, or Spotify links you choose to add.
+                <strong className="text-[#111111]">Profile information:</strong> your profile photo (a preset image or a photo you upload), location, bio, interests, and any Instagram, TikTok, or Spotify links you choose to add.
               </li>
               <li>
-                <strong className="text-[#172121]">Hangouts you create:</strong> title, description, category, date and time, capacity, cover image, venue name and Google Maps link, and any ticket price and currency.
+                <strong className="text-[#111111]">Hangouts you create:</strong> title, description, category, date and time, capacity, cover image, venue name and Google Maps link, and any ticket price and currency.
               </li>
               <li>
-                <strong className="text-[#172121]">Participation and activity:</strong> which Hangouts you host or join, people you follow (“vibe” with), and notifications generated by that activity.
+                <strong className="text-[#111111]">Participation and activity:</strong> which Hangouts you host or join, people you follow (“vibe” with), and notifications generated by that activity.
               </li>
               <li>
-                <strong className="text-[#172121]">Messages:</strong> messages you send in a Hangout Space.
+                <strong className="text-[#111111]">Messages:</strong> messages you send in a Hangout Space.
               </li>
               <li>
-                <strong className="text-[#172121]">Sponsorships:</strong> sponsorship pledges or payments you make, including the amount, currency, and any message you include.
+                <strong className="text-[#111111]">Sponsorships:</strong> sponsorship pledges or payments you make, including the amount, currency, and any message you include.
               </li>
               <li>
-                <strong className="text-[#172121]">Safety reports:</strong> reports you submit, as described in the Safety Reports section.
+                <strong className="text-[#111111]">Safety reports:</strong> reports you submit, as described in the Safety Reports section.
               </li>
               <li>
-                <strong className="text-[#172121]">Acceptance records:</strong> when you agree to the Hosting Guidelines, the Terms &amp; Conditions, or this Privacy Policy, we record which version you accepted and when.
+                <strong className="text-[#111111]">Acceptance records:</strong> when you agree to the Hosting Guidelines, the Terms &amp; Conditions, or this Privacy Policy, we record which version you accepted and when.
               </li>
             </ul>
           </Section>
@@ -189,19 +189,19 @@ export default function Privacy() {
             <p>LEENKIT is a social platform, so some information is visible to others by design:</p>
             <ul className="list-disc pl-5 space-y-1.5">
               <li>
-                <strong className="text-[#172121]">Public, including to people who are not signed in:</strong> your profile (name, username, photo, location, bio, interests, social links, profile stats, Organizer and Verified Organizer status, and whether and when you accepted the Hosting Guidelines), Hangouts and their details, who has joined a Hangout, and a Hangout’s total sponsorship amount and number of sponsors.
+                <strong className="text-[#111111]">Public, including to people who are not signed in:</strong> your profile (name, username, photo, location, bio, interests, social links, profile stats, Organizer and Verified Organizer status, and whether and when you accepted the Hosting Guidelines), Hangouts and their details, who has joined a Hangout, and a Hangout’s total sponsorship amount and number of sponsors.
               </li>
               <li>
-                <strong className="text-[#172121]">Signed-in users:</strong> who you follow (“vibe” with) and who follows you.
+                <strong className="text-[#111111]">Signed-in users:</strong> who you follow (“vibe” with) and who follows you.
               </li>
               <li>
-                <strong className="text-[#172121]">Hangout members:</strong> messages in a Hangout Space are visible to that Hangout’s Organizer and attendees.
+                <strong className="text-[#111111]">Hangout members:</strong> messages in a Hangout Space are visible to that Hangout’s Organizer and attendees.
               </li>
               <li>
-                <strong className="text-[#172121]">The Hangout’s Organizer:</strong> sponsorships you make to their Hangout, including who sponsored, the amount, and any message you include.
+                <strong className="text-[#111111]">The Hangout’s Organizer:</strong> sponsorships you make to their Hangout, including who sponsored, the amount, and any message you include.
               </li>
               <li>
-                <strong className="text-[#172121]">Only you:</strong> your payment records, your notifications, and your Terms/Privacy acceptance records are visible only to you within the app. Safety reports are not visible to any user, including you after submission.
+                <strong className="text-[#111111]">Only you:</strong> your payment records, your notifications, and your Terms/Privacy acceptance records are visible only to you within the app. Safety reports are not visible to any user, including you after submission.
               </li>
             </ul>
             <p>
@@ -212,10 +212,10 @@ export default function Privacy() {
           <Section {...section('providers')}>
             <p>LEENKIT relies on third-party providers to run the Service, including:</p>
             <ul className="list-disc pl-5 space-y-1.5">
-              <li><strong className="text-[#172121]">Supabase</strong> — authentication, database, file storage, and server functions</li>
-              <li><strong className="text-[#172121]">Netlify</strong> — website hosting</li>
-              <li><strong className="text-[#172121]">Paystack</strong> — payment processing</li>
-              <li><strong className="text-[#172121]">Google</strong> — optional sign-in and web fonts</li>
+              <li><strong className="text-[#111111]">Supabase</strong> — authentication, database, file storage, and server functions</li>
+              <li><strong className="text-[#111111]">Netlify</strong> — website hosting</li>
+              <li><strong className="text-[#111111]">Paystack</strong> — payment processing</li>
+              <li><strong className="text-[#111111]">Google</strong> — optional sign-in and web fonts</li>
             </ul>
             <p>
               These providers process information as needed to provide their services and according to their own terms and policies. LEENKIT may also disclose information where required by law or where reasonably necessary to protect the safety and rights of users or others.

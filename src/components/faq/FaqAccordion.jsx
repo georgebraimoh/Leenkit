@@ -6,7 +6,7 @@ function FaqItem({ item, isOpen, onToggle }) {
   const buttonId = useId();
 
   return (
-    <div className="border-b border-[#DDE3E0] last:border-b-0">
+    <div className="border-b-2 border-ink last:border-b-0">
       <h3>
         <button
           type="button"
@@ -16,7 +16,7 @@ function FaqItem({ item, isOpen, onToggle }) {
           onClick={onToggle}
           className="w-full flex items-start justify-between gap-4 py-4 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]/40 focus-visible:ring-offset-2 rounded-xl"
         >
-          <span className="font-heading font-bold text-sm sm:text-base text-[#172121] leading-snug">
+          <span className="font-heading font-bold text-sm sm:text-base text-[#111111] leading-snug">
             {item.question}
           </span>
           <ChevronDown

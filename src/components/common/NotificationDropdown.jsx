@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { Bell, Sparkles, CheckCheck, ChevronRight } from 'lucide-react';
+import { BellIcon } from './NavIcons';
 import { useUser } from '../../context/UserContext';
 import { authService } from '../../services/auth/authService';
 
@@ -58,36 +59,36 @@ export default function NotificationDropdown() {
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Bell Trigger Button */}
-      <motion.button
+      <m.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full hover:bg-white text-[#171717] transition-colors border border-transparent hover:border-[#E8E6E1] cursor-pointer flex items-center justify-center"
+        className="relative p-2 rounded-full hover:bg-white text-[#111111] transition-colors border-2 border-transparent hover:border-ink cursor-pointer flex items-center justify-center"
         aria-label="Notifications"
         title="Vibe Notifications"
       >
-        <Bell className="w-5 h-5 text-[#171717]" />
+        <BellIcon filled={isOpen} className="w-6 h-6 text-[#111111]" />
 
         {/* Subtle Unread Badge Indicator */}
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#18A999] rounded-full ring-2 ring-white animate-pulse" />
         )}
-      </motion.button>
+      </m.button>
 
       {/* Dropdown Popover */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.96 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-[#DDE3E0] rounded-3xl shadow-2xl z-50 overflow-hidden"
+            className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border-2 border-ink rounded-3xl shadow-2xl z-50 overflow-hidden"
           >
             {/* Header Bar */}
-            <div className="px-5 py-4 border-b border-[#DDE3E0] flex items-center justify-between bg-[#DDF4EF]/40">
+            <div className="px-5 py-4 border-b-2 border-ink flex items-center justify-between bg-[#DDF4EF]/40">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[#18A999]" />
-                <h3 className="font-extrabold font-heading text-sm text-[#172121]">
+                <h3 className="font-extrabold font-heading text-sm text-[#111111]">
                   Notifications
                 </h3>
                 {unreadCount > 0 && (
@@ -109,11 +110,11 @@ export default function NotificationDropdown() {
             </div>
 
             {/* Notification List */}
-            <div className="max-h-80 overflow-y-auto divide-y divide-[#DDE3E0]">
+            <div className="max-h-80 overflow-y-auto divide-y-2 divide-ink">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center space-y-2">
                   <Bell className="w-8 h-8 text-[#6F6F6F]/40 mx-auto" />
-                  <p className="text-xs font-semibold text-[#172121]">No notifications yet</p>
+                  <p className="text-xs font-semibold text-[#111111]">No notifications yet</p>
                   <p className="text-[11px] text-[#6F6F6F] max-w-xs mx-auto">
                     When people you vibe with host new activities, you'll be notified here!
                   </p>
@@ -129,7 +130,7 @@ export default function NotificationDropdown() {
                   >
                     <div className="space-y-1 min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-extrabold text-[#172121] font-heading truncate">
+                        <span className="text-xs font-extrabold text-[#111111] font-heading truncate">
                           {notif.title}
                         </span>
                         {!notif.isRead && (
@@ -158,7 +159,7 @@ export default function NotificationDropdown() {
             </div>
 
             {notifications.length > 0 && (
-              <div className="p-3 border-t border-[#DDE3E0] text-center bg-[#F7F5EF]/60">
+              <div className="p-3 border-t-2 border-ink text-center bg-[#FFF8EE]/60">
                 <button
                   onClick={() => {
                     setIsOpen(false);
@@ -171,7 +172,7 @@ export default function NotificationDropdown() {
                 </button>
               </div>
             )}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

@@ -12,7 +12,7 @@ export default function NotFound() {
         <EmptyState
           icon={Compass}
           title="Page not found"
-          description="This link doesn't lead anywhere. It may be mistyped, or the page has moved."
+          description="This page doesn't exist."
           actionLabel="Explore Hangouts"
           onAction={() => navigate('/explore')}
         />

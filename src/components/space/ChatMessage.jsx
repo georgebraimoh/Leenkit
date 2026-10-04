@@ -1,61 +1,69 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import ProfileImageViewer from '../common/ProfileImageViewer';
 import Avatar from '../common/Avatar';
 
-export default function ChatMessage({ message, isOwnMessage }) {
+// Phone-chat bubble. Consecutive messages from one person form a group:
+// the name shows on the first bubble, the avatar next to the last one.
+export default function ChatMessage({ message, isOwnMessage, isFirstInGroup = true, isLastInGroup = true }) {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   if (message.type === 'system') {
     return (
-      <div className="my-3 text-center" role="status">
-        <span className="inline-block px-3.5 py-1 text-xs font-medium bg-[#E8F0E8] text-[#2D5A27] rounded-full border border-[#D5E4D5] shadow-xs">
+      <div className="my-2 text-center" role="status">
+        <span className="inline-block px-3 py-1 text-xs font-bold bg-[#FFD166] text-[#111111] rounded-lg border-2 border-ink">
           {message.text}
         </span>
       </div>
     );
   }
 
-  const avatar = <Avatar src={message.userAvatar} name={message.userName} size="md" className="border border-[#E8E6E1] shadow-xs" />;
+  const corner = isOwnMessage
+    ? (isLastInGroup ? 'rounded-br-md' : '')
+    : (isLastInGroup ? 'rounded-bl-md' : '');
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.15 }}
-        className={`flex items-start gap-2.5 my-3 ${isOwnMessage ? 'flex-row-reverse' : ''}`}
-      >
-        {message.userAvatar ? (
-          <button
-            type="button"
-            onClick={() => setIsViewerOpen(true)}
-            aria-label={`View ${message.userName}'s profile picture`}
-            className="rounded-full shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]"
-          >
-            {avatar}
-          </button>
-        ) : avatar}
-
-        <div className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] space-y-1 ${isOwnMessage ? 'items-end text-right' : ''}`}>
-          <div className={`flex items-center gap-2 px-1 ${isOwnMessage ? 'justify-end' : ''}`}>
-            <span className="text-xs font-bold text-[#171717]">{isOwnMessage ? 'You' : message.userName}</span>
-            {message.timestamp && (
-              <time dateTime={message.createdAt} className="text-xs text-[#6F6F6F]">{message.timestamp}</time>
+      <div style={{ animationDuration: '0.28s' }} className={`animate-fade-up flex items-end gap-2 ${isOwnMessage ? 'justify-end' : ''} ${isFirstInGroup ? 'mt-3' : 'mt-1'}`}>
+        {!isOwnMessage && (
+          <div className="w-8 shrink-0">
+            {isLastInGroup && (
+              message.userAvatar ? (
+                <button
+                  type="button"
+                  onClick={() => setIsViewerOpen(true)}
+                  aria-label={`View ${message.userName}'s profile picture`}
+                  className="rounded-full cursor-pointer"
+                >
+                  <Avatar src={message.userAvatar} name={message.userName} size="sm" className="w-8 h-8 border-2 border-ink" />
+                </button>
+              ) : (
+                <Avatar src={message.userAvatar} name={message.userName} size="sm" className="w-8 h-8 border-2 border-ink" />
+              )
             )}
           </div>
+        )}
 
-          <div
-            className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line break-words ${
-              isOwnMessage
-                ? 'bg-[#18A999] text-white rounded-tr-xs shadow-xs text-left'
-                : 'bg-white text-[#171717] border border-[#E8E6E1] rounded-tl-xs shadow-xs text-left'
-            }`}
-          >
+        <div
+          className={`max-w-[78%] px-3 pt-2 pb-1.5 rounded-2xl border-2 border-ink shadow-xs ${corner} ${
+            isOwnMessage ? 'bg-[#18A999] text-white' : 'bg-white text-[#111111]'
+          }`}
+        >
+          {!isOwnMessage && isFirstInGroup && (
+            <p className="text-xs font-extrabold text-[#FF6B2C] mb-0.5">{message.userName}</p>
+          )}
+          <p className="text-sm leading-snug whitespace-pre-line break-words">
             {message.text}
-          </div>
+            {message.timestamp && (
+              <time
+                dateTime={message.createdAt}
+                className={`float-right ml-2 mt-1.5 text-[10px] leading-none ${isOwnMessage ? 'text-white/80' : 'text-[#6F6F6F]'}`}
+              >
+                {message.timestamp}
+              </time>
+            )}
+          </p>
         </div>
-      </motion.div>
+      </div>
 
       {message.userAvatar && (
         <ProfileImageViewer

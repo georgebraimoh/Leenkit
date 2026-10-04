@@ -78,7 +78,7 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
       <form onSubmit={handleSubmit} className="space-y-5 pt-2">
         <div className="p-3.5 bg-[#DDF4EF]/40 border border-[#18A999]/30 rounded-2xl flex items-center gap-3">
           <ShieldAlert className="w-5 h-5 text-[#18A999] shrink-0" />
-          <p className="text-xs text-[#171717]">
+          <p className="text-xs text-[#111111]">
             Reporting <strong className="font-bold">"{targetTitle || targetType}"</strong>. Your report is sent to LEENKIT and is not shown to the person or Hangout you are reporting.
           </p>
         </div>
@@ -96,8 +96,8 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
                 key={idx}
                 className={`flex items-center gap-3 p-3 rounded-2xl border text-xs font-semibold cursor-pointer transition-all ${
                   reason === r
-                    ? 'border-[#18A999] bg-[#DDF4EF]/50 text-[#171717]'
-                    : 'border-[#E8E6E1] bg-[#F7F6F2] text-[#6F6F6F] hover:text-[#171717]'
+                    ? 'border-[#18A999] bg-[#DDF4EF]/50 text-[#111111]'
+                    : 'border-ink bg-[#FFF8EE] text-[#6F6F6F] hover:text-[#111111]'
                 }`}
               >
                 <input
@@ -121,11 +121,11 @@ export default function ReportModal({ isOpen, onClose, targetType = 'activity', 
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Describe what happened..."
-            className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+            className="w-full px-4 py-3 bg-[#FFF8EE] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
           />
         </FormField>
 
-        <div className="pt-2 flex gap-3 border-t border-[#E8E6E1]">
+        <div className="pt-2 flex gap-3 border-t-2 border-ink">
           <Button onClick={onClose} variant="outline" size="md" className="w-1/3">
             Cancel
           </Button>

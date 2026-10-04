@@ -168,7 +168,7 @@ export default function EditProfile() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 space-y-8">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[#6F6F6F] hover:text-[#171717] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-[#6F6F6F] hover:text-[#111111] transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to profile</span>
@@ -176,12 +176,12 @@ export default function EditProfile() {
 
         <div className="space-y-2">
           <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Account Settings</span>
-          <h1 className="text-3xl font-extrabold font-heading text-[#172121]">
+          <h1 className="text-3xl font-extrabold font-heading text-[#111111]">
             Edit Profile
           </h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white border border-[#DDE3E0] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white border-2 border-ink rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
           {saveError && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-medium text-rose-600 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -197,7 +197,7 @@ export default function EditProfile() {
                 <Avatar src={customAvatarPreview || formData.avatar || null} name={formData.name} size="xl" className="border-2 border-[#18A999] shadow-sm" />
 
                 <div className="space-y-1">
-                  <label className="px-3.5 py-2 bg-[#EEF1EF] border border-[#DDE3E0] hover:border-[#18A999] hover:text-[#18A999] rounded-xl text-xs font-semibold text-[#172121] inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs">
+                  <label className="px-3.5 py-2 bg-[#EEF1EF] border-2 border-ink hover:border-[#18A999] hover:text-[#18A999] rounded-xl text-xs font-semibold text-[#111111] inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs">
                     <Upload className="w-3.5 h-3.5 text-[#18A999]" />
                     <span>Upload photo from device</span>
                     <input
@@ -247,7 +247,7 @@ export default function EditProfile() {
                 maxLength={80}
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
               />
             </FormField>
 
@@ -257,7 +257,7 @@ export default function EditProfile() {
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
                 placeholder="e.g. Web Developer, Architect..."
-                className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
               />
             </FormField>
           </div>
@@ -269,7 +269,7 @@ export default function EditProfile() {
               value={formData.location}
               onChange={e => setFormData({ ...formData, location: e.target.value })}
               placeholder="e.g. Wuse 2, Abuja"
-              className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+              className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
             />
           </FormField>
 
@@ -279,7 +279,7 @@ export default function EditProfile() {
               rows="3"
               value={formData.bio}
               onChange={e => setFormData({ ...formData, bio: e.target.value })}
-              className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+              className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
             />
           </FormField>
 
@@ -296,7 +296,7 @@ export default function EditProfile() {
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#18A999] text-white shadow-xs'
-                        : 'bg-[#EEF1EF] text-[#3D4948] border border-[#DDE3E0] hover:text-[#172121]'
+                        : 'bg-[#EEF1EF] text-[#3D4948] border-2 border-ink hover:text-[#111111]'
                     }`}
                   >
                     {interest}
@@ -307,9 +307,9 @@ export default function EditProfile() {
           </FormField>
 
           {/* Social Profiles Section */}
-          <div className="pt-6 border-t border-[#E8E6E1] space-y-4">
+          <div className="pt-6 border-t-2 border-ink space-y-4">
             <div className="space-y-1">
-              <h3 className="text-sm font-bold font-heading text-[#172121] flex items-center gap-2">
+              <h3 className="text-sm font-bold font-heading text-[#111111] flex items-center gap-2">
                 <Globe className="w-4 h-4 text-[#18A999]" />
                 <span>Social Profiles</span>
               </h3>
@@ -334,14 +334,14 @@ export default function EditProfile() {
                     }}
                     placeholder="https://www.instagram.com/username"
                     className={`w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border rounded-2xl text-sm focus:outline-none focus:bg-white ${
-                      socialErrors.instagramUrl ? 'border-rose-400 focus:border-rose-500' : 'border-[#DDE3E0] focus:border-[#18A999]'
+                      socialErrors.instagramUrl ? 'border-rose-400 focus:border-rose-500' : 'border-ink focus:border-[#18A999]'
                     }`}
                   />
                   {formData.instagramUrl && (
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, instagramUrl: '' })}
-                      className="absolute right-3 text-[#6F6F6F] hover:text-[#172121] cursor-pointer"
+                      className="absolute right-3 text-[#6F6F6F] hover:text-[#111111] cursor-pointer"
                       title="Clear Instagram URL"
                     >
                       <X className="w-4 h-4" />
@@ -356,7 +356,7 @@ export default function EditProfile() {
               {/* TikTok URL */}
               <FormField label="TikTok Profile URL" helpText="e.g. https://www.tiktok.com/@your_username">
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#172121]">
+                  <span className="absolute left-3.5 text-[#111111]">
                     <TikTokIcon className="w-4 h-4" />
                   </span>
                   <input
@@ -368,14 +368,14 @@ export default function EditProfile() {
                     }}
                     placeholder="https://www.tiktok.com/@username"
                     className={`w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border rounded-2xl text-sm focus:outline-none focus:bg-white ${
-                      socialErrors.tiktokUrl ? 'border-rose-400 focus:border-rose-500' : 'border-[#DDE3E0] focus:border-[#18A999]'
+                      socialErrors.tiktokUrl ? 'border-rose-400 focus:border-rose-500' : 'border-ink focus:border-[#18A999]'
                     }`}
                   />
                   {formData.tiktokUrl && (
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, tiktokUrl: '' })}
-                      className="absolute right-3 text-[#6F6F6F] hover:text-[#172121] cursor-pointer"
+                      className="absolute right-3 text-[#6F6F6F] hover:text-[#111111] cursor-pointer"
                       title="Clear TikTok URL"
                     >
                       <X className="w-4 h-4" />
@@ -402,14 +402,14 @@ export default function EditProfile() {
                     }}
                     placeholder="https://open.spotify.com/user/profile_id"
                     className={`w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border rounded-2xl text-sm focus:outline-none focus:bg-white ${
-                      socialErrors.spotifyUrl ? 'border-rose-400 focus:border-rose-500' : 'border-[#DDE3E0] focus:border-[#18A999]'
+                      socialErrors.spotifyUrl ? 'border-rose-400 focus:border-rose-500' : 'border-ink focus:border-[#18A999]'
                     }`}
                   />
                   {formData.spotifyUrl && (
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, spotifyUrl: '' })}
-                      className="absolute right-3 text-[#6F6F6F] hover:text-[#172121] cursor-pointer"
+                      className="absolute right-3 text-[#6F6F6F] hover:text-[#111111] cursor-pointer"
                       title="Clear Spotify URL"
                     >
                       <X className="w-4 h-4" />
@@ -424,7 +424,7 @@ export default function EditProfile() {
           </div>
 
           {/* Submit Action */}
-          <div className="pt-4 border-t border-[#E8E6E1] flex items-center justify-between">
+          <div className="pt-4 border-t-2 border-ink flex items-center justify-between">
             {saved ? (
               <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                 <CheckCircle className="w-4 h-4" /> Profile updated successfully!
@@ -438,9 +438,9 @@ export default function EditProfile() {
         </form>
 
         {paidEnabled && (
-        <section className="p-6 bg-white border border-[#DDE3E0] rounded-3xl flex flex-wrap items-center justify-between gap-3">
+        <section className="p-6 bg-white border-2 border-ink rounded-3xl flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold font-heading text-[#172121]">Payouts</h2>
+            <h2 className="text-lg font-bold font-heading text-[#111111]">Payouts</h2>
             <p className="text-sm text-[#3D4948]">Add a bank account to sell tickets and receive sponsorships.</p>
           </div>
           <Link to="/payouts"><Button variant="outline" size="md">Manage payouts</Button></Link>

@@ -50,7 +50,7 @@ export default function LocationAutocomplete({
           placeholder={placeholder}
           maxLength={120}
           enterKeyHint="search"
-          className="w-full pl-10 pr-24 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm text-[#172121] placeholder-[#6F6F6F] focus:outline-none focus:bg-white focus:border-[#18A999] shadow-xs transition-all"
+          className="w-full pl-10 pr-24 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm text-[#111111] placeholder-[#6F6F6F] focus:outline-none focus:bg-white focus:border-[#18A999] shadow-xs transition-all"
         />
         <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1">
           {query && (
@@ -58,7 +58,7 @@ export default function LocationAutocomplete({
               type="button"
               onClick={handleClear}
               aria-label="Clear area"
-              className="p-1.5 rounded-full text-[#6F6F6F] hover:text-[#172121] cursor-pointer"
+              className="p-1.5 rounded-full text-[#6F6F6F] hover:text-[#111111] cursor-pointer"
             >
               <X className="w-4 h-4" aria-hidden="true" />
             </button>
@@ -66,7 +66,7 @@ export default function LocationAutocomplete({
           <button
             type="submit"
             aria-label="Search area"
-            className="px-2.5 py-1.5 bg-white border border-[#DDE3E0] hover:border-[#18A999] text-[#172121] hover:text-[#18A999] rounded-xl text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
+            className="px-2.5 py-1.5 bg-white border-2 border-ink hover:border-[#18A999] text-[#111111] hover:text-[#18A999] rounded-xl text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
           >
             <Search className="w-3.5 h-3.5 text-[#18A999]" aria-hidden="true" />
             <span className="hidden sm:inline">Search</span>

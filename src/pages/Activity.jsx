@@ -64,9 +64,9 @@ export default function Activity() {
             <Sparkles className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold font-heading text-[#171717]">Activity</h2>
+            <h2 className="text-2xl font-bold font-heading text-[#111111]">Activity</h2>
             <p className="text-sm text-[#6F6F6F]">
-              Sign in to see real-time updates when people join your Hangouts, send messages, or vibe with your events.
+              Sign in to see who joins and chats.
             </p>
           </div>
           <Button onClick={() => openAuthModal('login')} variant="primary" size="lg" fullWidth>
@@ -86,9 +86,9 @@ export default function Activity() {
             <AlertTriangle className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold font-heading text-[#171717]">We couldn't load your Activity.</h2>
+            <h2 className="text-2xl font-bold font-heading text-[#111111]">We couldn't load your Activity.</h2>
             <p className="text-sm text-[#6F6F6F]">
-              An issue occurred while fetching your activity feed. Please try again.
+              Could not load your activity. Try again.
             </p>
           </div>
           <Button
@@ -124,18 +124,18 @@ export default function Activity() {
                 </span>
               )}
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#172121] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#111111] tracking-tight">
               Activity
             </h1>
             <p className="text-sm text-[#6F6F6F]">
-              See what's happening across your Hangouts.
+              Updates from your Hangouts.
             </p>
           </div>
 
           {unreadCount > 0 && (
             <button
               onClick={markAllNotificationsRead}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-[#DDE3E0] hover:border-[#18A999] text-[#18A999] text-xs font-bold rounded-full shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border-2 border-ink hover:border-[#18A999] text-[#18A999] text-xs font-bold rounded-full shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
             >
               <CheckCheck className="w-4 h-4 text-[#18A999]" />
               <span>Mark all read</span>
@@ -145,13 +145,13 @@ export default function Activity() {
 
         {/* Category Filter Tabs */}
         {notifications.length > 0 && (
-          <div className="flex items-center gap-2 border-b border-[#DDE3E0] pb-2 overflow-x-auto">
+          <div className="flex items-center gap-2 border-b-2 border-ink pb-2 overflow-x-auto">
             <button
               onClick={() => setActiveFilter('all')}
               className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                 activeFilter === 'all'
-                  ? 'bg-[#171717] text-white shadow-xs'
-                  : 'text-[#6F6F6F] hover:text-[#171717] hover:bg-white'
+                  ? 'bg-[#111111] text-white shadow-xs'
+                  : 'text-[#6F6F6F] hover:text-[#111111] hover:bg-white'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -162,8 +162,8 @@ export default function Activity() {
               onClick={() => setActiveFilter('messages')}
               className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                 activeFilter === 'messages'
-                  ? 'bg-[#171717] text-white shadow-xs'
-                  : 'text-[#6F6F6F] hover:text-[#171717] hover:bg-white'
+                  ? 'bg-[#111111] text-white shadow-xs'
+                  : 'text-[#6F6F6F] hover:text-[#111111] hover:bg-white'
               }`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
@@ -174,8 +174,8 @@ export default function Activity() {
               onClick={() => setActiveFilter('joins')}
               className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                 activeFilter === 'joins'
-                  ? 'bg-[#171717] text-white shadow-xs'
-                  : 'text-[#6F6F6F] hover:text-[#171717] hover:bg-white'
+                  ? 'bg-[#111111] text-white shadow-xs'
+                  : 'text-[#6F6F6F] hover:text-[#111111] hover:bg-white'
               }`}
             >
               <UserPlus className="w-3.5 h-3.5" />
@@ -186,8 +186,8 @@ export default function Activity() {
               onClick={() => setActiveFilter('vibes')}
               className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                 activeFilter === 'vibes'
-                  ? 'bg-[#171717] text-white shadow-xs'
-                  : 'text-[#6F6F6F] hover:text-[#171717] hover:bg-white'
+                  ? 'bg-[#111111] text-white shadow-xs'
+                  : 'text-[#6F6F6F] hover:text-[#111111] hover:bg-white'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -201,7 +201,7 @@ export default function Activity() {
           <EmptyState
             icon={Bell}
             title="Nothing happening yet"
-            description="When people join your Hangouts, send messages, or interact with them, you'll see it here."
+            description="Joins and messages show up here."
             actionLabel="Explore Hangouts"
             onAction={() => navigate('/explore')}
           />

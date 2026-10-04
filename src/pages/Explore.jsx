@@ -43,7 +43,7 @@ function GridSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 animate-pulse" aria-busy="true" aria-label="Loading Hangouts">
       {[0, 1, 2].map(i => (
-        <div key={i} className="h-80 bg-white border border-[#E8E6E1] rounded-3xl overflow-hidden">
+        <div key={i} className="h-80 bg-white border-2 border-ink rounded-3xl overflow-hidden">
           <div className="h-48 bg-[#E8E6E1]" />
           <div className="p-5 space-y-3">
             <div className="h-4 w-3/4 bg-[#E8E6E1] rounded-full" />
@@ -135,12 +135,9 @@ export default function Explore() {
     <PageTransition>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="space-y-4 max-w-3xl">
-          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#171717] tracking-tight">
-            What's happening <span className="text-[#18A999]">{locationTitle}?</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#111111] tracking-tight">
+            What's on <span className="text-[#FF6B2C]">{locationTitle}</span>
           </h1>
-          <p className="text-base text-[#6F6F6F] leading-relaxed">
-            Upcoming real-life Hangouts, soonest first.
-          </p>
           <SearchBar
             value={searchQuery}
             onChange={(v) => { setSearchQuery(v); setParam('q', v.trim(), ''); }}
@@ -156,11 +153,11 @@ export default function Explore() {
           onPriceChange={(v) => { setPrice(v); setParam('price', v, 'any'); }}
         />
 
-        <div className="flex items-center justify-between pt-4 border-t border-[#E8E6E1] text-xs text-[#6F6F6F]" aria-live="polite">
+        <div className="flex items-center justify-between pt-4 border-t-2 border-ink text-xs text-[#6F6F6F]" aria-live="polite">
           <span>
             {isHangoutsLoading
-              ? 'Loading Hangouts...'
-              : <>Showing <strong className="text-[#171717]">{filteredHangouts.length}</strong> upcoming {filteredHangouts.length === 1 ? 'Hangout' : 'Hangouts'}</>}
+              ? 'Loading...'
+              : <><strong className="text-[#111111]">{filteredHangouts.length}</strong> {filteredHangouts.length === 1 ? 'Hangout' : 'Hangouts'}</>}
           </span>
           {isFiltered && (
             <button
@@ -169,13 +166,13 @@ export default function Explore() {
               className="text-[#087F73] hover:underline font-semibold cursor-pointer flex items-center gap-1 pressable link-nudge"
             >
               <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Reset all filters</span>
+              <span>Reset</span>
             </button>
           )}
         </div>
 
         {hangoutsError && !isHangoutsLoading ? (
-          <div role="alert" className="max-w-md mx-auto p-8 bg-white border border-[#E8E6E1] rounded-3xl text-center space-y-4">
+          <div role="alert" className="max-w-md mx-auto p-8 bg-white border-2 border-ink rounded-3xl text-center space-y-4">
             <AlertTriangle className="w-8 h-8 text-rose-600 mx-auto" aria-hidden="true" />
             <p className="text-sm text-[#3D4948]">{hangoutsError}</p>
             <Button onClick={reloadHangouts} variant="outline" size="md">Try again</Button>

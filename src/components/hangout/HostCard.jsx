@@ -14,7 +14,7 @@ export default function HostCard({ hostId }) {
 
   return (
     <>
-      <div className="p-5 bg-white border border-[#E8E6E1] rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-xs">
+      <div className="p-5 bg-white border-2 border-ink rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-4 min-w-0">
           {host.avatar ? (
             <button
@@ -39,12 +39,12 @@ export default function HostCard({ hostId }) {
             {host.username ? (
               <Link
                 to={`/profile/${host.username}`}
-                className="font-bold text-[#171717] hover:text-[#18A999] transition-colors font-heading text-lg block truncate"
+                className="font-bold text-[#111111] hover:text-[#18A999] transition-colors font-heading text-lg block truncate"
               >
                 {host.name}
               </Link>
             ) : (
-              <span className="font-bold text-[#171717] font-heading text-lg block truncate">{host.name}</span>
+              <span className="font-bold text-[#111111] font-heading text-lg block truncate">{host.name}</span>
             )}
             {host.location && (
               <p className="text-xs text-[#6F6F6F] flex items-center gap-1 mt-0.5">
@@ -57,7 +57,7 @@ export default function HostCard({ hostId }) {
         {host.username && (
           <Link
             to={`/profile/${host.username}`}
-            className="px-4 py-2 text-xs font-semibold text-[#171717] bg-[#F7F6F2] hover:bg-[#E8E6E1] rounded-full transition-colors pressable"
+            className="px-4 py-2 text-xs font-semibold text-[#111111] bg-[#FFF8EE] hover:bg-[#E8E6E1] rounded-full transition-colors pressable"
           >
             View profile
           </Link>

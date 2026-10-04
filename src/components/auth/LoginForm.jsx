@@ -82,7 +82,7 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
             }}
             placeholder="name@example.com"
             disabled={isLoading || isResetLoading}
-            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
         </div>
       </FormField>
@@ -99,13 +99,13 @@ export default function LoginForm({ onSubmit, onToggleSignUp, isLoading, error }
             onChange={e => setPassword(e.target.value)}
             placeholder="Enter your password"
             disabled={isLoading || isResetLoading}
-            className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
+            className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6F6F6F] hover:text-[#171717] cursor-pointer"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6F6F6F] hover:text-[#111111] cursor-pointer"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>

@@ -91,7 +91,7 @@ export default function PayoutSettings() {
     return (
       <PageTransition>
         <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
-          <h1 className="text-2xl font-bold font-heading text-[#171717]">Payouts are coming soon</h1>
+          <h1 className="text-2xl font-bold font-heading text-[#111111]">Payouts are coming soon</h1>
           <p className="text-sm text-[#6F6F6F]">
             Paid tickets and online sponsorships are not available on LEENKIT yet, so there is nothing to set up here for now.
             Free Hangouts work as usual.
@@ -110,7 +110,7 @@ export default function PayoutSettings() {
     return (
       <PageTransition>
         <div className="max-w-md mx-auto px-4 py-20 text-center space-y-6">
-          <h1 className="text-2xl font-bold font-heading text-[#171717]">Payouts</h1>
+          <h1 className="text-2xl font-bold font-heading text-[#111111]">Payouts</h1>
           <p className="text-sm text-[#6F6F6F]">Sign in to set up where your ticket and sponsorship money is paid.</p>
           <Button onClick={() => openAuthModal('login')} variant="primary" size="lg" fullWidth>Sign in</Button>
         </div>
@@ -121,12 +121,12 @@ export default function PayoutSettings() {
   return (
     <PageTransition>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 space-y-8 pb-24">
-        <Link to="/my-hangouts" className="inline-flex items-center gap-2 text-xs font-semibold text-[#6F6F6F] hover:text-[#171717]">
+        <Link to="/my-hangouts" className="inline-flex items-center gap-2 text-xs font-semibold text-[#6F6F6F] hover:text-[#111111]">
           <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Your Hangouts
         </Link>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-extrabold font-heading text-[#172121]">Payouts</h1>
+          <h1 className="text-3xl font-extrabold font-heading text-[#111111]">Payouts</h1>
           <p className="text-sm text-[#3D4948]">
             LEENKIT collects ticket and sponsorship payments and holds your share until after the Hangout, so buyers can be
             refunded if plans change. About 2 days after each Hangout starts, your share is sent to your bank account by
@@ -135,7 +135,7 @@ export default function PayoutSettings() {
           </p>
         </div>
 
-        <div className="p-5 bg-[#DDF4EF]/60 border border-[#18A999]/30 rounded-2xl text-sm text-[#172121] space-y-1">
+        <div className="p-5 bg-[#DDF4EF]/60 border border-[#18A999]/30 rounded-2xl text-sm text-[#111111] space-y-1">
           <p className="font-bold">Example: a {formatMoney(5000, 'NGN')} ticket</p>
           <p>You receive <strong>{formatMoney(example.hostAmount, 'NGN')}</strong>. LEENKIT keeps {formatMoney(example.fee, 'NGN')}. The buyer pays {formatMoney(5000, 'NGN')}, nothing extra.</p>
         </div>
@@ -144,16 +144,16 @@ export default function PayoutSettings() {
           <div className="grid grid-cols-2 gap-4">
             {earnings.map(e => (
               <React.Fragment key={e.currency}>
-                <div className="p-5 bg-white border border-[#DDE3E0] rounded-2xl">
+                <div className="p-5 bg-white border-2 border-ink rounded-2xl">
                   <p className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F]">To be paid</p>
-                  <p className="text-2xl font-extrabold font-heading text-[#172121]">{formatMoney(e.toBePaid, e.currency)}</p>
+                  <p className="text-2xl font-extrabold font-heading text-[#111111]">{formatMoney(e.toBePaid, e.currency)}</p>
                   <p className="text-xs text-[#6F6F6F]">
                     {formatMoney(e.paidOut, e.currency)} already paid to your bank · {formatMoney(e.gross, e.currency)} in sales
                   </p>
                 </div>
-                <div className="p-5 bg-white border border-[#DDE3E0] rounded-2xl">
+                <div className="p-5 bg-white border-2 border-ink rounded-2xl">
                   <p className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F]">Sold</p>
-                  <p className="text-2xl font-extrabold font-heading text-[#172121]">{e.ticketsSold} tickets</p>
+                  <p className="text-2xl font-extrabold font-heading text-[#111111]">{e.ticketsSold} tickets</p>
                   <p className="text-xs text-[#6F6F6F]">{e.sponsorships} sponsorships{e.pendingRefunds ? ` · ${e.pendingRefunds} refunds pending` : ''}</p>
                 </div>
               </React.Fragment>
@@ -168,15 +168,15 @@ export default function PayoutSettings() {
         )}
 
         {isLoading ? (
-          <div className="h-40 bg-white border border-[#E8E6E1] rounded-3xl animate-pulse" aria-busy="true" />
+          <div className="h-40 bg-white border-2 border-ink rounded-3xl animate-pulse" aria-busy="true" />
         ) : account && !isEditing ? (
-          <div className="p-6 bg-white border border-[#DDE3E0] rounded-3xl space-y-4">
+          <div className="p-6 bg-white border-2 border-ink rounded-3xl space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-[#DDF4EF] text-[#087F73] flex items-center justify-center">
                 <Banknote className="w-5 h-5" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-sm font-bold text-[#172121]">{account.accountName}</p>
+                <p className="text-sm font-bold text-[#111111]">{account.accountName}</p>
                 <p className="text-xs text-[#6F6F6F]">{account.bankName} · •••• {account.accountLast4}</p>
               </div>
               <CheckCircle2 className="w-5 h-5 text-emerald-600 ml-auto" aria-label="Verified" />
@@ -188,15 +188,15 @@ export default function PayoutSettings() {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSave} className="p-6 bg-white border border-[#DDE3E0] rounded-3xl space-y-5">
-            <h2 className="text-lg font-bold font-heading text-[#172121]">{account ? 'Change payout account' : 'Add your bank account'}</h2>
+          <form onSubmit={handleSave} className="p-6 bg-white border-2 border-ink rounded-3xl space-y-5">
+            <h2 className="text-lg font-bold font-heading text-[#111111]">{account ? 'Change payout account' : 'Add your bank account'}</h2>
 
             <FormField label="Bank" required>
               <select
                 value={bankCode}
                 onChange={e => setBankCode(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
               >
                 <option value="">{banks.length ? 'Choose your bank' : 'Loading banks...'}</option>
                 {banks.map(b => <option key={b.code} value={b.code}>{b.name}</option>)}
@@ -212,7 +212,7 @@ export default function PayoutSettings() {
                 value={accountNumber}
                 onChange={e => setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 placeholder="0123456789"
-                className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm tracking-widest focus:outline-none focus:bg-white focus:border-[#18A999]"
+                className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm tracking-widest focus:outline-none focus:bg-white focus:border-[#18A999]"
               />
             </FormField>
 

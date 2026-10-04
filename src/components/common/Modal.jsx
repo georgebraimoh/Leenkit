@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -58,7 +58,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -67,7 +67,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
             className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs"
           />
 
-          <motion.div
+          <m.div
             ref={panelRef}
             role="dialog"
             aria-modal="true"
@@ -77,24 +77,24 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 15 }}
             transition={{ type: 'spring', duration: 0.35, bounce: 0.15 }}
-            className={`relative w-full ${maxWidth} max-h-[92vh] overflow-y-auto overscroll-contain bg-white rounded-t-3xl sm:rounded-3xl p-6 md:p-8 shadow-2xl border border-[#E8E6E1] z-10 focus:outline-none`}
+            className={`relative w-full ${maxWidth} max-h-[92vh] overflow-y-auto overscroll-contain bg-white rounded-t-3xl sm:rounded-3xl p-6 md:p-8 shadow-2xl border-2 border-ink z-10 focus:outline-none`}
           >
             <div className="flex items-start justify-between gap-4 mb-4">
               {title ? (
-                <h2 id={titleId} className="text-xl font-bold font-heading text-[#171717]">{title}</h2>
+                <h2 id={titleId} className="text-xl font-bold font-heading text-[#111111]">{title}</h2>
               ) : <span />}
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="p-2 -mr-2 -mt-1 rounded-full text-[#6F6F6F] hover:bg-[#F7F6F2] hover:text-[#171717] transition-colors pressable cursor-pointer"
+                className="p-2 -mr-2 -mt-1 rounded-full text-[#6F6F6F] hover:bg-[#FFF8EE] hover:text-[#111111] transition-colors pressable cursor-pointer"
               >
                 <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
             {children}
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

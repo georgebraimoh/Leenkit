@@ -32,37 +32,37 @@ export default function HostingGuidelinesModal({ isOpen, onClose, onAccept, isLo
         </div>
 
         {/* Guidelines List */}
-        <div className="space-y-3 bg-[#EEF1EF] p-4 rounded-2xl border border-[#DDE3E0] text-xs">
+        <div className="space-y-3 bg-[#EEF1EF] p-4 rounded-2xl border-2 border-ink text-xs">
           <div className="flex items-start gap-3">
             <div className="p-1.5 bg-[#DDF4EF] text-[#18A999] rounded-xl shrink-0 mt-0.5">
               <MapPin className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="font-bold text-[#172121]">1. Public & Accessible Venues</h4>
+              <h4 className="font-bold text-[#111111]">1. Public & Accessible Venues</h4>
               <p className="text-[#3D4948] leading-normal">
                 Host your meetup in an open, public place (coffee shops, parks, public sports grounds, venues). Never host first-time meetups in private residential spaces.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 pt-2 border-t border-[#DDE3E0]">
+          <div className="flex items-start gap-3 pt-2 border-t-2 border-ink">
             <div className="p-1.5 bg-[#DDF4EF] text-[#18A999] rounded-xl shrink-0 mt-0.5">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="font-bold text-[#172121]">2. Safety & Respect First</h4>
+              <h4 className="font-bold text-[#111111]">2. Safety & Respect First</h4>
               <p className="text-[#3D4948] leading-normal">
                 Treat all attendees with kindness and dignity. LEENKIT has zero tolerance for harassment, discrimination, or deceptive event details.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 pt-2 border-t border-[#DDE3E0]">
+          <div className="flex items-start gap-3 pt-2 border-t-2 border-ink">
             <div className="p-1.5 bg-[#DDF4EF] text-[#18A999] rounded-xl shrink-0 mt-0.5">
               <Users className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="font-bold text-[#172121]">3. Clear Details & Communication</h4>
+              <h4 className="font-bold text-[#111111]">3. Clear Details & Communication</h4>
               <p className="text-[#3D4948] leading-normal">
                 Set accurate date, time, and attendee capacity limits. Post updates in your Hangout Space if plans change so attendees stay informed.
               </p>
@@ -78,7 +78,7 @@ export default function HostingGuidelinesModal({ isOpen, onClose, onAccept, isLo
         )}
 
         {/* Action Controls */}
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-[#DDE3E0]">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-3 border-t-2 border-ink">
           <Button
             type="button"
             variant="outline"

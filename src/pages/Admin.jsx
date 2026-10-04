@@ -128,7 +128,7 @@ export default function Admin() {
       <PageTransition>
         <div className="max-w-md mx-auto px-4 py-20 text-center space-y-3">
           <ShieldAlert className="w-10 h-10 text-[#6F6F6F] mx-auto" aria-hidden="true" />
-          <h1 className="text-xl font-bold font-heading text-[#172121]">Admins only</h1>
+          <h1 className="text-xl font-bold font-heading text-[#111111]">Admins only</h1>
           <p className="text-sm text-[#6F6F6F]">This page is for the LEENKIT team.</p>
         </div>
       </PageTransition>
@@ -149,7 +149,7 @@ export default function Admin() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 pb-24">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold font-heading text-[#172121]">Admin</h1>
+            <h1 className="text-3xl font-extrabold font-heading text-[#111111]">Admin</h1>
             <p className="text-sm text-[#6F6F6F]">Safety reports, suspensions and refunds.</p>
           </div>
           <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
@@ -165,18 +165,18 @@ export default function Admin() {
               { label: 'Suspended', value: overview.suspendedUsers, icon: Ban },
               { label: 'Fees collected', value: formatMoney(overview.feesCollectedNgn, 'NGN'), icon: Users }
             ].map(s => (
-              <div key={s.label} className="p-5 bg-white border border-[#DDE3E0] rounded-2xl">
+              <div key={s.label} className="p-5 bg-white border-2 border-ink rounded-2xl">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F]">{s.label}</span>
                   <s.icon className="w-4 h-4 text-[#18A999]" aria-hidden="true" />
                 </div>
-                <p className="text-2xl font-extrabold font-heading text-[#172121] mt-2">{s.value}</p>
+                <p className="text-2xl font-extrabold font-heading text-[#111111] mt-2">{s.value}</p>
               </div>
             ))}
           </div>
         )}
 
-        <div className="flex gap-2 border-b border-[#DDE3E0] pb-2" role="tablist">
+        <div className="flex gap-2 border-b-2 border-ink pb-2" role="tablist">
           {[
             { id: 'reports', label: 'Reports' },
             { id: 'refunds', label: `Refunds (${payments.length})` },
@@ -188,7 +188,7 @@ export default function Admin() {
               role="tab"
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer ${tab === t.id ? 'bg-[#171717] text-white' : 'text-[#3D4948] hover:bg-white'}`}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer ${tab === t.id ? 'bg-[#111111] text-white' : 'text-[#3D4948] hover:bg-white'}`}
             >
               {t.label}
             </button>
@@ -206,7 +206,7 @@ export default function Admin() {
                   type="button"
                   aria-pressed={reportFilter === f.id}
                   onClick={() => setReportFilter(f.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer ${reportFilter === f.id ? 'bg-[#18A999] text-white' : 'bg-white border border-[#E8E6E1] text-[#3D4948]'}`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer ${reportFilter === f.id ? 'bg-[#18A999] text-white' : 'bg-white border-2 border-ink text-[#3D4948]'}`}
                 >
                   {f.label}
                 </button>
@@ -214,16 +214,16 @@ export default function Admin() {
             </div>
 
             {isLoading ? (
-              <div className="h-32 bg-white border border-[#E8E6E1] rounded-2xl animate-pulse" aria-busy="true" />
+              <div className="h-32 bg-white border-2 border-ink rounded-2xl animate-pulse" aria-busy="true" />
             ) : reports.length === 0 ? (
-              <p className="p-8 bg-white border border-[#E8E6E1] rounded-2xl text-center text-sm text-[#6F6F6F]">No reports here.</p>
+              <p className="p-8 bg-white border-2 border-ink rounded-2xl text-center text-sm text-[#6F6F6F]">No reports here.</p>
             ) : (
               <ul className="space-y-3">
                 {reports.map(r => {
                   const link = targetLink(r);
                   const isOpen = r.status === 'pending' || r.status === 'reviewing';
                   return (
-                    <li key={r.id} className="p-5 bg-white border border-[#DDE3E0] rounded-2xl space-y-3">
+                    <li key={r.id} className="p-5 bg-white border-2 border-ink rounded-2xl space-y-3">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="space-y-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
@@ -237,7 +237,7 @@ export default function Admin() {
                               </span>
                             )}
                           </div>
-                          <p className="text-base font-bold text-[#172121] break-words">
+                          <p className="text-base font-bold text-[#111111] break-words">
                             {link ? <Link to={link} className="hover:underline inline-flex items-center gap-1">{r.target_label} <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" /></Link> : r.target_label}
                           </p>
                           <p className="text-sm font-semibold text-rose-700">{r.reason}</p>
@@ -282,13 +282,13 @@ export default function Admin() {
 
         {tab === 'refunds' && (
           isLoading ? (
-            <div className="h-32 bg-white border border-[#E8E6E1] rounded-2xl animate-pulse" aria-busy="true" />
+            <div className="h-32 bg-white border-2 border-ink rounded-2xl animate-pulse" aria-busy="true" />
           ) : payments.length === 0 ? (
-            <p className="p-8 bg-white border border-[#E8E6E1] rounded-2xl text-center text-sm text-[#6F6F6F]">No refunds due.</p>
+            <p className="p-8 bg-white border-2 border-ink rounded-2xl text-center text-sm text-[#6F6F6F]">No refunds due.</p>
           ) : (
-            <div className="overflow-x-auto bg-white border border-[#DDE3E0] rounded-2xl">
+            <div className="overflow-x-auto bg-white border-2 border-ink rounded-2xl">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-wider text-[#6F6F6F] border-b border-[#E8E6E1]">
+                <thead className="text-left text-xs uppercase tracking-wider text-[#6F6F6F] border-b-2 border-ink">
                   <tr>
                     <th className="p-3">Paid</th>
                     <th className="p-3">Buyer</th>
@@ -302,7 +302,7 @@ export default function Admin() {
                 </thead>
                 <tbody>
                   {payments.map(p => (
-                    <tr key={p.id} className="border-b border-[#F0EEE9] last:border-0">
+                    <tr key={p.id} className="border-b-2 border-ink last:border-0">
                       <td className="p-3 whitespace-nowrap">{when(p.paid_at || p.created_at)}</td>
                       <td className="p-3">{p.payer_name || '—'}<div className="text-xs text-[#6F6F6F]">{p.payer_email}</div></td>
                       <td className="p-3">
@@ -333,13 +333,13 @@ export default function Admin() {
 
         {tab === 'payouts' && (
           isLoading ? (
-            <div className="h-32 bg-white border border-[#E8E6E1] rounded-2xl animate-pulse" aria-busy="true" />
+            <div className="h-32 bg-white border-2 border-ink rounded-2xl animate-pulse" aria-busy="true" />
           ) : payouts.length === 0 ? (
-            <p className="p-8 bg-white border border-[#E8E6E1] rounded-2xl text-center text-sm text-[#6F6F6F]">No payouts yet. Hosts are paid about 48 hours after each paid Hangout starts.</p>
+            <p className="p-8 bg-white border-2 border-ink rounded-2xl text-center text-sm text-[#6F6F6F]">No payouts yet. Hosts are paid about 48 hours after each paid Hangout starts.</p>
           ) : (
-            <div className="overflow-x-auto bg-white border border-[#DDE3E0] rounded-2xl">
+            <div className="overflow-x-auto bg-white border-2 border-ink rounded-2xl">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-wider text-[#6F6F6F] border-b border-[#E8E6E1]">
+                <thead className="text-left text-xs uppercase tracking-wider text-[#6F6F6F] border-b-2 border-ink">
                   <tr>
                     <th className="p-3">Due</th>
                     <th className="p-3">Host</th>
@@ -352,7 +352,7 @@ export default function Admin() {
                 </thead>
                 <tbody>
                   {payouts.map(p => (
-                    <tr key={p.id} className="border-b border-[#F0EEE9] last:border-0">
+                    <tr key={p.id} className="border-b-2 border-ink last:border-0">
                       <td className="p-3 whitespace-nowrap">{when(p.available_at)}</td>
                       <td className="p-3">{p.host_name || '—'}</td>
                       <td className="p-3">{p.hangout_id ? <Link to={`/hangout/${p.hangout_id}`} className="underline">{p.hangout_title}</Link> : '—'}</td>
@@ -379,7 +379,7 @@ export default function Admin() {
           <div className="space-y-4">
             {actionCopy?.body && <p className="text-sm text-[#3D4948]">{actionCopy.body}</p>}
             <label className="block space-y-1.5">
-              <span className="text-xs font-bold text-[#172121]">
+              <span className="text-xs font-bold text-[#111111]">
                 {action?.kind === 'refund' ? 'Paystack refund reference (required)' : 'Internal note (optional)'}
               </span>
               <textarea
@@ -387,7 +387,7 @@ export default function Admin() {
                 maxLength={1000}
                 value={note}
                 onChange={e => setNote(e.target.value)}
-                className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                className="w-full px-4 py-3 bg-[#FFF8EE] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
               />
             </label>
             {actionError && <p role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700">{actionError}</p>}

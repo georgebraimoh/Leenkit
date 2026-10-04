@@ -81,7 +81,7 @@ export default function Profile() {
     return (
       <PageTransition>
         <div className="max-w-5xl mx-auto px-4 py-20 text-center space-y-4">
-          <h2 className="text-xl font-bold font-heading text-[#171717]">Profile not found</h2>
+          <h2 className="text-xl font-bold font-heading text-[#111111]">Profile not found</h2>
           <p className="text-xs text-[#6F6F6F]">We couldn't find the requested member profile.</p>
           <Button onClick={() => navigate('/explore')}>Back to Explore</Button>
         </div>
@@ -148,7 +148,7 @@ export default function Profile() {
         />
 
         {/* Profile Card Header */}
-        <div className="editorial-surface p-6 md:p-10 relative overflow-hidden bg-white shadow-xl border border-[#DDE3E0] rounded-3xl">
+        <div className="editorial-surface p-6 md:p-10 relative overflow-hidden bg-white shadow-xl border-2 border-ink rounded-3xl">
           <span className="accent-orb -right-8 -top-8 w-24 h-24 bg-[#18A999]/6" />
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
@@ -159,14 +159,14 @@ export default function Profile() {
                   aria-label={`View ${profileUser.name}'s profile picture`}
                   className="rounded-full shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]"
                 >
-                  <Avatar src={profileUser.avatar} name={profileUser.name} size="2xl" className="border-4 border-[#EEF1EF] shadow-md hover:scale-105 transition-all duration-200" />
+                  <Avatar src={profileUser.avatar} name={profileUser.name} size="2xl" className="border-4 border-ink shadow-md hover:scale-105 transition-all duration-200" />
                 </button>
               ) : (
-                <Avatar src={null} name={profileUser.name} size="2xl" className="border-4 border-[#EEF1EF] shadow-md" />
+                <Avatar src={null} name={profileUser.name} size="2xl" className="border-4 border-ink shadow-md" />
               )}
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#172121]">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#111111]">
                     {profileUser.name}
                   </h1>
                 </div>
@@ -184,7 +184,7 @@ export default function Profile() {
                 )}
 
                 {profileUser.bio && (
-                  <p className="text-sm text-[#171717] max-w-xl leading-relaxed pt-1 break-words">
+                  <p className="text-sm text-[#111111] max-w-xl leading-relaxed pt-1 break-words">
                     {profileUser.bio.replace(/Joined Qleenq/gi, 'Joined LEENKIT')}
                   </p>
                 )}
@@ -198,7 +198,7 @@ export default function Profile() {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`${profileUser.name}'s Instagram Profile`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF1EF] hover:bg-[#18A999]/10 text-[#172121] hover:text-[#18A999] border border-[#DDE3E0] rounded-full text-xs font-semibold transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF1EF] hover:bg-[#18A999]/10 text-[#111111] hover:text-[#18A999] border-2 border-ink rounded-full text-xs font-semibold transition-colors cursor-pointer"
                       >
                         <InstagramIcon className="w-3.5 h-3.5 text-[#18A999]" />
                         <span>Instagram</span>
@@ -212,9 +212,9 @@ export default function Profile() {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`${profileUser.name}'s TikTok Profile`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF1EF] hover:bg-[#18A999]/10 text-[#172121] hover:text-[#18A999] border border-[#DDE3E0] rounded-full text-xs font-semibold transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF1EF] hover:bg-[#18A999]/10 text-[#111111] hover:text-[#18A999] border-2 border-ink rounded-full text-xs font-semibold transition-colors cursor-pointer"
                       >
-                        <TikTokIcon className="w-3.5 h-3.5 text-[#172121]" />
+                        <TikTokIcon className="w-3.5 h-3.5 text-[#111111]" />
                         <span>TikTok</span>
                         <ExternalLink className="w-3 h-3 text-[#6F6F6F]" />
                       </a>
@@ -226,7 +226,7 @@ export default function Profile() {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`${profileUser.name}'s Spotify Profile`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF1EF] hover:bg-[#18A999]/10 text-[#172121] hover:text-[#18A999] border border-[#DDE3E0] rounded-full text-xs font-semibold transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF1EF] hover:bg-[#18A999]/10 text-[#111111] hover:text-[#18A999] border-2 border-ink rounded-full text-xs font-semibold transition-colors cursor-pointer"
                       >
                         <SpotifyIcon className="w-3.5 h-3.5 text-[#1DB954]" />
                         <span>Spotify</span>
@@ -315,14 +315,14 @@ export default function Profile() {
 
           {/* Interests Badges */}
           {profileUser.interests && profileUser.interests.length > 0 && (
-            <div className="pt-6 mt-6 border-t border-[#E8E6E1] flex flex-wrap items-center gap-2">
+            <div className="pt-6 mt-6 border-t-2 border-ink flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F] mr-2">
                 Interests:
               </span>
               {profileUser.interests.map((interest, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1 bg-[#EEF1EF] text-[#172121] text-xs font-semibold rounded-full border border-[#DDE3E0]"
+                  className="px-3 py-1 bg-[#EEF1EF] text-[#111111] text-xs font-semibold rounded-full border-2 border-ink"
                 >
                   {interest}
                 </span>
@@ -330,14 +330,14 @@ export default function Profile() {
             </div>
           )}
 
-          <div className="pt-6 mt-6 border-t border-[#E8E6E1] grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div className="pt-6 mt-6 border-t-2 border-ink grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             <div className="p-3 bg-[#EEF1EF] rounded-2xl">
-              <span className="text-2xl font-extrabold font-heading text-[#172121]">{hostedAll.length}</span>
+              <span className="text-2xl font-extrabold font-heading text-[#111111]">{hostedAll.length}</span>
               <span className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F] block mt-0.5">Hosted</span>
             </div>
             {isOwnProfile && (
               <div className="p-3 bg-[#EEF1EF] rounded-2xl">
-                <span className="text-2xl font-extrabold font-heading text-[#172121]">{attended.length}</span>
+                <span className="text-2xl font-extrabold font-heading text-[#111111]">{attended.length}</span>
                 <span className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F] block mt-0.5">Attended</span>
               </div>
             )}
@@ -346,17 +346,17 @@ export default function Profile() {
 
         {/* Who You Vibe With Section (Visible on own profile) */}
         {isOwnProfile && (
-          <div className="space-y-6 pt-6 border-t border-[#DDE3E0]">
+          <div className="space-y-6 pt-6 border-t-2 border-ink">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#18A999]" />
-              <h2 className="text-2xl font-bold font-heading text-[#171717]">
+              <h2 className="text-2xl font-bold font-heading text-[#111111]">
                 Who you vibe with
               </h2>
             </div>
 
             {vibingProfiles.length === 0 ? (
-              <div className="p-6 bg-[#EEF1EF] rounded-2xl text-center space-y-2 border border-[#DDE3E0]">
-                <p className="text-sm font-semibold text-[#171717]">No vibes added yet</p>
+              <div className="p-6 bg-[#EEF1EF] rounded-2xl text-center space-y-2 border-2 border-ink">
+                <p className="text-sm font-semibold text-[#111111]">No vibes added yet</p>
                 <p className="text-xs text-[#6F6F6F]">
                   Discover Hangouts in Explore and click <strong>Vibe</strong> on members you connect with!
                 </p>
@@ -367,12 +367,12 @@ export default function Profile() {
                   <Link
                     key={u.id}
                     to={`/profile/${u.username}`}
-                    className="p-4 bg-white border border-[#E8E6E1] rounded-2xl flex items-center justify-between hover:border-[#D6D2C9] hover:shadow-sm transition-all pressable"
+                    className="p-4 bg-white border-2 border-ink rounded-2xl flex items-center justify-between hover:border-ink hover:shadow-sm transition-all pressable"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <Avatar src={u.avatar} name={u.name} size="lg" className="border border-[#E8E6E1]" />
+                      <Avatar src={u.avatar} name={u.name} size="lg" className="border-2 border-ink" />
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-[#171717] truncate">{u.name}</p>
+                        <p className="text-sm font-bold text-[#111111] truncate">{u.name}</p>
                         <p className="text-xs text-[#6F6F6F] truncate">{u.username ? `@${u.username}` : ''}{u.location ? ` · ${u.location}` : ''}</p>
                       </div>
                     </div>
@@ -391,7 +391,7 @@ export default function Profile() {
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-[#18A999]" />
-              <h2 className="text-2xl font-bold font-heading text-[#171717]">
+              <h2 className="text-2xl font-bold font-heading text-[#111111]">
                 Upcoming from {(profileUser.name || '').split(' ')[0]}
               </h2>
             </div>
@@ -409,7 +409,7 @@ export default function Profile() {
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-[#18A999]" />
-              <h2 className="text-2xl font-bold font-heading text-[#171717]">
+              <h2 className="text-2xl font-bold font-heading text-[#111111]">
                 Hangouts you attended ({attended.length})
               </h2>
             </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import AvatarStack from '../common/AvatarStack';
 import { useUser } from '../../context/UserContext';
@@ -74,7 +74,7 @@ export default function ActivityCard({ notification }) {
   };
 
   return (
-    <motion.div
+    <m.div
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -84,16 +84,16 @@ export default function ActivityCard({ notification }) {
       className={`group relative border rounded-2xl p-3.5 sm:p-4 transition-all duration-150 cursor-pointer ${
         isUnread
           ? 'bg-[#DDF4EF]/25 border-[#18A999] shadow-2xs'
-          : 'bg-white border-[#DDE3E0] hover:border-[#18A999]/60 hover:bg-[#F7F5EF]/40 shadow-2xs'
+          : 'bg-white border-ink hover:border-[#18A999]/60 hover:bg-[#FFF8EE]/40 shadow-2xs'
       }`}
     >
       {/* Header Row: 32-36px Avatar, Actor Name, Activity Label, Timestamp */}
       <div className="flex items-center gap-3">
-        <Avatar src={actorAvatar} name={actorName} size="md" className="border border-[#DDE3E0]" />
+        <Avatar src={actorAvatar} name={actorName} size="md" className="border-2 border-ink" />
 
         <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-            <span className="text-xs sm:text-sm font-semibold text-[#171717] truncate">
+            <span className="text-xs sm:text-sm font-semibold text-[#111111] truncate">
               {actorName}
             </span>
             <span className="text-[10px] text-[#6F6F6F]">·</span>
@@ -113,7 +113,7 @@ export default function ActivityCard({ notification }) {
 
       {/* Content Row: Hangout Title + Message / Context Preview */}
       <div className="mt-2.5 sm:pl-12 pl-0 space-y-0.5">
-        <h4 className="text-xs font-bold text-[#171717] truncate leading-tight">
+        <h4 className="text-xs font-bold text-[#111111] truncate leading-tight">
           {hangoutTitle}
         </h4>
 
@@ -125,7 +125,7 @@ export default function ActivityCard({ notification }) {
       </div>
 
       {/* Footer Row: Participant Avatar Stack (Vibe activities only) + Contextual CTA */}
-      <div className="mt-3 pt-2.5 border-t border-[#E8E6E1] flex items-center justify-between gap-2 sm:pl-12 pl-0">
+      <div className="mt-3 pt-2.5 border-t-2 border-ink flex items-center justify-between gap-2 sm:pl-12 pl-0">
         <div className="flex items-center gap-2 min-w-0">
           {showParticipantStack && (
             <>
@@ -142,6 +142,6 @@ export default function ActivityCard({ notification }) {
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }

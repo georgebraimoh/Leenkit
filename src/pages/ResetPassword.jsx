@@ -89,7 +89,7 @@ export default function ResetPassword() {
   return (
     <PageTransition>
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full bg-white border border-[#DDE3E0] rounded-3xl p-8 shadow-xl space-y-6">
+        <div className="max-w-md w-full bg-white border-2 border-ink rounded-3xl p-8 shadow-xl space-y-6">
           {/* Header Branding */}
           <div className="text-center space-y-2">
             <Link to="/" className="inline-flex items-center gap-2 group">
@@ -97,7 +97,7 @@ export default function ResetPassword() {
                 L
               </div>
             </Link>
-            <h1 className="text-2xl font-bold font-heading text-[#172121]">
+            <h1 className="text-2xl font-bold font-heading text-[#111111]">
               Reset Your Password
             </h1>
             <p className="text-xs text-[#3D4948]">
@@ -157,12 +157,13 @@ export default function ResetPassword() {
                     }}
                     placeholder="Enter new password"
                     disabled={isLoading}
-                    className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
+                    className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6F6F6F] hover:text-[#171717] cursor-pointer"
+                    aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6F6F6F] hover:text-[#111111] cursor-pointer"
                   >
                     {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -183,12 +184,13 @@ export default function ResetPassword() {
                     }}
                     placeholder="Confirm new password"
                     disabled={isLoading}
-                    className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
+                    className="w-full pl-10 pr-10 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999] disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6F6F6F] hover:text-[#171717] cursor-pointer"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6F6F6F] hover:text-[#111111] cursor-pointer"
                   >
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>

@@ -161,7 +161,7 @@ export default function HangoutDetails() {
           <EmptyState
             icon={AlertCircle}
             title="Hangout not found"
-            description="This Hangout may have been removed, or the link is incorrect."
+            description="It may have been removed, or the link is wrong."
             actionLabel="Explore Hangouts"
             onAction={() => navigate('/explore')}
           />
@@ -295,7 +295,7 @@ export default function HangoutDetails() {
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[#6F6F6F] hover:text-[#171717] transition-colors cursor-pointer group"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#6F6F6F] hover:text-[#111111] transition-colors cursor-pointer group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5" aria-hidden="true" />
             <span>Back</span>
@@ -346,7 +346,7 @@ export default function HangoutDetails() {
 
         {/* Cover */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-8">
-          <div className="relative h-64 sm:h-80 md:h-[380px] rounded-3xl overflow-hidden shadow-md border border-[#E8E6E1] bg-stone-100">
+          <div className="relative h-64 sm:h-80 md:h-[380px] rounded-3xl overflow-hidden shadow-md border-2 border-ink bg-stone-100">
             <img
               src={coverImgSrc}
               alt=""
@@ -356,7 +356,7 @@ export default function HangoutDetails() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
             <div className="absolute top-5 left-5 right-5 flex items-center justify-between pointer-events-none">
               <div className="flex items-center gap-2">
-                <span className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-[#171717] rounded-full shadow-md">
+                <span className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider bg-white text-[#111111] rounded-full shadow-md">
                   {hangout.category || 'Hangout'}
                 </span>
                 <span className={`px-3.5 py-1.5 text-xs font-bold rounded-full shadow-md ${hangout.isPaid ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'}`}>
@@ -380,7 +380,7 @@ export default function HangoutDetails() {
           {/* Main column */}
           <div className="lg:col-span-8 space-y-8">
             <div className="space-y-4">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-heading text-[#171717] tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-heading text-[#111111] tracking-tight leading-tight">
                 {hangout.title}
               </h1>
 
@@ -392,14 +392,14 @@ export default function HangoutDetails() {
                 </p>
               )}
 
-              <div className="p-5 bg-white border border-[#E8E6E1] rounded-2xl grid grid-cols-1 sm:grid-cols-3 gap-4 shadow-xs">
+              <div className="p-5 bg-white border-2 border-ink rounded-2xl grid grid-cols-1 sm:grid-cols-3 gap-4 shadow-xs">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-[#DDF4EF] text-[#18A999] flex items-center justify-center shrink-0">
                     <Calendar className="w-5 h-5" aria-hidden="true" />
                   </div>
                   <div className="space-y-1">
                     <span className="text-xs uppercase font-bold tracking-wider text-[#6F6F6F]">Date & time</span>
-                    <p className="text-sm font-bold text-[#171717] font-heading">{dateTimeLabel || 'Date TBD'}</p>
+                    <p className="text-sm font-bold text-[#111111] font-heading">{dateTimeLabel || 'Date TBD'}</p>
                     {calendarUrl && !closed && (
                       <a
                         href={calendarUrl}
@@ -437,7 +437,7 @@ export default function HangoutDetails() {
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     <span className="text-xs uppercase font-bold tracking-wider text-[#6F6F6F]">Location</span>
-                    <p className="text-sm font-bold text-[#171717] font-heading break-words">{rawLocation || 'Location TBD'}</p>
+                    <p className="text-sm font-bold text-[#111111] font-heading break-words">{rawLocation || 'Location TBD'}</p>
                     {googleMapsUrl && (
                       <a
                         href={googleMapsUrl}
@@ -465,7 +465,7 @@ export default function HangoutDetails() {
                     <span className="text-xs uppercase font-bold tracking-wider text-[#087F73]">Community support</span>
                     <div className="space-y-0.5">
                       {sponsorshipSummary.currencies.map(c => (
-                        <p key={c.currency} className="text-sm font-bold text-[#171717]">
+                        <p key={c.currency} className="text-sm font-bold text-[#111111]">
                           {c.totalPaid > 0 && <span>{formatMoney(c.totalPaid, c.currency)} paid</span>}
                           {c.totalPaid > 0 && c.totalPledged > 0 && <span> · </span>}
                           {c.totalPledged > 0 && (
@@ -492,7 +492,7 @@ export default function HangoutDetails() {
             {hangout.description && hangout.description.trim().length > 0 && (
               <div className="space-y-3 pt-2">
                 <h2 className="text-xs font-bold uppercase tracking-widest text-[#087F73]">About this Hangout</h2>
-                <div className="p-6 bg-white border border-[#E8E6E1] rounded-2xl shadow-xs">
+                <div className="p-6 bg-white border-2 border-ink rounded-2xl shadow-xs">
                   <p className="text-base text-[#333] leading-relaxed whitespace-pre-line break-words font-sans">
                     {hangout.description}
                   </p>
@@ -508,11 +508,11 @@ export default function HangoutDetails() {
             </div>
 
             {/* Who's going */}
-            <div className="space-y-4 pt-4 border-t border-[#E8E6E1]">
+            <div className="space-y-4 pt-4 border-t-2 border-ink">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xs font-bold uppercase tracking-widest text-[#087F73]">Who's going</h2>
-                  <p className="text-sm font-bold text-[#171717] font-heading mt-0.5">
+                  <p className="text-sm font-bold text-[#111111] font-heading mt-0.5">
                     {attendeeCount} {attendeeCount === 1 ? 'person' : 'people'} going
                   </p>
                 </div>
@@ -530,7 +530,7 @@ export default function HangoutDetails() {
                       <>
                         <Avatar src={user.avatar} name={user.name} size="lg" />
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#171717] truncate">
+                          <p className="text-xs font-bold text-[#111111] truncate">
                             {user.name}{userId === hangout.hostId ? ' · Host' : ''}
                           </p>
                           {user.username && <p className="text-xs text-[#6F6F6F] truncate">@{user.username}</p>}
@@ -542,19 +542,19 @@ export default function HangoutDetails() {
                         {user.username ? (
                           <Link
                             to={`/profile/${user.username}`}
-                            className="p-3 bg-white border border-[#E8E6E1] rounded-2xl flex items-center gap-3 hover:border-[#18A999]/40 transition-colors pressable"
+                            className="p-3 bg-white border-2 border-ink rounded-2xl flex items-center gap-3 hover:border-[#18A999]/40 transition-colors pressable"
                           >
                             {content}
                           </Link>
                         ) : (
-                          <div className="p-3 bg-white border border-[#E8E6E1] rounded-2xl flex items-center gap-3">{content}</div>
+                          <div className="p-3 bg-white border-2 border-ink rounded-2xl flex items-center gap-3">{content}</div>
                         )}
                       </li>
                     );
                   })}
                 </ul>
               ) : (
-                <p className="p-4 bg-white border border-[#E8E6E1] rounded-2xl text-sm text-[#3D4948] flex items-center gap-2">
+                <p className="p-4 bg-white border-2 border-ink rounded-2xl text-sm text-[#3D4948] flex items-center gap-2">
                   <Lock className="w-4 h-4 text-[#18A999] shrink-0" aria-hidden="true" />
                   For everyone's safety, the guest list is only visible to people going.
                 </p>
@@ -564,10 +564,10 @@ export default function HangoutDetails() {
 
           {/* Sidebar */}
           <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
-            <div className="editorial-surface p-6 space-y-6 shadow-lg border border-[#E8E6E1] rounded-3xl bg-white">
+            <div className="editorial-surface p-6 space-y-6 shadow-lg border-2 border-ink rounded-3xl bg-white">
               <div className="space-y-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F]">Status</span>
-                <div className="text-xl font-bold font-heading text-[#171717]">
+                <div className="text-xl font-bold font-heading text-[#111111]">
                   {isHost ? (
                     <span className="text-[#087F73]">You're hosting</span>
                   ) : attending ? (
@@ -642,7 +642,7 @@ export default function HangoutDetails() {
                 </Button>
               </div>
 
-              <div className="pt-4 border-t border-[#E8E6E1] space-y-2 text-xs text-[#6F6F6F]">
+              <div className="pt-4 border-t-2 border-ink space-y-2 text-xs text-[#6F6F6F]">
                 <p className="flex items-center gap-2 font-medium">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
                   {hangout.isPaid ? `Ticket: ${priceDisplay}, paid securely via Paystack` : 'Free to join'}
@@ -656,12 +656,12 @@ export default function HangoutDetails() {
         </div>
 
         {/* Mobile sticky CTA */}
-        <div className="lg:hidden fixed bottom-14 left-0 right-0 z-30 bg-white border-t border-[#E8E6E1] px-4 py-3 shadow-xl flex items-center justify-between gap-3">
+        <div className="lg:hidden fixed bottom-14 left-0 right-0 z-30 bg-white border-t-2 border-ink px-4 py-3 shadow-xl flex items-center justify-between gap-3">
           <div className="min-w-0">
             <span className="text-xs text-[#6F6F6F] uppercase font-bold tracking-wider block">
               {hangout.isPaid ? priceDisplay : 'Free'}
             </span>
-            <p className="text-xs font-bold text-[#171717] font-heading truncate">
+            <p className="text-xs font-bold text-[#111111] font-heading truncate">
               {isHost ? "You're hosting" : attending ? "You're going" : closed || `${attendeeCount}/${maxAttendees} going`}
             </p>
           </div>

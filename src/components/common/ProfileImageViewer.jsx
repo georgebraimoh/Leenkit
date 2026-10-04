@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
 export default function ProfileImageViewer({ isOpen, onClose, src, alt = 'Profile Picture' }) {
@@ -33,7 +33,7 @@ export default function ProfileImageViewer({ isOpen, onClose, src, alt = 'Profil
           aria-label={alt}
         >
           {/* Dark Translucent Backdrop */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -44,7 +44,7 @@ export default function ProfileImageViewer({ isOpen, onClose, src, alt = 'Profil
           />
 
           {/* Modal Container */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.9, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 12 }}
@@ -70,7 +70,7 @@ export default function ProfileImageViewer({ isOpen, onClose, src, alt = 'Profil
                 className="w-auto h-auto max-w-full max-h-[75vh] object-contain rounded-2xl select-none"
               />
             </div>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

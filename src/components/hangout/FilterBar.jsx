@@ -30,8 +30,8 @@ function PillGroup({ label, options, value, onChange }) {
             onClick={() => onChange(opt.id)}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer pressable ${
               isActive
-                ? 'bg-[#171717] text-white shadow-xs'
-                : 'bg-white border border-[#E8E6E1] text-[#3D4948] hover:text-[#171717]'
+                ? 'bg-[#111111] text-white shadow-xs'
+                : 'bg-white border-2 border-ink text-[#3D4948] hover:text-[#111111]'
             }`}
           >
             {opt.label}
@@ -66,7 +66,7 @@ export default function FilterBar({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center pt-2 border-t border-[#EFE8DB]">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center pt-2 border-t-2 border-ink">
         <div className="md:col-span-5">
           <LocationAutocomplete
             value={activeSearchLocation}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { MapPin, CheckCircle, ArrowRight, MessageSquare, Upload, Share2, Tag, AlertCircle } from 'lucide-react';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
@@ -246,11 +246,11 @@ export default function CreateHangout() {
 
         <div className="space-y-2">
           <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Bring People Together</span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#172121]">
+          <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[#111111]">
             Host a Hangout
           </h1>
           <p className="text-sm text-[#3D4948] max-w-xl">
-            Pick a public venue, set a time and a guest limit. People can find your Hangout, join, and chat before meeting up.
+            Pick a public place, a time and a guest limit.
           </p>
         </div>
 
@@ -270,10 +270,10 @@ export default function CreateHangout() {
 
         {createdActivity ? (
           /* Success Screen */
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white border border-[#DDE3E0] rounded-3xl p-8 text-center space-y-6 shadow-sm"
+            className="bg-white border-2 border-ink rounded-3xl p-8 text-center space-y-6 shadow-sm"
           >
             <div className="w-16 h-16 bg-[#DDF4EF] text-[#18A999] rounded-full flex items-center justify-center mx-auto shadow-xs">
               <CheckCircle className="w-8 h-8" />
@@ -281,17 +281,17 @@ export default function CreateHangout() {
 
             <div className="space-y-2">
               <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Success</span>
-              <h2 className="text-3xl font-bold font-heading text-[#172121]">
+              <h2 className="text-3xl font-bold font-heading text-[#111111]">
                 Your Hangout is live.
               </h2>
               <p className="text-sm text-[#3D4948] max-w-md mx-auto leading-relaxed">
-                Your LEENKIT Space is ready. People can now discover and join you at {createdActivity.location?.placeName || 'your venue'}.
+                It's live. People can now find and join it.
               </p>
             </div>
 
-            <div className="p-4 bg-[#EEF1EF] rounded-2xl max-w-sm mx-auto text-left space-y-1 border border-[#DDE3E0]">
+            <div className="p-4 bg-[#EEF1EF] rounded-2xl max-w-sm mx-auto text-left space-y-1 border-2 border-ink">
               <p className="text-xs font-bold uppercase text-[#18A999]">{createdActivity.category}</p>
-              <h4 className="font-bold text-[#171717] font-heading">{createdActivity.title}</h4>
+              <h4 className="font-bold text-[#111111] font-heading">{createdActivity.title}</h4>
               <p className="text-xs text-[#6F6F6F] flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-[#18A999] shrink-0" />
                 <span>{createdActivity.location?.placeName || 'Venue'} · {formatEventDate(createdActivity.date)}{createdActivity.time ? ` at ${formatEventTime(createdActivity.time)}` : ''}</span>
@@ -317,10 +317,10 @@ export default function CreateHangout() {
                 </Button>
               </Link>
             </div>
-          </motion.div>
+          </m.div>
         ) : (
           /* Hangout Creation Form */
-          <form onSubmit={handleSubmit} className="bg-white border border-[#DDE3E0] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white border-2 border-ink rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
             <div className="space-y-6">
               {/* Title */}
               <FormField label="Hangout Title" required error={errors.title}>
@@ -330,7 +330,7 @@ export default function CreateHangout() {
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   placeholder="e.g. Saturday Morning Coffee & Photowalk"
-                  className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                  className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                 />
               </FormField>
 
@@ -347,7 +347,7 @@ export default function CreateHangout() {
                 <select
                   value={formData.category}
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                  className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                 >
                   {CATEGORIES.filter(c => c.id !== 'all').map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.label}</option>
@@ -363,7 +363,7 @@ export default function CreateHangout() {
                     min={todayISO()}
                     value={formData.date}
                     onChange={e => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                    className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                   />
                 </FormField>
 
@@ -372,7 +372,7 @@ export default function CreateHangout() {
                     type="time"
                     value={formData.time}
                     onChange={e => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                    className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                   />
                 </FormField>
 
@@ -383,16 +383,16 @@ export default function CreateHangout() {
                     max={MAX_HANGOUT_CAPACITY}
                     value={formData.maxAttendees}
                     onChange={e => setFormData({ ...formData, maxAttendees: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                    className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                   />
                 </FormField>
               </div>
 
               {/* Paid vs Free Hangout Readiness Section */}
-              <div className="pt-2 p-5 bg-[#EEF1EF]/70 border border-[#DDE3E0] rounded-2xl space-y-4">
+              <div className="pt-2 p-5 bg-[#EEF1EF]/70 border-2 border-ink rounded-2xl space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-[#172121] uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-[#111111] uppercase tracking-wider flex items-center gap-1.5">
                       <Tag className="w-3.5 h-3.5 text-[#18A999]" />
                       <span>Event Admission & Price</span>
                     </span>
@@ -409,8 +409,8 @@ export default function CreateHangout() {
                     onClick={() => setFormData({ ...formData, isPaid: false, price: '' })}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                       !formData.isPaid
-                        ? 'bg-[#172121] text-white border-[#172121] shadow-xs'
-                        : 'bg-white border-[#DDE3E0] text-[#3D4948] hover:border-[#18A999]'
+                        ? 'bg-[#111111] text-white border-ink shadow-xs'
+                        : 'bg-white border-ink text-[#3D4948] hover:border-[#18A999]'
                     }`}
                   >
                     Free Hangout
@@ -423,7 +423,7 @@ export default function CreateHangout() {
                     className={`p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                       formData.isPaid
                         ? 'bg-[#18A999] text-white border-[#18A999] shadow-xs'
-                        : 'bg-white border-[#DDE3E0] text-[#3D4948] hover:border-[#18A999]'
+                        : 'bg-white border-ink text-[#3D4948] hover:border-[#18A999]'
                     }`}
                   >
                     Paid Hangout
@@ -446,11 +446,11 @@ export default function CreateHangout() {
 
                 {/* Paid Input Fields */}
                 {formData.isPaid && (
-                  <motion.div
+                  <m.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="space-y-4 pt-2 border-t border-[#DDE3E0]"
+                    className="space-y-4 pt-2 border-t-2 border-ink"
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField label="Ticket Price" required error={errors.price}>
@@ -463,24 +463,24 @@ export default function CreateHangout() {
                             value={formData.price}
                             onChange={e => setFormData({ ...formData, price: e.target.value })}
                             placeholder="5000"
-                            className="w-full pl-8 pr-4 py-2.5 bg-white border border-[#DDE3E0] rounded-xl text-sm focus:outline-none focus:border-[#18A999]"
+                            className="w-full pl-8 pr-4 py-2.5 bg-white border-2 border-ink rounded-xl text-sm focus:outline-none focus:border-[#18A999]"
                           />
                         </div>
                       </FormField>
 
                       <FormField label="Currency">
-                        <p className="px-4 py-2.5 bg-white border border-[#DDE3E0] rounded-xl text-sm font-semibold text-[#172121]">NGN (₦)</p>
+                        <p className="px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-sm font-semibold text-[#111111]">NGN (₦)</p>
                       </FormField>
                     </div>
 
-                    <p className="text-[11px] text-[#3D4948] bg-white p-3 rounded-xl border border-[#DDE3E0]">
+                    <p className="text-[11px] text-[#3D4948] bg-white p-3 rounded-xl border-2 border-ink">
                       <strong>How tickets work:</strong> attendees pay online through Paystack. LEENKIT holds the money until after the Hangout and sends your share to your bank about 2 days after it starts, minus any refunds (people who leave at least 24 hours before the start get their money back minus LEENKIT's fee; if you cancel, everyone is refunded in full). LEENKIT keeps {feeSettings.percent}% (min {formatMoney(feeSettings.minNgn, 'NGN')}) and covers Paystack's card fees.
                       {Number(formData.price) >= feeSettings.minPaymentNgn && (
                         <> You receive <strong>{formatMoney(estimateFee(formData.price, feeSettings).hostAmount, 'NGN')}</strong> per ticket.</>
                       )}
                       {' '}The price can't change once a ticket is sold.
                     </p>
-                  </motion.div>
+                  </m.div>
                 )}
               </div>
 
@@ -492,7 +492,7 @@ export default function CreateHangout() {
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Provide details about the meeting point, activities, vibes..."
-                  className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                  className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                 />
               </FormField>
 
@@ -501,7 +501,7 @@ export default function CreateHangout() {
                 <div className="space-y-4 pt-1">
                   {/* Device Upload Control */}
                   <div className="flex flex-wrap items-center gap-3">
-                    <label className="px-4 py-2.5 bg-white border border-[#DDE3E0] hover:border-[#18A999] hover:text-[#18A999] rounded-2xl text-xs font-semibold text-[#172121] flex items-center gap-2 transition-all shadow-xs cursor-pointer">
+                    <label className="px-4 py-2.5 bg-white border-2 border-ink hover:border-[#18A999] hover:text-[#18A999] rounded-2xl text-xs font-semibold text-[#111111] flex items-center gap-2 transition-all shadow-xs cursor-pointer">
                       <Upload className="w-4 h-4 text-[#18A999]" />
                       <span>Upload photo from device</span>
                       <input
@@ -574,7 +574,7 @@ export default function CreateHangout() {
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-6 border-t border-[#DDE3E0] flex items-center justify-between">
+            <div className="pt-6 border-t-2 border-ink flex items-center justify-between">
               <Button type="button" variant="outline" size="md" onClick={() => navigate(-1)}>
                 Cancel
               </Button>

@@ -61,13 +61,13 @@ export default function AuthCallback() {
   return (
     <PageTransition>
       <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full bg-white border border-[#DDE3E0] rounded-3xl p-8 shadow-xl space-y-5 text-center">
+        <div className="max-w-md w-full bg-white border-2 border-ink rounded-3xl p-8 shadow-xl space-y-5 text-center">
           {linkError || timedOut ? (
             <>
               <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
                 <AlertCircle className="w-5 h-5" aria-hidden="true" />
               </div>
-              <h1 className="text-xl font-bold font-heading text-[#172121]">
+              <h1 className="text-xl font-bold font-heading text-[#111111]">
                 {expired ? 'This link has expired' : 'We could not confirm your email'}
               </h1>
               <p role="alert" className="text-sm text-[#3D4948] leading-relaxed">
@@ -76,7 +76,7 @@ export default function AuthCallback() {
                   : linkError?.description || 'The confirmation did not complete. Try signing in, or request a new confirmation email.'}
               </p>
               <div className="text-left space-y-2">
-                <label htmlFor="callback-email" className="block text-xs font-semibold text-[#172121] uppercase tracking-wider">
+                <label htmlFor="callback-email" className="block text-xs font-semibold text-[#111111] uppercase tracking-wider">
                   Email address
                 </label>
                 <input
@@ -86,7 +86,7 @@ export default function AuthCallback() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                  className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                 />
                 <ResendConfirmation email={/\S+@\S+\.\S+/.test(email.trim()) ? email.trim() : ''} />
               </div>
@@ -102,7 +102,7 @@ export default function AuthCallback() {
               <div className="w-11 h-11 rounded-2xl bg-[#DDF4EF] text-[#087F73] flex items-center justify-center mx-auto">
                 <MailCheck className="w-5 h-5" aria-hidden="true" />
               </div>
-              <h1 className="text-xl font-bold font-heading text-[#172121]">Confirming your email…</h1>
+              <h1 className="text-xl font-bold font-heading text-[#111111]">Confirming your email…</h1>
               <p role="status" className="text-sm text-[#3D4948]">
                 One moment while we sign you in.
               </p>

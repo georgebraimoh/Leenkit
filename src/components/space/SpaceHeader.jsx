@@ -1,115 +1,97 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Info, ExternalLink } from 'lucide-react';
-import AvatarStack from '../common/AvatarStack';
+import { ArrowLeft, MoreVertical, Info, MapPin, ShieldAlert, LogOut } from 'lucide-react';
 import { formatEventDate, formatEventTime } from '../../utils/format';
 
-const DEFAULT_COVER_IMAGE = "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=400&q=80";
+const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=160&q=70';
+const menuItem = 'w-full flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-[#111111] hover:bg-[#FFF8EE] text-left cursor-pointer';
 
-export default function SpaceHeader({ hangout }) {
+// Chat-app style header: back, Hangout avatar + title, and an actions menu.
+export default function SpaceHeader({ hangout, onReport, onLeave }) {
   const [imgError, setImgError] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const close = (e) => { if (!menuRef.current?.contains(e.target)) setMenuOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('pointerdown', close);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', close);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
 
   if (!hangout) return null;
 
-  const formattedDate = hangout.date ? formatEventDate(hangout.date, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric'
-  }) : '';
-
-  const rawLocation = typeof hangout.location === 'object'
-    ? (hangout.location.placeName || hangout.location.address || '')
-    : (hangout.location || '');
-
+  const formattedDate = hangout.date
+    ? formatEventDate(hangout.date, { weekday: 'short', month: 'short', day: 'numeric' })
+    : '';
   const gMapsUrl = hangout.googleMapsUrl || (typeof hangout.location === 'object' ? hangout.location.googleMapsUrl : null);
-  const attendeeIds = hangout.attendeeIds || [];
-  const attendeeCount = hangout.attendeeCount ?? attendeeIds.length;
+  const attendeeCount = hangout.attendeeCount ?? (hangout.attendeeIds || []).length;
   const coverImgSrc = (imgError || !hangout.image) ? DEFAULT_COVER_IMAGE : hangout.image;
 
   return (
-    <div className="bg-white border-b border-[#E8E6E1] px-4 py-3 md:px-6 sticky top-0 z-20 shadow-xs">
-      <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
-        {/* Left Section: Back button & Hangout Thumbnail + Info */}
-        <div className="flex items-center gap-3 min-w-0">
-          <Link
-            to={`/hangout/${hangout.id}`}
-            className="p-2 rounded-full text-[#6F6F6F] hover:bg-[#F7F6F2] hover:text-[#171717] transition-colors cursor-pointer shrink-0"
-            title="Return to Hangout Details"
-            aria-label="Back to details"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
+    <header className="bg-white border-b-2 border-ink px-2 py-2 flex items-center gap-2 shrink-0">
+      <Link
+        to={`/hangout/${hangout.id}`}
+        className="p-2 rounded-xl hover:bg-[#FFF8EE] shrink-0"
+        aria-label="Back to Hangout"
+      >
+        <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+      </Link>
 
-          {/* Hangout Cover Thumbnail */}
-          <Link to={`/hangout/${hangout.id}`} className="shrink-0 group">
-            <img
-              src={coverImgSrc}
-              alt={hangout.title}
-              onError={() => setImgError(true)}
-              className="w-11 h-11 rounded-2xl object-cover border border-[#E8E6E1] group-hover:opacity-90 transition-opacity"
-            />
-          </Link>
+      <Link to={`/hangout/${hangout.id}`} className="flex items-center gap-2.5 min-w-0 flex-1">
+        <img
+          src={coverImgSrc}
+          alt=""
+          width="40"
+          height="40"
+          onError={() => setImgError(true)}
+          className="w-10 h-10 rounded-full object-cover border-2 border-ink shrink-0"
+        />
+        <span className="min-w-0">
+          <span className="block font-heading font-extrabold text-base text-[#111111] truncate leading-tight">{hangout.title}</span>
+          <span className="block text-xs text-[#3D4948] truncate">
+            {attendeeCount} going · {formattedDate}{hangout.time ? `, ${formatEventTime(hangout.time)}` : ''}
+          </span>
+        </span>
+      </Link>
 
-          {/* Hangout Title & Context Metadata */}
-          <div className="min-w-0 space-y-0.5">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-bold tracking-widest uppercase text-[#18A999] bg-[#DDF4EF] px-2 py-0.5 rounded-full shrink-0">
-                LEENKIT Space
-              </span>
+      <div className="relative shrink-0" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Chat options"
+          aria-expanded={menuOpen}
+          className="p-2 rounded-xl hover:bg-[#FFF8EE] cursor-pointer"
+        >
+          <MoreVertical className="w-5 h-5" aria-hidden="true" />
+        </button>
 
-              {rawLocation && (
-                <span className="text-xs text-[#3D4948] truncate flex items-center gap-1 max-w-[200px] sm:max-w-none">
-                  <MapPin className="w-3 h-3 text-[#18A999] shrink-0" />
-                  <span className="truncate">{rawLocation}</span>
-                </span>
-              )}
-
-              {gMapsUrl && (
-                <a
-                  href={gMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full hover:underline flex items-center gap-1 shrink-0"
-                >
-                  <ExternalLink className="w-3 h-3 text-emerald-600" />
-                  <span>Open in Google Maps</span>
-                </a>
-              )}
-            </div>
-
-            <Link
-              to={`/hangout/${hangout.id}`}
-              className="text-base sm:text-lg font-bold font-heading text-[#172121] hover:text-[#18A999] transition-colors leading-tight truncate block"
-            >
-              {hangout.title}
+        {menuOpen && (
+          <div role="menu" className="animate-pop-in absolute right-0 mt-1 w-52 bg-white border-2 border-ink rounded-2xl shadow-md py-1.5 z-30">
+            <Link role="menuitem" to={`/hangout/${hangout.id}`} className={menuItem}>
+              <Info className="w-4 h-4" aria-hidden="true" /> Hangout details
             </Link>
-
-            <p className="text-xs text-[#3D4948] flex items-center gap-2 truncate">
-              <span>{formattedDate} {hangout.time ? `· ${formatEventTime(hangout.time)}` : ''}</span>
-              <span>•</span>
-              <span className="font-semibold text-[#172121]">
-                {attendeeCount} {attendeeCount === 1 ? 'person' : 'people'} going
-              </span>
-            </p>
+            {gMapsUrl && (
+              <a role="menuitem" href={gMapsUrl} target="_blank" rel="noopener noreferrer" className={menuItem}>
+                <MapPin className="w-4 h-4" aria-hidden="true" /> Open in Maps
+              </a>
+            )}
+            <button role="menuitem" type="button" onClick={() => { setMenuOpen(false); onReport?.(); }} className={menuItem}>
+              <ShieldAlert className="w-4 h-4" aria-hidden="true" /> Report
+            </button>
+            {onLeave && (
+              <button role="menuitem" type="button" onClick={() => { setMenuOpen(false); onLeave(); }} className={`${menuItem} text-rose-700`}>
+                <LogOut className="w-4 h-4" aria-hidden="true" /> Leave Hangout
+              </button>
+            )}
           </div>
-        </div>
-
-        {/* Right Section: Attendees Avatar Stack & Details Button */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="hidden sm:block">
-            <AvatarStack attendeeIds={attendeeIds} maxVisible={3} size="md" />
-          </div>
-
-          <Link
-            to={`/hangout/${hangout.id}`}
-            className="px-3 py-1.5 rounded-full text-xs font-semibold text-[#172121] bg-[#EEF1EF] hover:bg-[#DDE3E0] transition-colors flex items-center gap-1.5 pressable"
-            title="View Hangout Details"
-          >
-            <Info className="w-4 h-4 text-[#18A999]" />
-            <span className="hidden sm:inline">Details</span>
-          </Link>
-        </div>
+        )}
       </div>
-    </div>
+    </header>
   );
 }

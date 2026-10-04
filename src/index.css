@@ -1,29 +1,56 @@
 @import "tailwindcss";
 
+/* Minimal neobrutalism: flat colours, solid ink outlines, hard offset
+   shadows. The shadow and radius scales below restyle every component that
+   uses Tailwind's shadow-* / rounded-* utilities. */
+@theme {
+  --color-ink: #111111;
+  --color-canvas: #FFF8EE;
+  --color-brand: #18A999;
+  --color-brand-dark: #087F73;
+  --color-orange: #FF6B2C;
+  --color-sun: #FFD166;
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --shadow-2xs: 1px 1px 0 0 var(--tw-shadow-color, #111111);
+  --shadow-xs: 2px 2px 0 0 var(--tw-shadow-color, #111111);
+  --shadow-sm: 3px 3px 0 0 var(--tw-shadow-color, #111111);
+  --shadow: 3px 3px 0 0 var(--tw-shadow-color, #111111);
+  --shadow-md: 4px 4px 0 0 var(--tw-shadow-color, #111111);
+  --shadow-lg: 5px 5px 0 0 var(--tw-shadow-color, #111111);
+  --shadow-xl: 6px 6px 0 0 var(--tw-shadow-color, #111111);
+  --shadow-2xl: 8px 8px 0 0 var(--tw-shadow-color, #111111);
+
+  --radius-xl: 0.75rem;
+  --radius-2xl: 0.875rem;
+  --radius-3xl: 1.125rem;
+}
+
 @layer base {
   :root {
-    --bg-canvas: #F7F5EF;
-    --text-primary: #172121;
+    --bg-canvas: #FFF8EE;
+    --text-primary: #111111;
     --text-secondary: #3D4948;
-    --text-muted: #687473;
     --accent-primary: #18A999;
-    --accent-hover: #087F73;
-    --accent-sage: #DDF4EF;
-    --accent-yellow: #FFD166;
-    --surface-card: #FFFFFF;
-    --surface-secondary: #EEF1EF;
-    --border-color: #DDE3E0;
+    --accent-orange: #FF6B2C;
   }
 
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font-sans);
     background-color: var(--bg-canvas);
     color: var(--text-primary);
     overflow-x: hidden;
   }
 
   h1, h2, h3, h4, .font-heading {
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-heading);
+  }
+
+  :focus-visible {
+    outline: 2px solid #111111;
+    outline-offset: 2px;
   }
 }
 
@@ -33,41 +60,30 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F7F5EF;
+  background: var(--bg-canvas);
 }
 ::-webkit-scrollbar-thumb {
-  background: #DDE3E0;
+  background: #111111;
   border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #687473;
-}
 
-/* Custom Editorial Glass Utilities */
+/* Cards */
 .editorial-card,
 .editorial-surface {
   background-color: #FFFFFF;
-  border: 1px solid #DDE3E0;
-  border-radius: 1.25rem;
-  box-shadow: 0 4px 20px -2px rgba(23, 33, 33, 0.03);
+  border: 2px solid #111111;
+  border-radius: 1.125rem;
+  box-shadow: 4px 4px 0 0 #111111;
 }
 
 .editorial-card {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .editorial-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px -4px rgba(23, 33, 33, 0.08);
-    border-color: #18A999;
-  }
-
-  .img-zoom:hover img,
-  .group:hover .img-zoom img {
-    transform: scale(1.05);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 0 #111111;
   }
 }
 
@@ -75,36 +91,28 @@
   overflow: hidden;
 }
 
-.img-zoom img {
-  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
+/* Press-down feedback used by buttons and cards. */
 .pressable {
-  transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .pressable:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 0 #111111;
 }
 
 .link-nudge {
-  transition: color 0.2s ease;
+  transition: color 0.15s ease;
 }
 
 .link-nudge svg {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.15s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .link-nudge:hover svg {
     transform: translateX(3px);
   }
-}
-
-.accent-orb {
-  pointer-events: none;
-  position: absolute;
-  border-radius: 9999px;
 }
 
 .badge-sage {
@@ -117,6 +125,13 @@
   color: #18A999;
 }
 
+/* Dotted chat wallpaper for the Hangout Space. */
+.chat-wallpaper {
+  background-color: #FFF8EE;
+  background-image: radial-gradient(rgba(17, 17, 17, 0.09) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
 /* Smooth hide scrollbars for horizontal chip bars */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -124,6 +139,24 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes squiggle {
+  0%, 100% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+}
+
+.animate-squiggle {
+  animation: squiggle 2.4s ease-in-out infinite;
+}
+
+@keyframes loader-bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+}
+
+.loader-dot {
+  animation: loader-bounce 0.9s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -144,9 +177,168 @@
   .pressable:active:not(:disabled) {
     transform: none;
   }
+}
 
-  .img-zoom img,
-  .img-zoom:hover img {
-    transform: none;
+
+/* ---------------------------------------------------------------------------
+   Motion: one easing curve and timing for the whole site. Everything here is
+   CSS (cheap to run) and is switched off for reduced-motion users.
+   --------------------------------------------------------------------------- */
+:root {
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Smooth colour/border/shadow changes on every interactive element. */
+a, button, input, select, textarea, [role="button"] {
+  transition-property: color, background-color, border-color, box-shadow, fill;
+  transition-duration: 0.2s;
+  transition-timing-function: var(--ease-smooth);
+}
+
+/* Buttons and cards lift on hover and press down on tap. */
+@media (hover: hover) and (pointer: fine) {
+  .pressable:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
   }
+}
+
+/* Scroll reveal: sections fade up as they enter the screen (see Reveal.jsx). */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s var(--ease-smooth), transform 0.6s var(--ease-smooth);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes tab-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.animate-fade-up { animation: fade-up 0.45s var(--ease-smooth) both; }
+.animate-pop-in { animation: pop-in 0.18s var(--ease-smooth) both; transform-origin: top right; }
+.animate-slide-up { animation: slide-up 0.5s var(--ease-smooth) both; }
+.animate-tab-pop { animation: tab-pop 0.35s var(--ease-smooth); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; }
+}
+
+
+/* Home hero underline with two balls riding it (SquiggleBalls.jsx). */
+.squiggle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.75rem;
+  height: 0.75rem;
+  color: #FF6B2C;
+}
+
+.squiggle__line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Balls are centred on the line. */
+.squiggle__balls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 24px;
+  margin-top: -12px;
+  /* The tracks slide past the line ends; clip them so the page never scrolls sideways. */
+  overflow: hidden;
+}
+
+/* Each track spans the line; translateX(%) is relative to its own width, so
+   the balls travel the full line at any screen size. */
+.squiggle__track {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.squiggle__track--orange {
+  animation: ride-right 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+
+.squiggle__track--green {
+  animation: ride-left 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+
+.squiggle__ball {
+  position: absolute;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  border: 2px solid #111111;
+}
+
+.squiggle__ball--orange {
+  left: 0;
+  background: #FF6B2C;
+  animation: ball-squash 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+
+.squiggle__ball--green {
+  right: 0;
+  background: #18A999;
+  animation: ball-blend 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+
+/* Each ball rolls to the middle, the two merge and hold there briefly, then
+   "alternate" sends them back to their own ends. */
+@keyframes ride-right {
+  0% { transform: translateX(0); }
+  78%, 100% { transform: translateX(calc(50% - 8px)); }
+}
+
+@keyframes ride-left {
+  0% { transform: translateX(0); }
+  78%, 100% { transform: translateX(calc(-50% + 8px)); }
+}
+
+/* As they meet the green turns see-through, so the two colours blend into
+   one; both squash slightly on impact. */
+@keyframes ball-blend {
+  0%, 62% { opacity: 1; transform: scale(1); }
+  78% { opacity: 0.6; transform: scale(1.3, 0.8); }
+  100% { opacity: 0.55; transform: scale(1.15); }
+}
+
+@keyframes ball-squash {
+  0%, 62% { transform: scale(1); }
+  78% { transform: scale(1.3, 0.8); }
+  100% { transform: scale(1.15); }
 }

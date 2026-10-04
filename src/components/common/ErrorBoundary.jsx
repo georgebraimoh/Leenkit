@@ -20,8 +20,8 @@ export default class ErrorBoundary extends React.Component {
 
     return (
       <div role="alert" className="min-h-[60vh] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white border border-[#DDE3E0] rounded-3xl p-8 text-center space-y-4 shadow-sm">
-          <h1 className="text-xl font-bold font-heading text-[#172121]">Something went wrong</h1>
+        <div className="max-w-md w-full bg-white border-2 border-ink rounded-3xl p-8 text-center space-y-4 shadow-sm">
+          <h1 className="text-xl font-bold font-heading text-[#111111]">Something went wrong</h1>
           <p className="text-sm text-[#3D4948]">
             This page hit an unexpected error. Reload to try again, or go back to Explore.
           </p>
@@ -35,7 +35,7 @@ export default class ErrorBoundary extends React.Component {
             </button>
             <a
               href="/explore"
-              className="px-5 py-2.5 rounded-full border border-[#DDE3E0] text-sm font-bold text-[#172121] hover:bg-[#DDF4EF]"
+              className="px-5 py-2.5 rounded-full border-2 border-ink text-sm font-bold text-[#111111] hover:bg-[#DDF4EF]"
             >
               Go to Explore
             </a>

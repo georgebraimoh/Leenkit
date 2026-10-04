@@ -128,11 +128,11 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-2xl font-extrabold font-heading text-[#172121]">
+                <h3 className="text-2xl font-extrabold font-heading text-[#111111]">
                   Pledge recorded
                 </h3>
                 <p className="text-sm text-[#6F6F6F] leading-relaxed max-w-xs mx-auto">
-                  You pledged <strong className="text-[#172121]">{currentSymbol}{numericAmount.toLocaleString()}</strong>. No money has moved: a pledge is a promise you settle with the host yourself. It shows as "pledged (unpaid)" to people going. To pay now, choose Paystack instead.
+                  You pledged <strong className="text-[#111111]">{currentSymbol}{numericAmount.toLocaleString()}</strong>. No money has moved: a pledge is a promise you settle with the host yourself. It shows as "pledged (unpaid)" to people going. To pay now, choose Paystack instead.
                 </p>
               </div>
 
@@ -158,14 +158,14 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
 
               {/* Currency & Amount Input */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-[#171717] block">
+                <label className="text-xs font-bold text-[#111111] block">
                   Amount
                 </label>
                 <div className="flex items-center gap-2">
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="px-3.5 py-3 bg-[#EEF1EF] border border-[#DDE3E0] focus:border-[#18A999] rounded-2xl text-sm font-bold text-[#171717] cursor-pointer outline-none"
+                    className="px-3.5 py-3 bg-[#EEF1EF] border-2 border-ink focus:border-[#18A999] rounded-2xl text-sm font-bold text-[#111111] cursor-pointer outline-none"
                   >
                     {CURRENCIES.map(c => (
                       <option key={c.code} value={c.code}>
@@ -183,7 +183,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       required
-                      className="w-full px-4 py-3 bg-white border border-[#DDE3E0] focus:border-[#18A999] rounded-2xl text-base font-bold text-[#171717] outline-none transition-colors"
+                      className="w-full px-4 py-3 bg-white border-2 border-ink focus:border-[#18A999] rounded-2xl text-base font-bold text-[#111111] outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -197,8 +197,8 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                       onClick={() => setAmount(preset)}
                       className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer border ${
                         amount === preset
-                          ? 'bg-[#172121] text-white border-[#172121]'
-                          : 'bg-[#EEF1EF] text-[#3D4948] border-[#DDE3E0] hover:border-[#18A999]'
+                          ? 'bg-[#111111] text-white border-ink'
+                          : 'bg-[#EEF1EF] text-[#3D4948] border-ink hover:border-[#18A999]'
                       }`}
                     >
                       {currentSymbol}{Number(preset).toLocaleString()}
@@ -209,7 +209,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
 
               {/* Optional Message */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#171717] block">
+                <label className="text-xs font-bold text-[#111111] block">
                   Optional message
                 </label>
                 <input
@@ -218,7 +218,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                   placeholder="e.g. I'll cover the drinks."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-[#DDE3E0] focus:border-[#18A999] rounded-2xl text-xs text-[#171717] outline-none transition-colors"
+                  className="w-full px-4 py-3 bg-white border-2 border-ink focus:border-[#18A999] rounded-2xl text-xs text-[#111111] outline-none transition-colors"
                 />
                 <span className="text-[10px] text-[#6F6F6F] block text-right">
                   {message.length} / 200
@@ -227,14 +227,14 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
 
               {/* Sponsorship Mode Selector */}
               {paidEnabled && (
-              <div className="grid grid-cols-2 gap-2 p-1 bg-[#EEF1EF] rounded-2xl border border-[#DDE3E0]">
+              <div className="grid grid-cols-2 gap-2 p-1 bg-[#EEF1EF] rounded-2xl border-2 border-ink">
                 <button
                   type="button"
                   onClick={() => setMode('paystack')}
                   className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     effectiveMode === 'paystack'
                       ? 'bg-[#18A999] text-white shadow-xs'
-                      : 'text-[#6F6F6F] hover:text-[#171717]'
+                      : 'text-[#6F6F6F] hover:text-[#111111]'
                   }`}
                 >
                   <CreditCard className="w-3.5 h-3.5" />
@@ -245,8 +245,8 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                   onClick={() => setMode('pledge')}
                   className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     effectiveMode === 'pledge'
-                      ? 'bg-[#172121] text-white shadow-xs'
-                      : 'text-[#6F6F6F] hover:text-[#172121]'
+                      ? 'bg-[#111111] text-white shadow-xs'
+                      : 'text-[#6F6F6F] hover:text-[#111111]'
                   }`}
                 >
                   <Bookmark className="w-3.5 h-3.5" />

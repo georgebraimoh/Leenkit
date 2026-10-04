@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Send } from 'lucide-react';
 
 const MAX_LENGTH = 2000;
@@ -31,13 +30,13 @@ export default function ChatInput({ onSendMessage, disabled = false, disabledRea
   const canSend = text.trim().length > 0 && !disabled && !isSending;
 
   return (
-    <div className="bg-white border-t border-[#E8E6E1] shadow-lg pb-[env(safe-area-inset-bottom)]">
+    <div className="bg-white border-t-2 border-ink pb-[env(safe-area-inset-bottom)] shrink-0">
       {(error || (disabled && disabledReason)) && (
-        <p role={error ? 'alert' : 'status'} className={`px-4 pt-2 text-xs font-medium ${error ? 'text-rose-700' : 'text-[#6F6F6F]'}`}>
+        <p role={error ? 'alert' : 'status'} className={`px-4 pt-2 text-xs font-bold ${error ? 'text-rose-700' : 'text-[#3D4948]'}`}>
           {error || disabledReason}
         </p>
       )}
-      <form onSubmit={handleSubmit} className="relative flex items-center gap-2 p-3">
+      <form onSubmit={handleSubmit} className="flex items-center gap-2 p-2.5">
         <input
           type="text"
           value={text}
@@ -45,18 +44,17 @@ export default function ChatInput({ onSendMessage, disabled = false, disabledRea
           disabled={disabled}
           maxLength={MAX_LENGTH}
           aria-label="Message"
-          placeholder={disabled ? 'Messaging is closed' : 'Say something to the Hangout...'}
-          className="w-full px-5 py-3 text-sm bg-[#F7F6F2] border border-transparent rounded-full text-[#171717] placeholder-[#6F6F6F] focus:outline-none focus:bg-white focus:border-[#18A999]/40 transition-all disabled:opacity-50 min-h-[44px]"
+          placeholder={disabled ? 'Messaging is closed' : 'Message'}
+          className="flex-1 min-w-0 px-4 py-2.5 text-sm bg-[#FFF8EE] border-2 border-ink rounded-full text-[#111111] placeholder-[#6F6F6F] focus:outline-none focus:bg-white disabled:opacity-50 min-h-[44px]"
         />
-        <motion.button
+        <button
           type="submit"
           disabled={!canSend}
-          whileTap={canSend ? { scale: 0.92 } : {}}
-          className="w-11 h-11 rounded-full bg-[#18A999] hover:bg-[#087F73] text-white flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shadow-xs min-h-[44px] min-w-[44px]"
+          className="pressable w-11 h-11 rounded-full bg-[#FF6B2C] text-white border-2 border-ink shadow-xs flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           aria-label={isSending ? 'Sending' : 'Send message'}
         >
-          <Send className="w-4 h-4 ml-0.5" aria-hidden="true" />
-        </motion.button>
+          <Send className="w-4 h-4 -ml-0.5" aria-hidden="true" />
+        </button>
       </form>
     </div>
   );

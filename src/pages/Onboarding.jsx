@@ -43,7 +43,7 @@ export default function Onboarding() {
     return (
       <PageTransition>
         <div className="max-w-md mx-auto px-4 py-20 text-center space-y-6">
-          <h1 className="text-2xl font-bold font-heading text-[#171717]">Set up your profile</h1>
+          <h1 className="text-2xl font-bold font-heading text-[#111111]">Set up your profile</h1>
           <p className="text-sm text-[#6F6F6F]">Sign in first, then we'll help you set up your profile.</p>
           <Button onClick={() => openAuthModal('welcome')} variant="primary" size="lg" fullWidth>Sign in</Button>
         </div>
@@ -85,7 +85,7 @@ export default function Onboarding() {
           <div className="h-full bg-[#18A999] transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }} />
         </div>
 
-        <div className="bg-white border border-[#DDE3E0] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+        <div className="bg-white border-2 border-ink rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
           {error && (
             <p role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-medium text-rose-700">{error}</p>
           )}
@@ -95,8 +95,8 @@ export default function Onboarding() {
               <div className="flex items-center gap-4">
                 <Avatar src={currentUser.avatar} name={currentUser.name} size="xl" />
                 <div className="space-y-1">
-                  <h1 className="text-2xl font-bold font-heading text-[#172121]">Welcome, {(currentUser.name || '').split(' ')[0]}!</h1>
-                  <p className="text-xs text-[#3D4948]">You can add a real photo any time from Edit profile. It helps people recognise you when you meet.</p>
+                  <h1 className="text-2xl font-bold font-heading text-[#111111]">Welcome, {(currentUser.name || '').split(' ')[0]}!</h1>
+                  <p className="text-xs text-[#3D4948]">Add a real photo later so people recognise you.</p>
                 </div>
               </div>
 
@@ -107,7 +107,7 @@ export default function Onboarding() {
                   maxLength={120}
                   onChange={e => setLocation(e.target.value)}
                   placeholder="e.g. Wuse 2, Abuja"
-                  className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                  className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                 />
               </FormField>
 
@@ -118,7 +118,7 @@ export default function Onboarding() {
           {step === 2 && (
             <div className="space-y-6">
               <div className="space-y-1">
-                <h1 className="text-2xl font-bold font-heading text-[#172121]">What are you into?</h1>
+                <h1 className="text-2xl font-bold font-heading text-[#111111]">What are you into?</h1>
                 <p className="text-xs text-[#3D4948]">Pick a few. They appear on your profile so hosts and guests know what you enjoy.</p>
               </div>
 
@@ -132,7 +132,7 @@ export default function Onboarding() {
                       aria-pressed={isSelected}
                       onClick={() => toggleInterest(tag)}
                       className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                        isSelected ? 'bg-[#18A999] text-white shadow-xs' : 'bg-[#DDF4EF] text-[#3D4948] border border-[#DDE3E0] hover:text-[#172121]'
+                        isSelected ? 'bg-[#18A999] text-white shadow-xs' : 'bg-[#DDF4EF] text-[#3D4948] border-2 border-ink hover:text-[#111111]'
                       }`}
                     >
                       {tag}
@@ -151,7 +151,7 @@ export default function Onboarding() {
           {step === 3 && (
             <div className="space-y-6">
               <div className="space-y-1">
-                <h1 className="text-2xl font-bold font-heading text-[#172121]">Add a short bio</h1>
+                <h1 className="text-2xl font-bold font-heading text-[#111111]">Add a short bio</h1>
                 <p className="text-xs text-[#3D4948]">Optional. A line or two about what you like doing.</p>
               </div>
 
@@ -162,7 +162,7 @@ export default function Onboarding() {
                   value={bio}
                   onChange={e => setBio(e.target.value)}
                   placeholder="e.g. Always up for a weekend photowalk, a coffee chat or five-a-side."
-                  className="w-full px-4 py-3 bg-[#EEF1EF] border border-[#DDE3E0] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+                  className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                 />
               </FormField>
 
@@ -179,7 +179,7 @@ export default function Onboarding() {
         <button
           type="button"
           onClick={() => navigate('/explore')}
-          className="block mx-auto text-xs font-semibold text-[#3D4948] hover:text-[#172121] underline underline-offset-2 cursor-pointer"
+          className="block mx-auto text-xs font-semibold text-[#3D4948] hover:text-[#111111] underline underline-offset-2 cursor-pointer"
         >
           Skip for now
         </button>

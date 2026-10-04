@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence, MotionConfig } from 'framer-motion';
+import { AnimatePresence, LazyMotion, MotionConfig } from 'framer-motion';
 
 import { UserProvider, useUser } from './context/UserContext';
 import { LeenkitProvider } from './context/LeenkitContext';
@@ -10,10 +10,16 @@ import { ToastProvider } from './components/common/Toast';
 import Navbar from './components/layout/Navbar';
 import MobileNav from './components/layout/MobileNav';
 import Footer from './components/layout/Footer';
-import AuthModal from './components/auth/AuthModal';
-import LegalAcceptanceGate from './components/auth/LegalAcceptanceGate';
 import ScrollToTop from './components/common/ScrollToTop';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import Loader from './components/common/Loader';
+import InstallPrompt from './components/common/InstallPrompt';
+
+const loadMotionFeatures = () => import('./lib/motionFeatures').then((mod) => mod.default);
+
+// Not needed for first paint.
+const AuthModal = lazy(() => import('./components/auth/AuthModal'));
+const LegalAcceptanceGate = lazy(() => import('./components/auth/LegalAcceptanceGate'));
 
 // Route-level Code Splitting / Lazy Loading
 const Home = lazy(() => import('./pages/Home'));
@@ -38,14 +44,7 @@ const PayoutSettings = lazy(() => import('./pages/PayoutSettings'));
 const Admin = lazy(() => import('./pages/Admin'));
 
 function PageFallback() {
-  return (
-    <div className="min-h-[60vh] flex items-center justify-center p-8">
-      <div className="text-center space-y-3">
-        <div className="w-8 h-8 border-4 border-[#18A999] border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-xs font-semibold text-[#3D4948]">Loading LEENKIT...</p>
-      </div>
-    </div>
-  );
+  return <Loader label="Loading" className="min-h-[60vh] p-8" />;
 }
 
 function AnimatedRoutes() {
@@ -97,12 +96,15 @@ function SuspendedBanner() {
 
 function GlobalAuthModal() {
   const { isAuthModalOpen, closeAuthModal, authModalInitialView } = useUser();
+  if (!isAuthModalOpen) return null;
   return (
-    <AuthModal
-      isOpen={isAuthModalOpen}
-      onClose={closeAuthModal}
-      initialView={authModalInitialView}
-    />
+    <Suspense fallback={null}>
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={closeAuthModal}
+        initialView={authModalInitialView}
+      />
+    </Suspense>
   );
 }
 
@@ -113,10 +115,11 @@ export default function App() {
       <UserProvider>
         <LocationProvider>
           <LeenkitProvider>
+            <LazyMotion features={loadMotionFeatures} strict>
             <MotionConfig reducedMotion="user">
               <BrowserRouter>
                 <ScrollToTop />
-                <div className="min-h-screen flex flex-col justify-between bg-[#F7F5EF] font-sans selection:bg-[#18A999]/20 selection:text-[#18A999]">
+                <div className="min-h-screen flex flex-col justify-between bg-[#FFF8EE] font-sans selection:bg-[#FF6B2C] selection:text-white">
                   <div>
                     <SuspendedBanner />
                     <Navbar />
@@ -127,10 +130,14 @@ export default function App() {
                   <Footer />
                   <MobileNav />
                   <GlobalAuthModal />
-                  <LegalAcceptanceGate />
+                  <Suspense fallback={null}>
+                    <LegalAcceptanceGate />
+                  </Suspense>
+                  <InstallPrompt />
                 </div>
               </BrowserRouter>
             </MotionConfig>
+            </LazyMotion>
           </LeenkitProvider>
         </LocationProvider>
       </UserProvider>

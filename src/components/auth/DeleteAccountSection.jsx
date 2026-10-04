@@ -50,13 +50,13 @@ export default function DeleteAccountSection() {
             <li>This can't be undone.</li>
           </ul>
           <label className="block space-y-1.5">
-            <span className="text-xs font-bold text-[#172121]">Type DELETE to confirm</span>
+            <span className="text-xs font-bold text-[#111111]">Type DELETE to confirm</span>
             <input
               type="text"
               value={confirmText}
               onChange={e => setConfirmText(e.target.value)}
               autoComplete="off"
-              className="w-full px-4 py-3 bg-[#F7F6F2] border border-[#E8E6E1] rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-rose-400"
+              className="w-full px-4 py-3 bg-[#FFF8EE] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-rose-400"
             />
           </label>
           {error && <p role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700">{error}</p>}

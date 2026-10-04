@@ -284,7 +284,7 @@ export default function Faq() {
             <HelpCircle className="w-4 h-4" aria-hidden="true" />
             <span>Help</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#172121]">
+          <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#111111]">
             Frequently Asked Questions
           </h1>
           <p className="text-base text-[#3D4948] leading-relaxed">
@@ -297,7 +297,7 @@ export default function Faq() {
             <a
               key={section.id}
               href={`#faq-${section.id}`}
-              className="px-3 py-1.5 text-xs font-semibold rounded-full bg-white border border-[#DDE3E0] text-[#172121] hover:border-[#18A999] hover:text-[#087F73] transition-colors"
+              className="px-3 py-1.5 text-xs font-semibold rounded-full bg-white border-2 border-ink text-[#111111] hover:border-[#18A999] hover:text-[#087F73] transition-colors"
             >
               {section.title}
             </a>
@@ -309,9 +309,9 @@ export default function Faq() {
             <section
               key={section.id}
               id={`faq-${section.id}`}
-              className="bg-white border border-[#DDE3E0] rounded-3xl p-5 sm:p-8 shadow-xs scroll-mt-24"
+              className="bg-white border-2 border-ink rounded-3xl p-5 sm:p-8 shadow-xs scroll-mt-24"
             >
-              <h2 className="text-xl font-bold font-heading text-[#172121] mb-2">
+              <h2 className="text-xl font-bold font-heading text-[#111111] mb-2">
                 {section.title}
               </h2>
               <FaqAccordion items={section.items} />

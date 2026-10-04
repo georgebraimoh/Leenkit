@@ -4,32 +4,60 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="canonical" href="https://leenkit.netlify.app" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LEENKIT — Discover &amp; Host Real-Life Hangouts</title>
-    <meta name="description" content="Discover, create, join, and share real-life Hangouts with people and communities." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>LEENKIT — Find your people. Find a Hangout.</title>
+    <meta name="description" content="Free, real-life Hangouts near you. Join in a tap. Show up." />
+
+    <!-- Installable web app -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#FFF8EE" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="LEENKIT" />
 
     <!-- Open Graph / Facebook / WhatsApp Preview Meta -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://leenkit.netlify.app" />
     <meta property="og:site_name" content="LEENKIT" />
-    <meta property="og:title" content="LEENKIT — Discover &amp; Host Real-Life Hangouts" />
-    <meta property="og:description" content="Discover, create, join, and share real-life Hangouts with people and communities." />
+    <meta property="og:title" content="LEENKIT — Find your people. Find a Hangout." />
+    <meta property="og:description" content="Free, real-life Hangouts near you. Join in a tap. Show up." />
     <meta property="og:image" content="https://leenkit.netlify.app/Leenkit-logo.png" />
 
     <!-- Twitter Card Meta -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://leenkit.netlify.app" />
-    <meta name="twitter:title" content="LEENKIT — Discover &amp; Host Real-Life Hangouts" />
-    <meta name="twitter:description" content="Discover, create, join, and share real-life Hangouts with people and communities." />
+    <meta name="twitter:title" content="LEENKIT — Find your people. Find a Hangout." />
+    <meta name="twitter:description" content="Free, real-life Hangouts near you. Join in a tap. Show up." />
     <meta name="twitter:image" content="https://leenkit.netlify.app/Leenkit-logo.png" />
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Lexend:wght@600;700;800&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Start connecting to the API and fonts before the app asks for them -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Splash shown until the app renders (replaced by React) -->
+    <style>
+      body { margin: 0; background: #FFF8EE; color: #111111; }
+      .boot { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; font: 800 28px/1 'Bricolage Grotesque', system-ui, sans-serif; }
+      .boot b { color: #18A999; }
+      .boot i { display: flex; gap: 6px; }
+      .boot i span { width: 12px; height: 12px; border: 2px solid #111111; border-radius: 50%; animation: boot 0.9s ease-in-out infinite; }
+      .boot i span:nth-child(1) { background: #18A999; }
+      .boot i span:nth-child(2) { background: #FF6B2C; animation-delay: 0.15s; }
+      .boot i span:nth-child(3) { background: #FFD166; animation-delay: 0.3s; }
+      @keyframes boot { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
+      @media (prefers-reduced-motion: reduce) { .boot i span { animation: none; } }
+    </style>
   </head>
-  <body class="bg-[#F7F5EF] text-[#172121] antialiased selection:bg-[#18A999]/20 selection:text-[#18A999]">
-    <div id="root"></div>
+  <body class="antialiased">
+    <div id="root">
+      <div class="boot" role="status" aria-label="Loading LEENKIT">
+        <div>LEEN<b>KIT</b></div>
+        <i><span></span><span></span><span></span></i>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

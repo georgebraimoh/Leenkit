@@ -101,13 +101,13 @@ export default function LegalAcceptanceGate() {
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-[#DDE3E0] space-y-5 focus:outline-none"
+        className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-2 border-ink space-y-5 focus:outline-none"
       >
         <div className="space-y-3 text-center">
           <div className="w-11 h-11 rounded-2xl bg-[#DDF4EF] text-[#087F73] flex items-center justify-center mx-auto">
             <FileText className="w-5 h-5" aria-hidden="true" />
           </div>
-          <h2 id={titleId} className="text-xl font-bold font-heading text-[#172121]">
+          <h2 id={titleId} className="text-xl font-bold font-heading text-[#111111]">
             Before you continue
           </h2>
           <p className="text-sm text-[#3D4948] leading-relaxed">
@@ -148,7 +148,7 @@ export default function LegalAcceptanceGate() {
             type="button"
             onClick={handleSignOut}
             disabled={isSubmitting}
-            className="text-xs font-semibold text-[#3D4948] hover:text-[#172121] underline underline-offset-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]/40 rounded-sm disabled:opacity-50"
+            className="text-xs font-semibold text-[#3D4948] hover:text-[#111111] underline underline-offset-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18A999]/40 rounded-sm disabled:opacity-50"
           >
             Sign out instead
           </button>
