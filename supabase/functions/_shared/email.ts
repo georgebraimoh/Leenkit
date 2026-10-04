@@ -102,7 +102,7 @@ export async function sendEmail(
 // ---------------------------------------------------------------------------
 // Payment emails
 // ---------------------------------------------------------------------------
-export type PaymentEmailKind = "receipt" | "payment_not_confirmed";
+export type PaymentEmailKind = "receipt" | "payment_not_confirmed" | "refund_processed";
 
 export type PaymentEmailData = {
   kind: PaymentEmailKind;
@@ -116,6 +116,9 @@ export type PaymentEmailData = {
   hangoutDate?: string | null;
   hangoutTime?: string | null;
   venue?: string | null;
+  refundReference?: string | null;
+  // payments.metadata.refund_reason for payment_not_confirmed emails.
+  reason?: string | null;
 };
 
 export function formatMoney(amount: number, currency: string): string {
@@ -149,6 +152,19 @@ export function buildPaymentEmail(data: PaymentEmailData, cfg: EmailConfig): { s
   } else if (data.kind === "receipt") {
     subject = `Thank you for sponsoring ${title}`;
     intro = `Your sponsorship payment for ${title} was successful.`;
+  } else if (data.kind === "refund_processed") {
+    // Only sent after an admin recorded a Paystack refund reference
+    // (admin_mark_refunded requires it). No timing promise: it depends on
+    // the payer's bank or card issuer.
+    subject = `Your refund for ${title}`;
+    intro =
+      `A refund for this payment has been issued through Paystack to the original payment method. ` +
+      `How long it takes to appear depends on your bank or card issuer.`;
+  } else if (data.reason === "hangout_cancelled") {
+    subject = `${title} was cancelled`;
+    intro =
+      `The Hangout you paid for has been cancelled. Your payment has been flagged for review by LEENKIT. ` +
+      `Please keep this email and contact us about this payment.`;
   } else {
     subject = `About your payment for ${title}`;
     intro =
@@ -161,10 +177,13 @@ export function buildPaymentEmail(data: PaymentEmailData, cfg: EmailConfig): { s
     ["Hangout", title],
     ...(when ? [["Date", when] as [string, string]] : []),
     ...(data.venue ? [["Venue", data.venue] as [string, string]] : []),
-    [data.kind === "receipt" ? "Amount paid" : "Amount received", money],
+    [data.kind === "receipt" ? "Amount paid" : data.kind === "refund_processed" ? "Amount refunded" : "Amount received", money],
     ["Payment type", data.paymentType === "ticket" ? "Ticket" : "Sponsorship"],
     ["Reference", data.reference],
-    ...(paid ? [["Paid at", paid] as [string, string]] : []),
+    ...(data.kind === "refund_processed" && data.refundReference
+      ? [["Refund reference", data.refundReference] as [string, string]]
+      : []),
+    ...(paid && data.kind !== "refund_processed" ? [["Paid at", paid] as [string, string]] : []),
   ];
 
   const text = [
