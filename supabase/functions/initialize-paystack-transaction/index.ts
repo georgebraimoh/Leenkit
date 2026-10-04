@@ -254,6 +254,8 @@ serve(async (req) => {
     const fee = platformFee(finalAmount, feeSettings);
     const hostAmount = Math.round((finalAmount - fee) * 100) / 100;
     const reference = `LK_${payment_type === "ticket" ? "TKT" : "SPN"}_${crypto.randomUUID().replace(/-/g, "").substring(0, 16)}`;
+    // Test-mode payments are never paid out or auto-refunded with live keys.
+    const paystackMode = paystackSecretKey.startsWith("sk_live_") ? "live" : "test";
 
     // Create pending payment record
     const { error: insertPayError } = await supabaseAdmin.from("payments").insert({
@@ -267,6 +269,7 @@ serve(async (req) => {
       platform_fee: fee,
       host_amount: hostAmount,
       status: "pending",
+      paystack_mode: paystackMode,
       metadata: {
         message: message ? String(message).substring(0, 200) : null,
         user_email: user.email,

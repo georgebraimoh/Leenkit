@@ -37,11 +37,11 @@ const setStart = (id, offset) => as('service_role', '', `
   WHERE id = '${id}'`);
 
 let refN = 0;
-const buy = async (hangout, user, type = 'ticket', amount = 5000) => {
+const buy = async (hangout, user, type = 'ticket', amount = 5000, mode = 'live') => {
   const ref = `R${++refN}`;
   const fee = Math.max(Math.round(amount * 0.1), 200);
-  await db.exec(`INSERT INTO public.payments (user_id, hangout_id, host_id, payment_type, reference, amount, currency, status, platform_fee, host_amount)
-                 VALUES ('${user}', '${hangout}', '${host}', '${type}', '${ref}', ${amount}, 'NGN', 'pending', ${fee}, ${amount - fee})`);
+  await db.exec(`INSERT INTO public.payments (user_id, hangout_id, host_id, payment_type, reference, amount, currency, status, platform_fee, host_amount, paystack_mode)
+                 VALUES ('${user}', '${hangout}', '${host}', '${type}', '${ref}', ${amount}, 'NGN', 'pending', ${fee}, ${amount - fee}, '${mode}')`);
   const s = (await as('service_role', '', `SELECT public.settle_payment('${ref}', ${amount * 100}, 'NGN') AS s`)).rows[0].s;
   return { ref, s, fee };
 };
@@ -51,7 +51,7 @@ const attending = async (h, u) => (await db.query(`SELECT count(*)::int c FROM p
 // ------------------------------------------------ setup checks
 await asErr('paid Hangout needs a transfer-capable payout account', 'authenticated', noRecipientHost, insertHangout(noRecipientHost), /PAYOUT_SETUP_REQUIRED/);
 const settings = (await db.query(`SELECT value FROM public.platform_settings WHERE key='payments'`)).rows[0].value;
-ok('payouts are OFF by default, refunds ON', settings.payouts_enabled === false && settings.refunds_enabled === true && settings.leave_cutoff_hours === 24);
+ok('payouts are OFF by default, refunds ON, payout_mode live', settings.payout_mode === 'live' && settings.payouts_enabled === false && settings.refunds_enabled === true && settings.leave_cutoff_hours === 24);
 
 // ------------------------------------------------ leaving >= 24h before start
 const h1 = await mkPaidHangout();
@@ -164,11 +164,27 @@ ok('its payment unlinked and fully refunded', pd.payout_id === null && pd.status
 
 // Host without a transfer recipient -> needs review, not sent
 const legacyHangout = (await as('service_role', '', insertHangout(noRecipientHost))).rows[0].id;
-await db.exec(`INSERT INTO public.payments (user_id, hangout_id, host_id, payment_type, reference, amount, currency, status, platform_fee, host_amount)
-               VALUES ('${stayer}', '${legacyHangout}', '${noRecipientHost}', 'ticket', 'LEG1', 5000, 'NGN', 'successful', 500, 4500)`);
+await db.exec(`INSERT INTO public.payments (user_id, hangout_id, host_id, payment_type, reference, amount, currency, status, platform_fee, host_amount, paystack_mode)
+               VALUES ('${stayer}', '${legacyHangout}', '${noRecipientHost}', 'ticket', 'LEG1', 5000, 'NGN', 'successful', 500, 4500, 'live')`);
 await setStart(legacyHangout, '-3 days');
 await as('service_role', '', `SELECT public.schedule_host_payouts()`);
 ok('host without recipient -> payout needs_review', (await db.query(`SELECT status FROM public.host_payouts WHERE hangout_id=$1`, [legacyHangout])).rows[0].status === 'needs_review');
+
+// ------------------------------------------------ test-mode payments are never paid out
+const hTest = await mkPaidHangout();
+await buy(hTest, stayer, 'ticket', 5000, 'test');
+await db.exec(`INSERT INTO public.payments (user_id, hangout_id, host_id, payment_type, reference, amount, currency, status, platform_fee, host_amount)
+               VALUES ('${outsider}', '${hTest}', '${host}', 'ticket', 'LEGACY_NULL_MODE', 5000, 'NGN', 'successful', 500, 4500)`);
+await setStart(hTest, '-3 days');
+await as('service_role', '', `SELECT public.schedule_host_payouts()`);
+ok('test-mode and legacy (unknown mode) payments are never paid out with live payouts',
+  (await db.query(`SELECT count(*)::int c FROM public.host_payouts WHERE hangout_id=$1`, [hTest])).rows[0].c === 0);
+await db.exec(`UPDATE public.platform_settings SET value = value || '{"payout_mode":"test"}'::jsonb WHERE key='payments'`);
+await as('service_role', '', `SELECT public.schedule_host_payouts()`);
+const testPayout = (await db.query(`SELECT amount FROM public.host_payouts WHERE hangout_id=$1`, [hTest])).rows;
+ok('staging (payout_mode=test) pays out only test payments', testPayout.length === 1 && Number(testPayout[0].amount) === 4500);
+await db.exec(`UPDATE public.platform_settings SET value = value || '{"payout_mode":"live"}'::jsonb WHERE key='payments'`);
+ok('payout_mode is live by default (fresh database)', settings.payout_mode === undefined || settings.payout_mode === 'live');
 
 // ------------------------------------------------ admin tools
 const failed = await buy(await mkPaidHangout(), outsider);

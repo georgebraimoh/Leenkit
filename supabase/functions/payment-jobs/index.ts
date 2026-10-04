@@ -7,7 +7,7 @@
 // refunds can be paused with refunds_enabled = false.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { adminClient } from "../_shared/http.ts";
-import { getPaymentSettings, paystackClient, processPayouts, processRefunds } from "../_shared/paymentJobs.ts";
+import { getPaymentSettings, modeForSecretKey, paystackClient, processPayouts, processRefunds } from "../_shared/paymentJobs.ts";
 import { cronSecretValid } from "../_shared/cron.ts";
 
 serve(async (req) => {
@@ -28,7 +28,7 @@ serve(async (req) => {
 
   const result: Record<string, unknown> = {};
   try {
-    result.refunds = await processRefunds(admin, paystack, { settings });
+    result.refunds = await processRefunds(admin, paystack, { settings, mode: modeForSecretKey(secretKey) });
   } catch (err) {
     console.error("payment-jobs refunds failed:", (err as Error).message);
     result.refunds = { error: "failed" };

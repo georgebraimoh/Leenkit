@@ -61,10 +61,17 @@ const msg = (r: PaystackResponse) => String(r.body?.message || `Paystack request
 // ---------------------------------------------------------------- refunds
 export type RefundSummary = { submitted: number; processed: number; needsReview: number; requeued: number; skipped?: string };
 
+// mode: 'live' or 'test', from the secret key in use. Refunds are only
+// submitted for payments made in the same mode (never test refunds with
+// live keys); payments of unknown mode are left for an admin.
+export function modeForSecretKey(secretKey: string): "live" | "test" {
+  return secretKey.startsWith("sk_live_") ? "live" : "test";
+}
+
 export async function processRefunds(
   admin: AdminClient,
   paystack: Paystack,
-  opts: { limit?: number; now?: () => number; settings?: PaymentSettings } = {},
+  opts: { limit?: number; now?: () => number; settings?: PaymentSettings; mode?: "live" | "test" } = {},
 ): Promise<RefundSummary> {
   const now = opts.now || Date.now;
   const settings = opts.settings || (await getPaymentSettings(admin));
@@ -88,6 +95,7 @@ export async function processRefunds(
     .select("id, reference, amount, currency, refund_amount, refund_reason, refund_attempts")
     .eq("status", "requires_refund")
     .eq("refund_status", "queued")
+    .eq("paystack_mode", opts.mode || "live")
     .order("refund_requested_at", { ascending: true })
     .limit(opts.limit || 25);
 

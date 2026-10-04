@@ -68,7 +68,7 @@ function fakePaystack(handler: (path: string, init: any) => jobs.PaystackRespons
 const NOW = Date.parse('2026-10-05T12:00:00Z');
 const clock = () => NOW;
 const iso = (msAgo: number) => new Date(NOW - msAgo).toISOString();
-const refundRow = (over: any = {}) => ({ id: 'p1', reference: 'REF1', amount: 5000, currency: 'NGN', status: 'requires_refund', refund_status: 'queued', refund_amount: 4500, refund_reason: 'attendee_left', refund_attempts: 0, refund_requested_at: iso(60000), ...over });
+const refundRow = (over: any = {}) => ({ id: 'p1', reference: 'REF1', amount: 5000, currency: 'NGN', status: 'requires_refund', refund_status: 'queued', refund_amount: 4500, refund_reason: 'attendee_left', refund_attempts: 0, refund_requested_at: iso(60000), paystack_mode: 'live', ...over });
 
 // ---------------------------------------------------------------- refunds
 {
@@ -128,6 +128,16 @@ const refundRow = (over: any = {}) => ({ id: 'p1', reference: 'REF1', amount: 50
   await jobs.applyRefundEvent(admin2, 'refund.failed', { transaction_reference: 'REF1', status: 'failed' });
   ok('refund.failed -> failed for admin follow-up', admin2.tables.payments[0].refund_status === 'failed');
   ok('event without reference ignored', (await jobs.applyRefundEvent(admin2, 'refund.processed', {})) === 'no_reference');
+}
+
+{
+  const admin = fakeAdmin({ payments: [refundRow({ paystack_mode: 'test' }), refundRow({ id: 'p2', reference: 'REF2', paystack_mode: null })] });
+  const ps = fakePaystack(() => ({ ok: true, status: 200, body: { status: true, data: { status: 'pending' } } }));
+  await jobs.processRefunds(admin, ps.fn, { now: clock, mode: 'live' });
+  ok('live keys never refund test-mode or unknown-mode payments', ps.calls.length === 0);
+  await jobs.processRefunds(admin, ps.fn, { now: clock, mode: 'test' });
+  ok('test keys refund test-mode payments', ps.calls.length === 1 && ps.calls[0].init.body.transaction === 'REF1');
+  ok('mode from secret key', jobs.modeForSecretKey('sk_live_abc') === 'live' && jobs.modeForSecretKey('sk_test_abc') === 'test');
 }
 
 // ---------------------------------------------------------------- payouts
