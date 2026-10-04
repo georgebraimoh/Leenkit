@@ -46,6 +46,9 @@ jobs:
       - name: Email unit tests (fake Resend + fake Supabase)
         run: npm run test:email
 
+      - name: Refund/payout job unit tests (fake Paystack + fake Supabase)
+        run: npm run test:payments
+
       - name: Database tests (all migrations replayed into in-memory Postgres)
         run: npm run test:db
 

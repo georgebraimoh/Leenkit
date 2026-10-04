@@ -55,11 +55,13 @@ export const payoutService = {
     if (!userId) return null;
     const { data, error } = await supabase
       .from('host_payout_accounts')
-      .select('bank_name, account_name, account_last4, currency, updated_at')
+      .select('bank_name, account_name, account_last4, currency, updated_at, paystack_recipient_code')
       .eq('user_id', userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!data) return null;
+    // Accounts saved before held payouts (split-payment subaccounts) cannot
+    // receive transfers; treat them as not set up so the host adds them again.
+    if (!data || !data.paystack_recipient_code) return null;
     return {
       bankName: data.bank_name,
       accountName: data.account_name,
@@ -79,7 +81,9 @@ export const payoutService = {
       gross: Number(r.gross || 0),
       platformFees: Number(r.platform_fees || 0),
       hostEarnings: Number(r.host_earnings || 0),
-      pendingRefunds: Number(r.pending_refunds || 0)
+      pendingRefunds: Number(r.pending_refunds || 0),
+      paidOut: Number(r.paid_out || 0),
+      toBePaid: Number(r.to_be_paid || 0)
     }));
   },
 

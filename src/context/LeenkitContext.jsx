@@ -162,12 +162,14 @@ export function LeenkitProvider({ children }) {
     if (hangout && hangout.hostId === userId) {
       throw new Error('Hosts cannot leave their own Hangout. Cancel it instead.');
     }
+    let result;
     try {
-      await hangoutService.leaveHangout(userId, id);
+      result = await hangoutService.leaveHangout(userId, id);
     } catch (err) {
       throw new Error(friendlyError(err, 'Could not leave this Hangout.'));
     }
-    return refreshHangout(id);
+    await refreshHangout(id);
+    return result;
   };
 
   const createHangout = async (newHangoutData) => {

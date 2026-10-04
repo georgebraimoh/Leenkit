@@ -137,7 +137,7 @@ export default function Privacy() {
               LEENKIT also records the platform fee and the Organizer’s share for each payment, so Organizers can see what they earned.
             </p>
             <p>
-              <strong>Organizer payouts.</strong> If you set up payouts, you give us your bank and account number. We send them to Paystack to verify the account and create a payout (“subaccount”) record in your name. LEENKIT stores only the bank name, the verified account name, the last four digits of the account number and Paystack’s reference for it; Paystack holds the full details.
+              <strong>Organizer payouts.</strong> If you set up payouts, you give us your bank and account number. We send them to Paystack to look up the account name and register the account as a transfer recipient, so your earnings can be paid to it after each Hangout. LEENKIT stores only the bank name, the account name returned by your bank, the last four digits of the account number and Paystack’s reference for the recipient; Paystack holds the full details. LEENKIT also keeps a record of each payout (amount, Hangout, transfer reference and status).
             </p>
           </Section>
 

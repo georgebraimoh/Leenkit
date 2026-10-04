@@ -142,7 +142,7 @@ export default function MyHangouts() {
     cancel: {
       title: 'Cancel this Hangout?',
       message: pendingAction.hangout.isPaid
-        ? 'Everyone going will be notified. Paid tickets are not refunded automatically yet; contact LEENKIT support to arrange refunds.'
+        ? 'Everyone going will be notified, and everyone who paid (tickets and sponsorships) is refunded in full automatically. This cannot be undone.'
         : 'Everyone going will be notified and the Hangout will stop taking new people.',
       confirmLabel: 'Cancel Hangout',
       variant: 'danger'

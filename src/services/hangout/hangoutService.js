@@ -217,18 +217,24 @@ export const hangoutService = {
     }
   },
 
+  // Leaves through the server so paid tickets/sponsorships are refunded per
+  // policy (>= 24h before the start: amount minus LEENKIT's fee; later: none).
+  // Returns { refund_amount, currency, paid }.
   async leaveHangout(userId, hangoutId) {
     if (!userId) throw new Error('Must be signed in to leave.');
 
-    const { error } = await supabase
-      .from('hangout_attendees')
-      .delete()
-      .eq('hangout_id', hangoutId)
-      .eq('user_id', userId);
-
+    const { data, error } = await supabase.rpc('leave_hangout', { p_hangout_id: hangoutId });
     if (error) {
       throw new Error(error.message);
     }
+    return data || { refund_amount: 0 };
+  },
+
+  // What leaving now would refund the signed-in user.
+  async getLeaveRefundPreview(hangoutId) {
+    const { data, error } = await supabase.rpc('get_leave_refund_preview', { p_hangout_id: hangoutId });
+    if (error) throw new Error(error.message);
+    return data;
   },
 
   async cancelHangout(hangoutId) {

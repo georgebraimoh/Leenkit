@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { emailConfigFromEnv } from "../_shared/email.ts";
 import { runAfterResponse, sendPaymentEmailOnce } from "../_shared/paymentEmails.ts";
+import { applyRefundEvent, applyTransferEvent } from "../_shared/paymentJobs.ts";
 
 // Webhook HMAC-SHA512 Signature Verification
 async function verifyHmacSignature(secret: string, bodyText: string, signature: string): Promise<boolean> {
@@ -40,13 +41,51 @@ serve(async (req) => {
   const eventPayload = JSON.parse(bodyText);
   const { event, data } = eventPayload;
 
-  if (event !== "charge.success" || !data) {
+  const isRefundEvent = typeof event === "string" && event.startsWith("refund.");
+  const isTransferEvent = typeof event === "string" && event.startsWith("transfer.");
+
+  if (!data || (event !== "charge.success" && !isRefundEvent && !isTransferEvent)) {
     return new Response("Event ignored", { status: 200 });
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+  // Refund and payout (transfer) lifecycle events.
+  if (isRefundEvent || isTransferEvent) {
+    const ref = isRefundEvent ? (data.transaction_reference || data.transaction?.reference) : data.reference;
+    const key = `paystack_evt_${event}_${ref || "none"}_${data.refund_reference || data.transfer_code || data.id || ""}`;
+
+    const { data: seen } = await supabaseAdmin
+      .from("payment_events").select("status").eq("event_key", key).maybeSingle();
+    if (seen?.status === "completed") {
+      return new Response("Event already completed", { status: 200 });
+    }
+    if (!seen) {
+      await supabaseAdmin.from("payment_events").insert({
+        event_key: key, event_type: event, reference: ref || null, status: "processing", payload: eventPayload,
+      });
+    }
+
+    try {
+      const outcome = isRefundEvent
+        ? await applyRefundEvent(supabaseAdmin, event, data)
+        : await applyTransferEvent(supabaseAdmin, event, data);
+      await supabaseAdmin.from("payment_events").update({ status: "completed" }).eq("event_key", key);
+
+      // A completed refund may trigger the "refund issued" email (inactive
+      // until Resend is configured).
+      if (isRefundEvent && outcome === "refunded" && ref) {
+        await runAfterResponse(sendPaymentEmailOnce(supabaseAdmin, ref, emailConfigFromEnv((k) => Deno.env.get(k))));
+      }
+      return new Response(`Webhook processed: ${outcome}`, { status: 200 });
+    } catch (err) {
+      console.error(`Webhook ${event} error:`, (err as Error).message);
+      await supabaseAdmin.from("payment_events").update({ status: "error" }).eq("event_key", key);
+      return new Response("Internal execution error", { status: 500 });
+    }
+  }
 
   // Durable Idempotency Key based on Paystack numeric transaction ID + event name
   const eventKey = `paystack_evt_${data.id}_${event}`;

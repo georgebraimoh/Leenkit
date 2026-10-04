@@ -3,37 +3,27 @@
 // (provider outage, function stopped mid-send, refunds marked by an admin).
 // Each payment is still emailed at most once per kind (see paymentEmails.ts).
 //
-// Not for browsers: requires the header `x-cron-secret` matching the
-// EMAIL_RETRY_SECRET secret. If that secret is not set the function refuses
-// to run. Schedule it (e.g. every 10 minutes) with Supabase Cron calling this
-// URL with the header; see docs/RESEND_EMAIL_SETUP.md.
+// Not for browsers: requires the header `x-cron-secret` matching CRON_SECRET
+// (or the older EMAIL_RETRY_SECRET). Refuses to run if neither is set.
+// Inactive until Resend is configured (RESEND_API_KEY + EMAIL_FROM).
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { adminClient } from "../_shared/http.ts";
 import { emailConfigFromEnv, isEmailConfigured } from "../_shared/email.ts";
 import { MAX_EMAIL_ATTEMPTS, sendPaymentEmailOnce } from "../_shared/paymentEmails.ts";
+import { cronSecretValid } from "../_shared/cron.ts";
 
 const LOOKBACK_DAYS = 3;
 const BATCH = 100;
 
-function timingSafeEqual(a: string, b: string): boolean {
-  const ea = new TextEncoder().encode(a);
-  const eb = new TextEncoder().encode(b);
-  let diff = ea.length ^ eb.length;
-  for (let i = 0; i < Math.max(ea.length, eb.length); i++) diff |= (ea[i] ?? 0) ^ (eb[i] ?? 0);
-  return diff === 0;
-}
-
 serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
-  const secret = Deno.env.get("EMAIL_RETRY_SECRET") || "";
-  if (secret.length < 24) {
-    console.error("email-retry: EMAIL_RETRY_SECRET is not set (min 24 chars); refusing to run.");
+  const auth = cronSecretValid(req, (k) => Deno.env.get(k));
+  if (auth === "not_configured") {
+    console.error("email-retry: CRON_SECRET is not set (min 24 chars); refusing to run.");
     return new Response("Not configured", { status: 503 });
   }
-  if (!timingSafeEqual(req.headers.get("x-cron-secret") || "", secret)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  if (auth !== "ok") return new Response("Unauthorized", { status: 401 });
 
   const cfg = emailConfigFromEnv((k) => Deno.env.get(k));
   if (!isEmailConfigured(cfg)) {

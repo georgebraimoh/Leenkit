@@ -131,14 +131,16 @@ serve(async (req) => {
       return json({ error: "This Hangout is no longer open." }, 400);
     }
 
-    // Money goes to the host's Paystack subaccount; LEENKIT keeps its fee.
+    // LEENKIT collects the whole payment and holds the host's share until
+    // after the Hangout (refund policy), then pays it by Paystack Transfer.
+    // The host must have a payout account that can receive transfers.
     const { data: payout } = await supabaseAdmin
       .from("host_payout_accounts")
-      .select("paystack_subaccount_code")
+      .select("paystack_recipient_code")
       .eq("user_id", hangout.host_id)
       .maybeSingle();
 
-    if (!payout?.paystack_subaccount_code) {
+    if (!payout?.paystack_recipient_code) {
       return json({
         error: payment_type === "ticket"
           ? "The host hasn't finished setting up payouts, so tickets can't be sold yet."
@@ -264,7 +266,6 @@ serve(async (req) => {
       currency: finalCurrency,
       platform_fee: fee,
       host_amount: hostAmount,
-      paystack_subaccount_code: payout.paystack_subaccount_code,
       status: "pending",
       metadata: {
         message: message ? String(message).substring(0, 200) : null,
@@ -306,11 +307,6 @@ serve(async (req) => {
         hangout_id,
         payment_type,
       },
-      // Split: host's subaccount gets the rest; LEENKIT (main account) gets
-      // exactly `transaction_charge` and pays Paystack's processing fee.
-      subaccount: payout.paystack_subaccount_code,
-      transaction_charge: Math.round(fee * 100),
-      bearer: "account",
     };
 
     if (sanitizedCallbackUrl) {

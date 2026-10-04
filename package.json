@@ -8,10 +8,11 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "npm run test:email && npm run test:db",
+    "test": "npm run test:email && npm run test:payments && npm run test:db",
     "test:email": "node tests/email/email.test.mts",
-    "test:db": "node tests/db/core.test.mjs && node tests/db/batch.test.mjs && node tests/db/hardening.test.mjs",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "test:db": "node tests/db/core.test.mjs && node tests/db/batch.test.mjs && node tests/db/hardening.test.mjs && node tests/db/refunds.test.mjs",
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "test:payments": "node tests/payments/jobs.test.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

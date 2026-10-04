@@ -48,7 +48,7 @@ if (h) {
 
 // Paid flow
 await asErr('paid Hangout without payout account blocked', 'authenticated', host, `INSERT INTO public.hangouts (${[...new Set([...cols, 'max_attendees', 'is_paid', 'price', 'currency'])].join(',')}) VALUES (${[...new Set([...cols, 'max_attendees', 'is_paid', 'price', 'currency'])].map((k) => (k === 'host_id' ? `'${host}'` : { is_paid: 'true', price: '5000', currency: "'NGN'" }[k] ?? base[k] ?? "'x'")).join(',')})`, /PAYOUT_SETUP_REQUIRED/);
-await db.exec(`INSERT INTO public.host_payout_accounts (user_id, bank_code, bank_name, account_name, account_last4, paystack_subaccount_code) VALUES ('${host}', '058', 'GTB', 'HOST', '1234', 'ACCT_x')`);
+await db.exec(`INSERT INTO public.host_payout_accounts (user_id, bank_code, bank_name, account_name, account_last4, paystack_recipient_code) VALUES ('${host}', '058', 'GTB', 'HOST', '1234', 'RCP_x')`);
 const ph = await tryOk('paid Hangout with payout account', () => mkHangout(host, { is_paid: 'true', price: '5000', currency: "'NGN'" }));
 if (ph) {
   const pay = (ref, user, type = 'ticket', amt = 5000) => db.exec(`INSERT INTO public.payments (user_id, hangout_id, host_id, payment_type, reference, amount, currency, status, platform_fee, host_amount) VALUES ('${user}', '${ph.id}', '${host}', '${type}', '${ref}', ${amt}, 'NGN', 'pending', 500, 4500)`);
@@ -69,7 +69,7 @@ if (ph) {
   await tryOk('host cancels paid Hangout', () => as('authenticated', host, `UPDATE public.hangouts SET status='cancelled' WHERE id='${ph.id}'`));
   const rr = (await db.query(`SELECT reference, status FROM public.payments WHERE hangout_id=$1 ORDER BY reference`, [ph.id])).rows.map((r) => r.reference + ':' + r.status).join(',');
   ok('cancel flags ticket refunds', /R1:requires_refund/.test(rr), rr);
-  ok('note: paid sponsorship on cancelled Hangout not flagged', /R4:successful/.test(rr), rr);
+  ok('cancel also refunds paid sponsorships (owner policy)', /R4:requires_refund/.test(rr), rr);
 }
 
 // Admin

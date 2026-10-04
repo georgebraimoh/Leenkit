@@ -74,12 +74,12 @@ npx supabase secrets set --project-ref <ref> RESEND_API_KEY=<leenkit-edge-functi
 npx supabase secrets set --project-ref <ref> EMAIL_FROM="LEENKIT <no-reply@mail.yourdomain.com>"
 npx supabase secrets set --project-ref <ref> APP_URL=https://<site> SUPPORT_EMAIL=qleenqapp@gmail.com
 npx supabase secrets set --project-ref <ref> ALLOWED_ORIGINS=https://<site>
-npx supabase secrets set --project-ref <ref> EMAIL_RETRY_SECRET=<random, at least 24 characters>
+npx supabase secrets set --project-ref <ref> CRON_SECRET=<random, at least 24 characters>
 # optional: EMAIL_REPLY_TO=qleenqapp@gmail.com
 ```
 
 - `ALLOWED_ORIGINS` is **required**. Without it the Edge Functions reject every browser origin and payment callback URL (they fail closed). Use a comma-separated list; add `http://localhost:5173` only on a project used for local development, never on production.
-- Generate `EMAIL_RETRY_SECRET` locally, e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+- Generate `CRON_SECRET` locally (shared by the scheduled functions), e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
 - If `RESEND_API_KEY` or `EMAIL_FROM` is missing, payments still settle normally and no email is sent (the functions log `email_not_configured`).
 
 ## 6. Deploy order (staging, then production)
@@ -96,14 +96,14 @@ npx supabase secrets set --project-ref <ref> EMAIL_RETRY_SECRET=<random, at leas
    ```
 4. Schedule the email sweeper. Enable the `pg_cron` and `pg_net` extensions (Database → Extensions), store the secret in Vault, then schedule it (SQL editor):
    ```sql
-   select vault.create_secret('<EMAIL_RETRY_SECRET>', 'email_retry_secret');
+   select vault.create_secret('<CRON_SECRET>', 'cron_secret');
 
    select cron.schedule('leenkit-email-retry', '*/10 * * * *', $$
      select net.http_post(
        url := 'https://<ref>.supabase.co/functions/v1/email-retry',
        headers := jsonb_build_object(
          'Content-Type', 'application/json',
-         'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'email_retry_secret')
+         'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret')
        ),
        body := '{}'::jsonb
      );

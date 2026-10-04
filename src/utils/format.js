@@ -137,6 +137,8 @@ export function friendlyError(err, fallback = 'Something went wrong. Please try 
   if (msg.includes('LEENKIT_HANGOUT_CLOSED')) return 'This Hangout is no longer open to join.';
   if (msg.includes('LEENKIT_HANGOUT_NOT_FOUND')) return 'This Hangout no longer exists.';
   if (msg.includes('LEENKIT_PAYOUT_SETUP_REQUIRED')) return 'Add your bank account in Payouts before selling tickets.';
+  if (msg.includes('LEENKIT_PAYOUT_ALREADY_SENT')) return 'This Hangout has already been paid out, so it can no longer be cancelled. Contact LEENKIT support.';
+  if (msg.includes('LEENKIT_RATE_LIMITED')) return 'You are doing that too often. Please wait a moment and try again.';
   if (msg.toLowerCase().includes('row-level security') && msg.includes('hangouts')) return 'Your account cannot host right now. Contact LEENKIT support if you think this is a mistake.';
   if (msg.toLowerCase().includes('row-level security')) return 'You do not have permission to do that.';
   if (msg.includes('payments_hangout_id_fkey')) {

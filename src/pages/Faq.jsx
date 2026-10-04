@@ -177,13 +177,13 @@ const FAQ_SECTIONS = [
         id: 'cancelled-hangout',
         question: 'What happens if a Hangout is cancelled?',
         answer:
-          'If a Hangout is cancelled, follow any updates from the Organizer in the Hangout details or Hangout Space. Before purchasing, review the ticket and refund information shown for that Hangout. LEENKIT’s refund policy is still being finalised, so no specific refund outcome is promised.'
+          'If the Organizer or LEENKIT cancels a Hangout, everyone who paid for a ticket or an online sponsorship is refunded in full automatically, to the original payment method through Paystack. It can take up to 10 business days for the money to arrive.'
       },
       {
         id: 'refunds',
         question: 'Can I get a refund?',
         answer:
-          'LEENKIT’s refund policy is still being finalised. Until it is published, please review the ticket and refund information shown for a Hangout before you buy, and keep your payment reference. For questions about a payment, contact ' + LEGAL_CONTACT_EMAIL + '.'
+          'Yes, in these cases: if the Hangout is cancelled, or LEENKIT could not confirm your spot, you get a full refund. If you leave a Hangout at least 24 hours before it starts, you get back what you paid minus LEENKIT’s platform fee; the Leave screen shows the exact amount before you confirm. Leaving later, or not attending, is not refunded. Refunds go back to your original payment method through Paystack and can take up to 10 business days. For questions about a payment, contact ' + LEGAL_CONTACT_EMAIL + ' with your payment reference.'
       }
     ]
   },

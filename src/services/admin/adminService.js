@@ -40,5 +40,17 @@ export const adminService = {
 
   async markRefunded(paymentId, note) {
     unwrap(await supabase.rpc('admin_mark_refunded', { p_payment_id: paymentId, p_note: note || null }));
+  },
+
+  async retryRefund(paymentId) {
+    unwrap(await supabase.rpc('admin_retry_refund', { p_payment_id: paymentId }));
+  },
+
+  async listPayouts(status = null) {
+    return unwrap(await supabase.rpc('admin_list_payouts', { p_status: status })) || [];
+  },
+
+  async retryPayout(payoutId) {
+    unwrap(await supabase.rpc('admin_retry_payout', { p_payout_id: payoutId }));
   }
 };

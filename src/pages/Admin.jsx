@@ -43,6 +43,7 @@ export default function Admin() {
   const [reportFilter, setReportFilter] = useState('open');
   const [reports, setReports] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [payouts, setPayouts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -59,14 +60,16 @@ export default function Admin() {
     setIsLoading(true);
     setError('');
     try {
-      const [ov, reps, pays] = await Promise.all([
+      const [ov, reps, pays, pouts] = await Promise.all([
         adminService.overview(),
         adminService.listReports(reportFilter === 'all' || reportFilter === 'open' ? null : reportFilter),
-        adminService.listPayments('requires_refund')
+        adminService.listPayments('requires_refund'),
+        adminService.listPayouts(null)
       ]);
       setOverview(ov);
       setReports(reportFilter === 'open' ? reps.filter(r => r.status === 'pending' || r.status === 'reviewing') : reps);
       setPayments(pays);
+      setPayouts(pouts);
     } catch (err) {
       setError(err.message || 'Could not load admin data.');
     } finally {
@@ -104,6 +107,8 @@ export default function Admin() {
         await adminService.updateReport(item.id, 'resolved', note || 'Hangout cancelled by LEENKIT');
       }
       if (kind === 'refund') await adminService.markRefunded(item.id, note);
+      if (kind === 'retry_refund') await adminService.retryRefund(item.id);
+      if (kind === 'retry_payout') await adminService.retryPayout(item.id);
       setAction(null);
       showToast('Done.', 'success');
       load();
@@ -133,8 +138,10 @@ export default function Admin() {
   const actionCopy = action && {
     report: { title: action.status === 'dismissed' ? 'Dismiss report' : action.status === 'reviewing' ? 'Mark as reviewing' : 'Resolve report', confirm: 'Save', variant: 'primary' },
     suspend: { title: `Suspend ${action.item.target_label}?`, confirm: 'Suspend account', variant: 'danger', body: 'They will not be able to host, join or post. Their upcoming Hangouts are cancelled and attendees notified.' },
-    cancel: { title: `Cancel "${action.item.target_label}"?`, confirm: 'Cancel Hangout', variant: 'danger', body: 'Attendees are notified. Paid tickets are added to Refunds.' },
-    refund: { title: 'Mark as refunded', confirm: 'Mark refunded', variant: 'primary', body: `Refund ${formatMoney(action.item.amount, action.item.currency)} to ${action.item.payer_name || 'the buyer'} in your Paystack dashboard first (Transactions → search the reference → Refund). Then record it here.` }
+    cancel: { title: `Cancel "${action.item.target_label}"?`, confirm: 'Cancel Hangout', variant: 'danger', body: 'Attendees are notified, and everyone who paid (tickets and sponsorships) is refunded in full automatically.' },
+    refund: { title: 'Mark as refunded', confirm: 'Mark refunded', variant: 'primary', body: `Only for refunds you made yourself in the Paystack dashboard (normally refunds are sent automatically). Refund ${formatMoney(action.item.refund_amount ?? action.item.amount, action.item.currency)} to ${action.item.payer_name || 'the buyer'} in Paystack first (Transactions → search the reference → Refund), then record its reference here.` },
+    retry_refund: { title: 'Retry this refund?', confirm: 'Retry refund', variant: 'primary', body: 'First check the Paystack dashboard (Transactions → this reference) that no refund was already made for it. The refund is then sent again on the next payment job run.' },
+    retry_payout: { title: 'Retry this payout?', confirm: 'Retry payout', variant: 'primary', body: 'First check the Paystack dashboard (Transfers) that this payout was not already paid, and that your Paystack balance can cover it. It is sent to the host’s current payout account on the next payment job run.' },
   }[action.kind];
 
   return (
@@ -170,7 +177,11 @@ export default function Admin() {
         )}
 
         <div className="flex gap-2 border-b border-[#DDE3E0] pb-2" role="tablist">
-          {[{ id: 'reports', label: 'Reports' }, { id: 'refunds', label: `Refunds (${payments.length})` }].map(t => (
+          {[
+            { id: 'reports', label: 'Reports' },
+            { id: 'refunds', label: `Refunds (${payments.length})` },
+            { id: 'payouts', label: `Payouts (${payouts.filter(p => p.status === 'failed' || p.status === 'needs_review').length} need attention)` }
+          ].map(t => (
             <button
               key={t.id}
               type="button"
@@ -284,6 +295,7 @@ export default function Admin() {
                     <th className="p-3">Hangout</th>
                     <th className="p-3">Amount</th>
                     <th className="p-3">Why</th>
+                    <th className="p-3">Refund</th>
                     <th className="p-3">Reference</th>
                     <th className="p-3"><span className="sr-only">Action</span></th>
                   </tr>
@@ -299,8 +311,62 @@ export default function Admin() {
                       </td>
                       <td className="p-3 whitespace-nowrap font-bold">{formatMoney(p.amount, p.currency)}</td>
                       <td className="p-3 text-xs">{(p.refund_reason || '').replace(/_/g, ' ') || '—'}</td>
+                      <td className="p-3 text-xs">
+                        <span className="font-bold">{formatMoney(p.refund_amount ?? p.amount, p.currency)}</span>
+                        <div className="text-[#6F6F6F]">{(p.refund_status || 'queued').replace(/_/g, ' ')}</div>
+                        {p.refund_last_error && <div className="text-rose-700">{p.refund_last_error}</div>}
+                      </td>
                       <td className="p-3 font-mono text-xs">{p.reference}</td>
-                      <td className="p-3"><Button size="sm" variant="primary" onClick={() => openAction('refund', p)}>Mark refunded</Button></td>
+                      <td className="p-3 space-y-2">
+                        {(p.refund_status === 'failed' || p.refund_status === 'needs_review') && (
+                          <Button size="sm" variant="outline" onClick={() => openAction('retry_refund', p)}>Retry refund</Button>
+                        )}
+                        <Button size="sm" variant="primary" onClick={() => openAction('refund', p)}>Mark refunded</Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
+
+        {tab === 'payouts' && (
+          isLoading ? (
+            <div className="h-32 bg-white border border-[#E8E6E1] rounded-2xl animate-pulse" aria-busy="true" />
+          ) : payouts.length === 0 ? (
+            <p className="p-8 bg-white border border-[#E8E6E1] rounded-2xl text-center text-sm text-[#6F6F6F]">No payouts yet. Hosts are paid about 48 hours after each paid Hangout starts.</p>
+          ) : (
+            <div className="overflow-x-auto bg-white border border-[#DDE3E0] rounded-2xl">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs uppercase tracking-wider text-[#6F6F6F] border-b border-[#E8E6E1]">
+                  <tr>
+                    <th className="p-3">Due</th>
+                    <th className="p-3">Host</th>
+                    <th className="p-3">Hangout</th>
+                    <th className="p-3">Amount</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3">Reference</th>
+                    <th className="p-3"><span className="sr-only">Action</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payouts.map(p => (
+                    <tr key={p.id} className="border-b border-[#F0EEE9] last:border-0">
+                      <td className="p-3 whitespace-nowrap">{when(p.available_at)}</td>
+                      <td className="p-3">{p.host_name || '—'}</td>
+                      <td className="p-3">{p.hangout_id ? <Link to={`/hangout/${p.hangout_id}`} className="underline">{p.hangout_title}</Link> : '—'}</td>
+                      <td className="p-3 whitespace-nowrap font-bold">{formatMoney(p.amount, p.currency)}</td>
+                      <td className="p-3 text-xs">
+                        {p.status.replace(/_/g, ' ')}{p.paid_at ? ` · ${when(p.paid_at)}` : ''}
+                        {p.failure_reason && <div className="text-rose-700">{p.failure_reason.replace(/_/g, ' ')}</div>}
+                      </td>
+                      <td className="p-3 font-mono text-xs">{p.transfer_reference}</td>
+                      <td className="p-3">
+                        {(p.status === 'failed' || p.status === 'needs_review') && (
+                          <Button size="sm" variant="outline" onClick={() => openAction('retry_payout', p)}>Retry payout</Button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

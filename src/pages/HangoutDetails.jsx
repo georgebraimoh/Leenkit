@@ -27,6 +27,7 @@ import ReportModal from '../components/safety/ReportModal';
 import SafetyReminder from '../components/safety/SafetyReminder';
 import SponsorHangoutModal from '../components/hangout/SponsorHangoutModal';
 import { hangoutService } from '../services/hangout/hangoutService';
+import { useLeaveRefundMessage, leaveToastMessage } from '../hooks/useLeaveRefundMessage';
 import { paymentService } from '../services/payment/paymentService';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
@@ -81,6 +82,11 @@ export default function HangoutDetails() {
   const [notFound, setNotFound] = useState(false);
 
   const hangout = getHangoutById(id);
+  const leaveMessage = useLeaveRefundMessage(
+    hangout,
+    leaveConfirmOpen,
+    'You will lose access to the Hangout Space. You can join again while spots are open.'
+  );
   const attending = hangout ? isAttending(hangout.id) : false;
   const isHost = Boolean(currentUser?.id && hangout?.hostId === currentUser.id);
   const isMember = attending || isHost;
@@ -233,9 +239,9 @@ export default function HangoutDetails() {
     setIsLeaving(true);
     setLeaveError('');
     try {
-      await leaveHangout(hangout.id);
+      const result = await leaveHangout(hangout.id);
       setLeaveConfirmOpen(false);
-      showToast('You left the Hangout.', 'success');
+      showToast(leaveToastMessage(result), 'success');
     } catch (err) {
       setLeaveError(err.message);
     } finally {
@@ -273,9 +279,7 @@ export default function HangoutDetails() {
           onClose={() => { setLeaveConfirmOpen(false); setLeaveError(''); }}
           onConfirm={handleConfirmLeave}
           title="Leave this Hangout?"
-          message={hangout.isPaid
-            ? 'You will lose access to the Hangout Space. Leaving does not refund your ticket.'
-            : 'You will lose access to the Hangout Space. You can join again while spots are open.'}
+          message={leaveMessage}
           confirmLabel="Leave Hangout"
           isLoading={isLeaving}
           error={leaveError}

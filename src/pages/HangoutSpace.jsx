@@ -11,6 +11,7 @@ import { Lock, Sparkles, ShieldAlert, LogOut, MessageSquare, AlertTriangle } fro
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 import { closedReason } from '../utils/format';
+import { useLeaveRefundMessage } from '../hooks/useLeaveRefundMessage';
 
 function dayLabel(iso) {
   if (!iso) return '';
@@ -53,6 +54,7 @@ export default function HangoutSpace() {
 
   const isLoading = isAuthLoading || isHangoutsLoading;
   const hangout = isLoading ? null : getHangoutById(id);
+  const leaveMessage = useLeaveRefundMessage(hangout, leaveOpen, 'You will lose access to this Space.');
   const roomMessages = (id && messagesMap[id]) ? messagesMap[id] : [];
   const attending = hangout ? isAttending(hangout.id) : false;
   const closed = closedReason(hangout);
@@ -181,9 +183,7 @@ export default function HangoutSpace() {
           onClose={() => { setLeaveOpen(false); setLeaveError(''); }}
           onConfirm={handleConfirmLeave}
           title="Leave this Hangout?"
-          message={hangout.isPaid
-            ? 'You will lose access to this Space. Leaving does not refund your ticket.'
-            : 'You will lose access to this Space.'}
+          message={leaveMessage}
           confirmLabel="Leave Hangout"
           isLoading={isLeaving}
           error={leaveError}

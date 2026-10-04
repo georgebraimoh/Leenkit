@@ -1,11 +1,11 @@
-// Host payout account: list banks, verify an account number, and create or
-// update the host's Paystack subaccount (split payments).
+// Host payout account: list banks, verify an account number, and register it
+// as the host's Paystack transfer recipient (held payouts after each Hangout).
 //
 // POST { action: "banks" }
 // POST { action: "resolve", bank_code, account_number }
 // POST { action: "save", bank_code, account_number }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { adminClient, corsHeaders, getFeeSettings, json, paystack, requireUser } from "../_shared/http.ts";
+import { adminClient, corsHeaders, json, paystack, requireUser } from "../_shared/http.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
@@ -56,39 +56,26 @@ serve(async (req) => {
       return json(req, { error: "This account cannot receive payouts." }, 403);
     }
 
-    const fee = await getFeeSettings(admin);
     const bankList = await paystack("/bank?country=nigeria&currency=NGN&perPage=200");
     const bankName = (bankList.data || []).find((b: any) => b.code === bankCode)?.name || bankCode;
 
-    const { data: existing } = await admin
-      .from("host_payout_accounts")
-      .select("paystack_subaccount_code")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    const subaccountPayload = {
-      business_name: `${profile.name || "LEENKIT host"} (LEENKIT)`.slice(0, 100),
-      bank_code: bankCode,
-      settlement_bank: bankCode,
-      account_number: accountNumber,
-      // LEENKIT's share; each transaction also sets an exact transaction_charge.
-      percentage_charge: fee.percent,
-      primary_contact_email: user.email,
-      metadata: JSON.stringify({ leenkit_user_id: user.id }),
-    };
-
-    let subaccountCode: string;
-    if (existing?.paystack_subaccount_code) {
-      const res = await paystack(`/subaccount/${encodeURIComponent(existing.paystack_subaccount_code)}`, {
-        method: "PUT",
-        body: JSON.stringify(subaccountPayload),
-      });
-      subaccountCode = res.data?.subaccount_code || existing.paystack_subaccount_code;
-    } else {
-      const res = await paystack("/subaccount", { method: "POST", body: JSON.stringify(subaccountPayload) });
-      subaccountCode = res.data?.subaccount_code;
-    }
-    if (!subaccountCode) throw new Error("Paystack did not return a subaccount code.");
+    // Payouts are sent by Paystack Transfer after each Hangout, so the host's
+    // account is registered as a transfer recipient (Paystack keeps the full
+    // account number; LEENKIT stores only the last 4 digits).
+    const recipient = await paystack("/transferrecipient", {
+      method: "POST",
+      body: JSON.stringify({
+        type: "nuban",
+        name: accountName,
+        account_number: accountNumber,
+        bank_code: bankCode,
+        currency: "NGN",
+        description: `LEENKIT host ${user.id}`,
+        metadata: { leenkit_user_id: user.id },
+      }),
+    });
+    const recipientCode: string | undefined = recipient.data?.recipient_code;
+    if (!recipientCode) throw new Error("Paystack did not return a transfer recipient.");
 
     const row = {
       user_id: user.id,
@@ -97,7 +84,7 @@ serve(async (req) => {
       bank_name: bankName,
       account_name: accountName,
       account_last4: accountNumber.slice(-4),
-      paystack_subaccount_code: subaccountCode,
+      paystack_recipient_code: recipientCode,
       updated_at: new Date().toISOString(),
     };
     const { error: upsertError } = await admin.from("host_payout_accounts").upsert(row, { onConflict: "user_id" });

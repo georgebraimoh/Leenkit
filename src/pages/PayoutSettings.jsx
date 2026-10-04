@@ -111,8 +111,10 @@ export default function PayoutSettings() {
         <div className="space-y-2">
           <h1 className="text-3xl font-extrabold font-heading text-[#172121]">Payouts</h1>
           <p className="text-sm text-[#3D4948]">
-            Ticket and sponsorship payments go straight to your bank account through Paystack, usually the next business day.
-            LEENKIT keeps {fees.percent}% (minimum {formatMoney(fees.minNgn, 'NGN')}) and pays the Paystack card fees.
+            LEENKIT collects ticket and sponsorship payments and holds your share until after the Hangout, so buyers can be
+            refunded if plans change. About 2 days after each Hangout starts, your share is sent to your bank account by
+            Paystack transfer, minus any refunds. LEENKIT keeps {fees.percent}% (minimum {formatMoney(fees.minNgn, 'NGN')}) and
+            pays the Paystack card fees.
           </p>
         </div>
 
@@ -126,9 +128,11 @@ export default function PayoutSettings() {
             {earnings.map(e => (
               <React.Fragment key={e.currency}>
                 <div className="p-5 bg-white border border-[#DDE3E0] rounded-2xl">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F]">You've earned</p>
-                  <p className="text-2xl font-extrabold font-heading text-[#172121]">{formatMoney(e.hostEarnings, e.currency)}</p>
-                  <p className="text-xs text-[#6F6F6F]">from {formatMoney(e.gross, e.currency)} in sales</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F]">To be paid</p>
+                  <p className="text-2xl font-extrabold font-heading text-[#172121]">{formatMoney(e.toBePaid, e.currency)}</p>
+                  <p className="text-xs text-[#6F6F6F]">
+                    {formatMoney(e.paidOut, e.currency)} already paid to your bank · {formatMoney(e.gross, e.currency)} in sales
+                  </p>
                 </div>
                 <div className="p-5 bg-white border border-[#DDE3E0] rounded-2xl">
                   <p className="text-xs font-bold uppercase tracking-wider text-[#6F6F6F]">Sold</p>
@@ -214,7 +218,7 @@ export default function PayoutSettings() {
             </div>
 
             <p className="text-xs text-[#6F6F6F]">
-              We verify the account with Paystack and only store the bank, account name and last 4 digits. Paystack holds the full details.
+              We check the account number with Paystack and show the account name your bank returns. LEENKIT stores only the bank, account name and last 4 digits; Paystack holds the full details.
             </p>
           </form>
         )}

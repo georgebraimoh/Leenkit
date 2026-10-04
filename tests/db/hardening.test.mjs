@@ -11,8 +11,8 @@ const other = await mkUser('other@x.com', { name: 'Other' });
 const admin = await mkUser('admin@x.com', { name: 'Admin' });
 await db.exec(`UPDATE public.profiles SET is_admin = true WHERE id = '${admin}'`);
 await as('authenticated', host, `SELECT public.accept_hosting_guidelines('1.0')`);
-await db.exec(`INSERT INTO public.host_payout_accounts (user_id, bank_code, bank_name, account_name, account_last4, paystack_subaccount_code)
-               VALUES ('${host}', '058', 'GTB', 'HOST', '1234', 'ACCT_test')`);
+await db.exec(`INSERT INTO public.host_payout_accounts (user_id, bank_code, bank_name, account_name, account_last4, paystack_recipient_code)
+               VALUES ('${host}', '058', 'GTB', 'HOST', '1234', 'RCP_test')`);
 
 const reqCols = (await db.query(`SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='hangouts' AND is_nullable='NO' AND column_default IS NULL AND column_name <> 'id'`)).rows.map((r) => r.column_name);
 const base = { title: "'H'", category: "'Food'", date: "'2026-12-01'", time: "'18:00'", max_attendees: '50' };

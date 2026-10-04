@@ -10,102 +10,181 @@ email is **not** part of the first payments launch:
 
 - Payment emails stay off: with no `RESEND_API_KEY`, the Edge Functions skip
   them and payments are unaffected. `email-retry` does not need to be deployed
-  or scheduled yet.
-- Terms, FAQ and Privacy no longer promise LEENKIT receipts or refund emails,
-  and Privacy does not list Resend. When you enable Resend, re-add Resend to
-  Privacy §10 (providers) and the payment-email line to §8 (uses).
+  or scheduled yet. Paystack's own customer receipts can cover receipts.
+- Terms, FAQ and Privacy do not promise LEENKIT emails and do not list Resend.
+  When you enable Resend, re-add Resend to Privacy §10 (providers) and the
+  payment-email line to §8 (uses).
 - Keep **Confirm email** OFF in Supabase Auth for now. Supabase's built-in
   email service only delivers to your project's team members and is heavily
-  rate-limited, so confirmation (and password-reset) emails would not reach
+  rate-limited, so confirmation and password-reset emails would not reach
   normal users. The app works either way.
-- **Password reset** has the same limitation. Options until you own a domain:
-  (a) accept that reset emails do not work for users yet, or (b) configure
-  Supabase custom SMTP with a Gmail account (e.g. `qleenqapp@gmail.com`,
-  `smtp.gmail.com`, port 465, a Google *app password*), which needs no domain
-  and sends from that Gmail address (Google sending limits apply).
-- Fastest route to full email: buy a domain (~$10/year), point it at Netlify
-  as the site's custom domain, and verify a subdomain in Resend
+- **Password reset** has the same limitation. Until you own a domain you can
+  configure Supabase custom SMTP with a Gmail account (`smtp.gmail.com`,
+  port 465, a Google app password), which needs no domain.
+- Fastest route to full email: buy a domain (~$10/year), use it as the
+  Netlify site's custom domain, and verify a subdomain in Resend
   (`docs/RESEND_EMAIL_SETUP.md`).
 
-## 1. Owner decisions required
+## 1. Decisions
 
-These are business or legal choices. The code has defaults where noted; the
-Terms/UI describe the defaults and must be updated if you choose differently.
+### Made by the owner (implemented)
 
-| # | Decision | Current default in code | Where to change |
-|---|---|---|---|
-| 1 | **Platform fee** | 10% per ticket/sponsorship, minimum ₦200; minimum payment ₦1,000; LEENKIT pays Paystack's processing fee (`bearer: account`) | `public.platform_settings` (`platform_fee`), Terms §7, Sponsor modal copy |
-| 2 | **Refund policy**: when refunds happen (host cancellation, platform cancellation, attendee leaving, overflow, duplicates), who approves, who funds them | Payments are *flagged* `requires_refund`; an admin issues the refund manually in Paystack and records the Paystack refund reference; buyer then gets a "refund issued" email. No automatic refunds, no deadline promised. | Terms §7, FAQ, admin process |
-| 3 | **Who funds refunds under split payments.** The host's share is settled to their Paystack subaccount; a later refund may come out of LEENKIT's balance. | Not decided; nothing recovers money from hosts | Confirm with Paystack; decide policy |
-| 4 | **Payout hold / dispute window.** Hosts are paid by Paystack on its settlement schedule; LEENKIT holds no balance, there is no in-app withdrawal and no ledger of host funds. | No hold | If you need a hold (e.g. until after the Hangout), configure Paystack subaccount settlement or switch to a transfer-based model (new work) |
-| 5 | **Sponsorships on cancelled Hangouts** | Sponsorships *paid after* cancellation are flagged `requires_refund`; sponsorships paid *before* a cancellation are not flagged automatically | `flag_refunds_on_cancel()` |
-| 6 | **Payout account name matching** | Account number is resolved with Paystack and the bank's account name is shown; it is **not** compared with the host's name | `payout-account` function, Terms §7 |
-| 7 | **Retention periods** for payment events, safety reports, admin audit log, anonymised deleted accounts | None set (kept indefinitely). New Paystack events are stored minimised. `minimize_historical_payment_events()` exists but is not run. | Privacy §11; run the function only if you decide to |
-| 8 | **Abuse limits** | Reports 10/hour and 3 per target per day; messages 20/minute; pledges 10/hour | `20261002030000` triggers |
-| 9 | **Legal**: governing law, legal entity, minimum age, organizer verification process, professional legal review | Not decided; documents say so neutrally | Terms, Privacy |
+| Topic | Decision | Implementation |
+|---|---|---|
+| Platform fee | 10% per ticket/sponsorship, minimum ₦200; minimum payment ₦1,000; LEENKIT pays Paystack's processing fee | `platform_settings.platform_fee`; Terms §7 |
+| Host cancels (or LEENKIT cancels) | Every paid ticket and online sponsorship refunded **in full** | `flag_refunds_on_cancel()` queues full refunds |
+| Spot not confirmed (full/closed/already going) | Full refund | `settle_payment()` → `requires_refund` → queued |
+| Attendee or sponsor leaves ≥ 24h before start | Refund of what they paid **minus LEENKIT's fee** | `leave_hangout()`; preview in the Leave dialog |
+| Leaves < 24h before start / no-show | No refund | `leave_hangout()` |
+| Host money | **Held** until after the Hangout, then paid by Paystack Transfer ~48h after the start, minus refunds | `host_payouts` ledger + `payment-jobs` |
 
-## 2. Staging setup checklist
+Refunds are sent automatically by `payment-jobs` through the Paystack Refund
+API and completed by `refund.processed` webhooks. Paystack can take up to 10
+business days to return money to cards/banks.
 
-There is no staging project yet. Production (`xczzkxxpxqkqkpratiyp`) must not be used for staging.
+### Still open
 
-1. **Supabase**: create a new project (e.g. `leenkit-staging`) in the same region. Keep its URL, anon key, service-role key and database password separate from production.
-2. **Migrations**: from this branch, link the CLI to the *staging* ref and push:
+| # | Decision | Current default |
+|---|---|---|
+| A | Payout account name matching | Not compared with the host's name (Terms say so) |
+| B | Retention periods (payment events, reports, audit log, anonymised accounts) | None set; new Paystack events are stored minimised |
+| C | Abuse limits | Reports 10/h and 3 per target/day; messages 20/min; pledges 10/h |
+| D | Time zone for "24 hours before start" | West Africa Time (`platform_settings.payments.timezone`); per-Hangout time zones not supported yet |
+| E | Legal: governing law, legal entity, minimum age, organizer verification process, professional legal review | Documents stay neutral |
+
+## 2. Paystack requirements for this payment model
+
+LEENKIT now collects payments into its own Paystack balance (no split
+payments) and pays hosts by **Transfer**. In the Paystack dashboard:
+
+1. Business **activated for live payments** (compliance approved). Transfers
+   from the API generally require a **registered business** (not a Starter
+   business).
+2. **Transfers enabled** for the account.
+3. **Disable transfer OTP** (Settings → Preferences) so the API can send
+   transfers without a one-time code. If OTP stays on, payouts stop at
+   `needs_review` with that instruction.
+4. Settlement: payments settle to LEENKIT's Paystack **balance**, and payouts
+   are drawn from that balance. If your account settles everything to your
+   bank automatically, ask Paystack how to keep funds in the balance for
+   transfers (or top up the balance before payouts run).
+5. **Webhook URL** (test and live): `https://<ref>.supabase.co/functions/v1/paystack-webhook`.
+   It must receive `charge.success`, `refund.*` and `transfer.*` events.
+6. Customer receipts on (Settings → Preferences) while LEENKIT email is off.
+
+## 3. Turning payouts on
+
+Payouts are **off** by default. The ledger is still filled, so hosts see what
+they will receive. To switch on (after §2 is done), in the SQL editor:
+
+```sql
+update public.platform_settings
+set value = jsonb_set(value, '{payouts_enabled}', 'true')
+where key = 'payments';
+```
+
+Refunds are on by default. To pause them in an emergency, set
+`refunds_enabled` to `false` the same way.
+
+## 4. Scheduled job
+
+`payment-jobs` submits queued refunds and sends due payouts. Deploy it without
+JWT verification (it checks its own secret) and run it every 10 minutes:
+
+```bash
+npx supabase secrets set --project-ref <ref> CRON_SECRET=<random, at least 24 characters>
+npx supabase functions deploy payment-jobs --no-verify-jwt --project-ref <ref>
+```
+
+Enable `pg_cron` and `pg_net` (Database → Extensions), then in the SQL editor:
+
+```sql
+select vault.create_secret('<CRON_SECRET>', 'cron_secret');
+
+select cron.schedule('leenkit-payment-jobs', '*/10 * * * *', $$
+  select net.http_post(
+    url := 'https://<ref>.supabase.co/functions/v1/payment-jobs',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret')
+    ),
+    body := '{}'::jsonb
+  );
+$$);
+```
+
+## 5. Staging setup checklist
+
+There is no staging project yet. Production (`xczzkxxpxqkqkpratiyp`) must not
+be used for staging.
+
+1. **Supabase**: create a new project (e.g. `leenkit-staging`). Keep its keys
+   and password separate from production.
+2. **Migrations**: link the CLI to the *staging* ref and push:
    ```bash
    npx supabase link --project-ref <staging-ref>
-   npx supabase db push            # applies every migration in supabase/migrations
-   npx supabase migration list     # local and remote must match
+   npx supabase db push
+   npx supabase migration list
    ```
-   The same migrations are replayed from scratch by `npm run test:db` on every CI run.
-3. **Auth**: Site URL = staging site; Redirect URLs = `<staging>/auth/callback`, `<staging>/reset-password`; Google OAuth client with the staging callback (`https://<staging-ref>.supabase.co/auth/v1/callback`); turn on Confirm email.
-4. **Resend**: staging API keys; SMTP and Edge Function secrets per `docs/RESEND_EMAIL_SETUP.md`.
-5. **Paystack**: **test** secret key in the staging project's secrets (`PAYSTACK_SECRET_KEY`); in the Paystack dashboard (test mode) set the webhook URL to `https://<staging-ref>.supabase.co/functions/v1/paystack-webhook`.
-6. **Edge Function secrets**: `ALLOWED_ORIGINS=<staging site>`, `APP_URL=<staging site>`, Resend secrets, `EMAIL_RETRY_SECRET`. Deploy functions per `docs/RESEND_EMAIL_SETUP.md` §6 and schedule `email-retry`.
-7. **Netlify**: either a second site from the same repo (simplest isolation) or a branch deploy of a `staging` branch. Set `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` to the **staging** project for that site/context only. Production env vars stay unchanged.
-8. **Admin**: make your staging account admin (SQL editor on staging): `update public.profiles set is_admin = true where id = '<your staging user id>';`
-9. **Test data**: create test users only (no copies of production users). Use Paystack test cards.
-10. Run the checks in `docs/RESEND_EMAIL_SETUP.md` §7 and §3 below.
+3. **Auth**: Site URL and Redirect URLs (`<staging>/auth/callback`,
+   `<staging>/reset-password`); Google OAuth client for staging; Confirm
+   email OFF (see §0).
+4. **Paystack (test mode)**: `PAYSTACK_SECRET_KEY` = test secret key; webhook
+   URL = `https://<staging-ref>.supabase.co/functions/v1/paystack-webhook`.
+5. **Secrets**: `ALLOWED_ORIGINS=<staging site>`, `APP_URL=<staging site>`,
+   `CRON_SECRET`. Deploy all Edge Functions
+   (`paystack-webhook` and `payment-jobs` with `--no-verify-jwt`) and schedule
+   `payment-jobs` (§4). Turn payouts on in staging (§3).
+6. **Netlify**: second site (or branch deploy) with `VITE_SUPABASE_URL` /
+   `VITE_SUPABASE_ANON_KEY` of the **staging** project only.
+7. **Admin**: `update public.profiles set is_admin = true where id = '<your staging user id>';`
+8. **Test data**: test users only; Paystack test cards and test bank accounts.
 
-## 3. Staging acceptance tests (manual, on staging)
+## 6. Staging acceptance tests
 
-- [ ] Email signup → confirm → onboarding → Terms/Privacy acceptance recorded.
-- [ ] Google sign-in → acceptance prompt → recorded once.
-- [ ] Free Hangout: create (Hosting Guidelines prompt), join, message, leave, cancel.
-- [ ] Paid ticket (test card): one receipt; spot confirmed; webhook resend from Paystack does not duplicate.
-- [ ] Two buyers for the last spot at the same time: one confirmed, the other `requires_refund` + "About your payment" email.
-- [ ] Host cancels paid Hangout → tickets `requires_refund` → cancellation emails.
-- [ ] Admin: refund in Paystack test dashboard → "Mark refunded" with the refund reference → refund email; audit log entry.
-- [ ] Sponsorship (online and pledge); sponsor message visible to host only.
-- [ ] Payout account: resolve + save with a Paystack test bank account.
-- [ ] Account deletion: user with no payments (fully deleted); user with payments (anonymised; past Hangout images kept).
-- [ ] Reports: submit; 11th report in an hour is refused with a friendly message.
-- [ ] Security headers present (`curl -I <staging>`), no CSP errors in the browser console.
+- [ ] Sign up / Google sign-in → Terms & Privacy acceptance recorded once.
+- [ ] Host adds payout bank account (Paystack test account) → "To be paid" shows ₦0.
+- [ ] Buy a ticket (test card) → spot confirmed; resend the webhook → no duplicate.
+- [ ] Leave ≥ 24h before start → dialog shows refund minus fee → refund appears in Paystack (test) → payment `refunded`.
+- [ ] Leave < 24h before start → dialog says no refund; nothing refunded.
+- [ ] Two buyers for the last spot → one confirmed, the other fully refunded automatically.
+- [ ] Online sponsorship, then host cancels → ticket and sponsorship fully refunded.
+- [ ] Hangout in the past (set its date back in staging) → after the next job run a payout is created; with payouts on, a Paystack test transfer is sent and marked paid by `transfer.success`.
+- [ ] Cancelling that Hangout after the payout is paid is refused.
+- [ ] Admin: refunds and payouts tabs; retry a failed refund / payout; audit log entries.
+- [ ] Account deletion with and without payments.
+- [ ] Security headers present; no CSP errors in the browser console.
 
-## 4. Paystack live-payment checklist (do not start without explicit owner approval)
+## 7. Paystack live-payment checklist (only with explicit owner approval)
 
-- [ ] Paystack business account activated for live payments; compliance/KYC complete (owner).
-- [ ] Decisions 1–5 above made, and Terms/FAQ/UI updated to match.
-- [ ] All staging tests in §3 passed with test keys.
-- [ ] Confirmed with Paystack: split-payment refund behaviour, chargeback liability, subaccount settlement schedule.
-- [ ] Live **secret** key set only as `PAYSTACK_SECRET_KEY` in the production project's Edge Function secrets (never in Git or `VITE_*`). The frontend does not use a Paystack public key (checkout is a redirect).
-- [ ] Live webhook URL in Paystack (live mode): `https://xczzkxxpxqkqkpratiyp.supabase.co/functions/v1/paystack-webhook`; signature verification uses the live secret key.
-- [ ] `ALLOWED_ORIGINS=https://leenkit.netlify.app` (and any custom domain) set in production.
-- [ ] Production smoke test with a small real payment by the owner, then refund it via the admin flow.
-- [ ] Rollback plan (§5) rehearsed on staging.
+- [ ] §2 complete on the live Paystack account.
+- [ ] All staging tests in §6 passed with test keys.
+- [ ] Live **secret** key only as `PAYSTACK_SECRET_KEY` in the production project's Edge Function secrets (never in Git or `VITE_*`). The frontend uses no Paystack key (checkout is a redirect).
+- [ ] Live webhook URL set: `https://xczzkxxpxqkqkpratiyp.supabase.co/functions/v1/paystack-webhook`.
+- [ ] `ALLOWED_ORIGINS=https://leenkit.netlify.app` (plus any custom domain) in production.
+- [ ] Test-mode payments created in production while it used test keys are reviewed (they are not real money) before live payouts are enabled.
+- [ ] `payment-jobs` scheduled; payouts switched on (§3).
+- [ ] Owner makes a small real payment, leaves ≥ 24h before start, and confirms the refund arrives.
+- [ ] Rollback plan (§8) understood.
 
-## 5. Production release and rollback
+## 8. Production release and rollback
 
-**Before release:** take a backup (Supabase dashboard → Database → Backups if on a paid plan; otherwise `npx supabase db dump --linked -f backup-schema.sql` and `npx supabase db dump --linked --data-only -f backup-data.sql`, which need Docker) and store it outside the repo.
+**Before release:** take a backup (Database → Backups on a paid plan; otherwise
+`npx supabase db dump --linked -f backup-schema.sql` and
+`npx supabase db dump --linked --data-only -f backup-data.sql`, which need
+Docker) and keep it outside the repo.
 
-**Release order (one maintenance window):** apply migrations → set secrets → deploy Edge Functions → schedule `email-retry` → Auth/SMTP settings → merge to `main` (Netlify deploys the frontend) → smoke test.
+**Release order (one window):** apply migrations → set secrets → deploy Edge
+Functions → schedule `payment-jobs` → merge to `main` (Netlify deploys the
+frontend) → smoke test → only then switch payouts on.
 
 **Rollback:**
 - Frontend: Netlify → Deploys → publish the previous deploy (`49b73ee`).
-- Edge Functions: redeploy from the previous commit (`git checkout 49b73ee -- supabase/functions && npx supabase functions deploy ...`), then restore the working tree.
-- Database: migrations are forward-only. If the old frontend must run against the new schema, re-open the two compatibility points:
+- Edge Functions: redeploy from the previous commit.
+- Payments: set `refunds_enabled` / `payouts_enabled` to `false` to stop money movement immediately without a redeploy.
+- Database: migrations are forward-only. If the old frontend must run against the new schema:
   ```sql
-  -- old frontend selects * on profiles
-  grant select on table public.profiles to anon, authenticated;
-  -- old frontend records acceptance for 2026-10-01
-  -- (re-create record_legal_acceptance with c_terms_version/c_privacy_version = '2026-10-01')
+  grant select on table public.profiles to anon, authenticated;  -- old frontend selects * on profiles
+  -- and re-create record_legal_acceptance() accepting version '2026-10-01'
   ```
-  Restore from backup only as a last resort (it loses data written since the backup).
+  Restore from backup only as a last resort.

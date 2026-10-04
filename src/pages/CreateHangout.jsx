@@ -467,7 +467,7 @@ export default function CreateHangout() {
                     </div>
 
                     <p className="text-[11px] text-[#3D4948] bg-white p-3 rounded-xl border border-[#DDE3E0]">
-                      <strong>How tickets work:</strong> attendees pay online through Paystack and the money goes to your bank account, usually the next business day. LEENKIT keeps {feeSettings.percent}% (min {formatMoney(feeSettings.minNgn, 'NGN')}) and covers Paystack's card fees.
+                      <strong>How tickets work:</strong> attendees pay online through Paystack. LEENKIT holds the money until after the Hangout and sends your share to your bank about 2 days after it starts, minus any refunds (people who leave at least 24 hours before the start get their money back minus LEENKIT's fee; if you cancel, everyone is refunded in full). LEENKIT keeps {feeSettings.percent}% (min {formatMoney(feeSettings.minNgn, 'NGN')}) and covers Paystack's card fees.
                       {Number(formData.price) >= feeSettings.minPaymentNgn && (
                         <> You receive <strong>{formatMoney(estimateFee(formData.price, feeSettings).hostAmount, 'NGN')}</strong> per ticket.</>
                       )}
