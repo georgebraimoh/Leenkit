@@ -9,6 +9,7 @@ import { CATEGORIES } from '../data/categories';
 import SafetySection from '../components/safety/SafetySection';
 import Reveal from '../components/common/Reveal';
 import SquiggleBalls from '../components/common/SquiggleBalls';
+import HomeFaq from '../components/faq/HomeFaq';
 import { isOpenHangout, sortByEventDate } from '../utils/format';
 
 const STEPS = [
@@ -143,6 +144,11 @@ export default function Home() {
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
+        </Reveal>
+
+        {/* FAQ */}
+        <Reveal>
+          <HomeFaq />
         </Reveal>
       </div>
     </PageTransition>
