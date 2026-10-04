@@ -159,7 +159,7 @@ const FAQ_SECTIONS = [
         id: 'how-payments',
         question: 'How do payments work?',
         answer:
-          'Paid tickets and online sponsorships are paid on the Hangout page through Paystack, in Nigerian Naira. Your spot is confirmed only after LEENKIT has verified the payment with Paystack, and you get a receipt by email. Review the Hangout details so you know what you are paying for.'
+          'Paid tickets and online sponsorships are paid on the Hangout page through Paystack, in Nigerian Naira. Your spot is confirmed only after LEENKIT has verified the payment with Paystack; the Hangout page shows the result. Paystack may also send you its own payment receipt. Review the Hangout details so you know what you are paying for.'
       },
       {
         id: 'what-is-sponsorship',

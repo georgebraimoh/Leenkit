@@ -88,6 +88,21 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Suspended or deleted accounts cannot pay (settlement runs as the service
+    // role, so the attendee/sponsorship RLS checks would not stop them).
+    const { data: payerProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("suspended_at, deleted_at")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!payerProfile || payerProfile.suspended_at || payerProfile.deleted_at) {
+      return new Response(JSON.stringify({ error: "This account cannot make payments." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Fetch authoritative Hangout record from DB (ignore ticket prices sent by browser)
     const { data: hangout, error: hangoutError } = await supabaseAdmin
       .from("hangouts")

@@ -157,7 +157,7 @@ export default function Terms() {
               <strong>Payout accounts.</strong> To sell tickets or receive online sponsorships, an Organizer must add a Nigerian bank account. LEENKIT checks the account number with Paystack and shows the account name the bank returns; LEENKIT does not currently confirm that this name matches the Organizer. Organizers must only add accounts they are entitled to receive money into, and are responsible for any taxes on what they earn.
             </p>
             <p>
-              <strong>Refunds.</strong> If a Hangout is cancelled, or LEENKIT cannot confirm a buyer’s spot (for example, it filled up while they were paying), the payment is flagged for review by LEENKIT. Refunds are not automatic: where LEENKIT issues a refund, it is made through Paystack to the original payment method, and the buyer is told by email once it has been issued. Leaving a Hangout you paid for does not automatically entitle you to a refund. LEENKIT’s full refund policy, including how refunds for Organizer cancellations are funded, is still being finalised.
+              <strong>Refunds.</strong> If a Hangout is cancelled, or LEENKIT cannot confirm a buyer’s spot (for example, it filled up while they were paying), the payment is flagged for review by LEENKIT. Refunds are not automatic: where LEENKIT issues a refund, it is made through Paystack to the original payment method. Leaving a Hangout you paid for does not automatically entitle you to a refund. LEENKIT’s full refund policy, including how refunds for Organizer cancellations are funded, is still being finalised.
             </p>
             <p>
               <strong>Pledges</strong> are promises recorded in the app with no payment. LEENKIT is not involved in settling pledges.

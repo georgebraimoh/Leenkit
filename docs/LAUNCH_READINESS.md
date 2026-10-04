@@ -3,6 +3,30 @@
 Status of branch `feature/payouts-admin` (not merged, not deployed). Nothing in
 this document has been applied to production.
 
+## 0. Email status: deferred (no sending domain yet)
+
+Resend needs a domain you own (`leenkit.netlify.app` cannot be verified), so
+email is **not** part of the first payments launch:
+
+- Payment emails stay off: with no `RESEND_API_KEY`, the Edge Functions skip
+  them and payments are unaffected. `email-retry` does not need to be deployed
+  or scheduled yet.
+- Terms, FAQ and Privacy no longer promise LEENKIT receipts or refund emails,
+  and Privacy does not list Resend. When you enable Resend, re-add Resend to
+  Privacy §10 (providers) and the payment-email line to §8 (uses).
+- Keep **Confirm email** OFF in Supabase Auth for now. Supabase's built-in
+  email service only delivers to your project's team members and is heavily
+  rate-limited, so confirmation (and password-reset) emails would not reach
+  normal users. The app works either way.
+- **Password reset** has the same limitation. Options until you own a domain:
+  (a) accept that reset emails do not work for users yet, or (b) configure
+  Supabase custom SMTP with a Gmail account (e.g. `qleenqapp@gmail.com`,
+  `smtp.gmail.com`, port 465, a Google *app password*), which needs no domain
+  and sends from that Gmail address (Google sending limits apply).
+- Fastest route to full email: buy a domain (~$10/year), point it at Netlify
+  as the site's custom domain, and verify a subdomain in Resend
+  (`docs/RESEND_EMAIL_SETUP.md`).
+
 ## 1. Owner decisions required
 
 These are business or legal choices. The code has defaults where noted; the
