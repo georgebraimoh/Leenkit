@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { emailConfigFromEnv } from "../_shared/email.ts";
+import { runAfterResponse, sendPaymentEmailOnce } from "../_shared/paymentEmails.ts";
 
 // Webhook HMAC-SHA512 Signature Verification
 async function verifyHmacSignature(secret: string, bodyText: string, signature: string): Promise<boolean> {
@@ -93,5 +95,14 @@ serve(async (req) => {
     "completed";
 
   await supabaseAdmin.from("payment_events").update({ status: eventStatus }).eq("event_key", eventKey);
+
+  // Receipt / payment-not-confirmed email via Resend. Sent at most once per
+  // payment; failures are logged and never affect settlement or this response.
+  if (settled === "successful" || settled === "requires_refund") {
+    await runAfterResponse(
+      sendPaymentEmailOnce(supabaseAdmin, reference, emailConfigFromEnv((k) => Deno.env.get(k))),
+    );
+  }
+
   return new Response(`Webhook processed: ${settled}`, { status: 200 });
 });

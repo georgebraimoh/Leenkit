@@ -177,6 +177,7 @@ export default function Privacy() {
               <li>Create and maintain your account and sign you in</li>
               <li>Show profiles and Hangouts and let people discover, join, and share Hangouts</li>
               <li>Run Hangout Spaces and send in-app notifications</li>
+              <li>Send account emails, such as email confirmation and password reset links, and payment emails, such as receipts and notices about a payment we could not confirm</li>
               <li>Process ticket and sponsorship payments and confirm attendance</li>
               <li>Record acceptance of our Terms, Privacy Policy, and Hosting Guidelines</li>
               <li>Protect the Service, enforce our Terms, and respond to misuse</li>
@@ -214,6 +215,7 @@ export default function Privacy() {
               <li><strong className="text-[#172121]">Supabase</strong> — authentication, database, file storage, and server functions</li>
               <li><strong className="text-[#172121]">Netlify</strong> — website hosting</li>
               <li><strong className="text-[#172121]">Paystack</strong> — payment processing</li>
+              <li><strong className="text-[#172121]">Resend</strong> — delivering account and payment emails (your email address and the content of those emails)</li>
               <li><strong className="text-[#172121]">Google</strong> — optional sign-in and web fonts</li>
             </ul>
             <p>
@@ -239,7 +241,10 @@ export default function Privacy() {
               <li>You can view and edit your profile details at any time from Edit Profile.</li>
               <li>You can choose what you post in Hangouts, Hangout Spaces, and your profile.</li>
               <li>
-                You can delete your account at any time from Edit Profile → Delete account. We remove your profile, photos, messages, follows, notifications and payout details. If you have bought or sold tickets or sponsorships, we keep the payment records (amount, date, Hangout and reference) for accounting and legal obligations, but they are no longer linked to your name, username or email.
+                You can delete your account at any time from Edit Profile → Delete account. Upcoming Hangouts you host are cancelled, and we remove your profile details, uploaded photos, follows, notifications, payout details and your messages in Hangout Spaces.
+              </li>
+              <li>
+                If you have never made or received a payment, your account and its remaining records are deleted. If you have bought or sold tickets or sponsorships, we keep the payment records (such as amount, date, Hangout and reference) and the payment confirmations received from Paystack for accounting, dispute and legal purposes, together with your Terms and Privacy acceptance records and any safety reports you submitted. These stay linked to an anonymised account record that no longer shows your name or username, but Paystack’s confirmations can include the email address used for the payment. Past Hangouts you hosted that had payments remain, shown as hosted by a deleted member. Paystack keeps its own records under its own policies.
               </li>
             </ul>
             <p>

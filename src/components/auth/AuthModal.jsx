@@ -7,6 +7,7 @@ import { useUser } from '../../context/UserContext';
 import { Mail } from 'lucide-react';
 import leenkitIcon from '../../assets/Leenkit icon.png';
 import { EMAIL_CONFIRMATION_NOTICE } from '../../data/legal';
+import ResendConfirmation from './ResendConfirmation';
 
 export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) {
   const { loginWithGoogle, loginWithEmail, registerWithEmail } = useUser();
@@ -15,6 +16,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [authNotice, setAuthNotice] = useState('');
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState('');
 
   // Open on the requested view every time, with no stale errors.
   useEffect(() => {
@@ -44,11 +46,13 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
   const handleEmailLogin = async ({ email, password }) => {
     setIsLoading(true);
     setAuthError('');
+    setUnconfirmedEmail('');
     try {
       await loginWithEmail(email, password);
       onClose();
     } catch (e) {
       setAuthError(e.message || "Failed to sign in.");
+      if (e.code === 'email_not_confirmed') setUnconfirmedEmail(email);
     } finally {
       setIsLoading(false);
     }
@@ -61,6 +65,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
       const result = await registerWithEmail({ name, email, password, avatar, acceptedLegal });
       if (result?.needsEmailConfirmation) {
         setAuthNotice(EMAIL_CONFIRMATION_NOTICE);
+        setUnconfirmedEmail(email);
         setView('login');
         return;
       }
@@ -148,6 +153,12 @@ export default function AuthModal({ isOpen, onClose, initialView = 'welcome' }) 
         {authNotice && view === 'login' && (
           <div role="status" className="p-3 bg-[#DDF4EF] border border-[#18A999]/30 rounded-2xl text-xs font-medium text-[#087F73] text-left">
             {authNotice}
+          </div>
+        )}
+
+        {unconfirmedEmail && view === 'login' && (
+          <div className="text-left">
+            <ResendConfirmation email={unconfirmedEmail} />
           </div>
         )}
 

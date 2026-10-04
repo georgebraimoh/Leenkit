@@ -7,7 +7,7 @@ export const PRIVACY_VERSION = '2026-10-02';
 
 // Human-readable "Last updated" dates shown on the documents.
 export const TERMS_LAST_UPDATED = 'October 2, 2026';
-export const PRIVACY_LAST_UPDATED = 'October 2, 2026';
+export const PRIVACY_LAST_UPDATED = 'October 4, 2026';
 
 // Shown when signup needs email confirmation: acceptance can only be recorded
 // once the user has a session, so the legal gate asks on first sign-in.

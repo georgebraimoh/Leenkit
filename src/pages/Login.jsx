@@ -5,6 +5,7 @@ import LoginForm from '../components/auth/LoginForm';
 import SignUpForm from '../components/auth/SignUpForm';
 import { useUser } from '../context/UserContext';
 import { EMAIL_CONFIRMATION_NOTICE } from '../data/legal';
+import ResendConfirmation from '../components/auth/ResendConfirmation';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [authNotice, setAuthNotice] = useState('');
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState('');
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -43,11 +45,13 @@ export default function Login() {
   const handleEmailLogin = async ({ email, password }) => {
     setIsLoading(true);
     setAuthError('');
+    setUnconfirmedEmail('');
     try {
       await loginWithEmail(email, password);
       navigate('/explore');
     } catch (e) {
       setAuthError(e.message || "Failed to sign in.");
+      if (e.code === 'email_not_confirmed') setUnconfirmedEmail(email);
     } finally {
       setIsLoading(false);
     }
@@ -60,6 +64,7 @@ export default function Login() {
       const result = await registerWithEmail({ name, email, password, avatar, acceptedLegal });
       if (result?.needsEmailConfirmation) {
         setAuthNotice(EMAIL_CONFIRMATION_NOTICE);
+        setUnconfirmedEmail(email);
         setIsSignUp(false);
         return;
       }
@@ -143,6 +148,8 @@ export default function Login() {
               {authNotice}
             </div>
           )}
+
+          {unconfirmedEmail && !isSignUp && <ResendConfirmation email={unconfirmedEmail} />}
 
           {/* Email Form */}
           {isSignUp ? (

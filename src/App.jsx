@@ -25,6 +25,7 @@ const MyHangouts = lazy(() => import('./pages/MyHangouts'));
 const Profile = lazy(() => import('./pages/Profile'));
 const EditProfile = lazy(() => import('./pages/EditProfile'));
 const Login = lazy(() => import('./pages/Login'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Safety = lazy(() => import('./pages/Safety'));
 const Faq = lazy(() => import('./pages/Faq'));
@@ -66,6 +67,7 @@ function AnimatedRoutes() {
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/safety" element={<Safety />} />

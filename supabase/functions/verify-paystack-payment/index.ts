@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { emailConfigFromEnv } from "../_shared/email.ts";
+import { runAfterResponse, sendPaymentEmailOnce } from "../_shared/paymentEmails.ts";
 
 function getAllowedOrigins(): string[] {
   const envOrigins = Deno.env.get("ALLOWED_ORIGINS");
@@ -116,6 +118,14 @@ serve(async (req) => {
 
         payment.status = settled === "not_found" ? payment.status : settled;
       }
+    }
+
+    // Same once-only email as the webhook (whichever runs first sends it; a
+    // failed earlier attempt is retried here). Never affects the response.
+    if (payment.status === "successful" || payment.status === "requires_refund") {
+      await runAfterResponse(
+        sendPaymentEmailOnce(supabaseAdmin, reference, emailConfigFromEnv((k) => Deno.env.get(k))),
+      );
     }
 
     return new Response(JSON.stringify({ status: payment.status, payment }), {

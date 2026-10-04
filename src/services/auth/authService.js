@@ -6,6 +6,30 @@ const DEFAULT_AVATAR = null;
 
 export const CURRENT_GUIDELINES_VERSION = '1.0';
 
+// Public profile columns. Must match the column-level SELECT grant in
+// 20261002020100_profile_private_fields.sql; select('*') is not permitted
+// because admin/moderation columns are private.
+const PROFILE_COLUMNS = [
+  'id', 'name', 'username', 'avatar', 'location', 'bio', 'interests',
+  'hosted_count', 'attended_count', 'is_organizer', 'is_verified_organizer',
+  'organizer_verified_at', 'followers_count', 'following_count', 'created_at',
+  'updated_at', 'instagram_url', 'tiktok_url', 'spotify_url',
+  'hosting_guidelines_accepted_at', 'hosting_guidelines_version'
+].join(',');
+
+// The signed-in user's own admin / suspension / deletion state. These fields
+// are not readable on profiles; only get_my_account_status() returns them,
+// and only for the caller. Fails safe: no status means "not admin".
+async function getMyAccountStatus() {
+  const { data, error } = await supabase.rpc('get_my_account_status');
+  if (error) {
+    console.warn('Could not load account status:', error.message);
+    return {};
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  return row || {};
+}
+
 function guidelinesAcceptError(error) {
   const parts = [error?.message, error?.details, error?.hint, error?.code].filter(Boolean);
   const detail = parts.join(' | ') || 'Unknown error';
@@ -18,7 +42,7 @@ function guidelinesAcceptError(error) {
   return new Error(error?.message || 'Failed to accept hosting guidelines');
 }
 
-function formatUser(authUser, profile = {}) {
+function formatUser(authUser, profile = {}, status = {}) {
   return {
     id: authUser.id,
     name:
@@ -51,10 +75,10 @@ function formatUser(authUser, profile = {}) {
     organizerVerifiedAt: profile.organizer_verified_at || null,
     hostedCount: profile.hosted_count || 0,
     attendedCount: profile.attended_count || 0,
-    isAdmin: Boolean(profile.is_admin),
-    suspendedAt: profile.suspended_at || null,
-    suspensionReason: profile.suspension_reason || null,
-    deletedAt: profile.deleted_at || null
+    isAdmin: Boolean(status.is_admin),
+    suspendedAt: status.suspended_at || null,
+    suspensionReason: status.suspension_reason || null,
+    deletedAt: status.deleted_at || null
   };
 }
 
@@ -62,7 +86,8 @@ function formatProfile(p) {
   if (!p) return null;
   return {
     id: p.id,
-    name: p.deleted_at ? 'Deleted member' : (p.name || 'LEENKIT Member'),
+    // Deleted accounts are anonymised server-side (name "Deleted member").
+    name: p.name || 'LEENKIT Member',
     email: p.email || '',
     username: p.username || `user_${p.id.slice(0, 8)}`,
     avatar: p.avatar || DEFAULT_AVATAR,
@@ -78,31 +103,54 @@ function formatProfile(p) {
     isVerifiedOrganizer: Boolean(p.is_verified_organizer),
     organizerVerifiedAt: p.organizer_verified_at || null,
     hostedCount: p.hosted_count || 0,
-    attendedCount: p.attended_count || 0,
-    isAdmin: Boolean(p.is_admin),
-    suspendedAt: p.suspended_at || null,
-    deletedAt: p.deleted_at || null
+    attendedCount: p.attended_count || 0
   };
 }
 
+// Where Supabase sends people after they click the confirmation link. The
+// URL must be in Supabase Auth → URL Configuration → Redirect URLs; if it is
+// not, Supabase falls back to the Site URL and the session is still picked up.
+function confirmationRedirectUrl() {
+  return `${window.location.origin}/auth/callback?next=/onboarding`;
+}
+
+// Supabase Auth error → message and code the UI can act on.
+function authError(error, fallback) {
+  const code = error?.code || '';
+  const message = error?.message || '';
+  let friendly = message || fallback;
+
+  if (code === 'email_not_confirmed' || /email not confirmed/i.test(message)) {
+    friendly = 'Please confirm your email address before signing in. Check your inbox for the confirmation link.';
+  } else if (
+    code === 'over_email_send_rate_limit' ||
+    code === 'over_request_rate_limit' ||
+    error?.status === 429 ||
+    /rate limit|only request this after/i.test(message)
+  ) {
+    friendly = 'Too many emails were requested. Please wait a minute and try again.';
+  } else if (code === 'invalid_credentials' || /invalid login credentials/i.test(message)) {
+    friendly = 'Incorrect email or password.';
+  }
+
+  const err = new Error(friendly);
+  err.code = code || (/email not confirmed/i.test(message) ? 'email_not_confirmed' : undefined);
+  return err;
+}
+
 async function getProfile(authUser) {
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', authUser.id)
-    .maybeSingle();
+  const [{ data: profile, error }, status] = await Promise.all([
+    supabase.from('profiles').select(PROFILE_COLUMNS).eq('id', authUser.id).maybeSingle(),
+    getMyAccountStatus()
+  ]);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  if (profile) {
-    return formatUser(authUser, profile);
-  }
-
   // The handle_new_user() trigger creates every profile. If the row is not
   // there yet (trigger lag), show the auth data without writing anything.
-  return formatUser(authUser, {});
+  return formatUser(authUser, profile || {}, status);
 }
 
 export const authService = {
@@ -111,7 +159,7 @@ export const authService = {
   async fetchProfilesAll() {
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(PROFILE_COLUMNS)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -128,7 +176,7 @@ export const authService = {
 
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(PROFILE_COLUMNS)
       .in('id', uniqueIds);
 
     if (error) {
@@ -144,7 +192,7 @@ export const authService = {
 
     const { data: p, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(PROFILE_COLUMNS)
       .eq('username', username)
       .maybeSingle();
 
@@ -180,7 +228,7 @@ export const authService = {
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw authError(error, 'Unable to sign in. Please try again.');
     }
 
     if (!data.user) {
@@ -201,6 +249,7 @@ export const authService = {
       email: email.trim(),
       password,
       options: {
+        emailRedirectTo: confirmationRedirectUrl(),
         data: {
           name: name.trim(),
           ...(avatar ? { avatar } : {})
@@ -209,7 +258,7 @@ export const authService = {
     });
 
     if (error) {
-      throw new Error(error.message);
+      throw authError(error, 'Account could not be created. Please try again.');
     }
 
     if (!data.user) {
@@ -223,6 +272,26 @@ export const authService = {
 
     const user = await getProfile(data.user);
     return { user, needsEmailConfirmation: false };
+  },
+
+  // Sends the signup confirmation email again (delivered through the SMTP
+  // provider configured in Supabase, e.g. Resend). Supabase rate-limits this;
+  // it also returns success for unknown emails so accounts can't be probed.
+  async resendConfirmationEmail(email) {
+    const trimmed = (email || '').trim();
+    if (!trimmed) {
+      throw new Error('Please enter your email address.');
+    }
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: trimmed,
+      options: { emailRedirectTo: confirmationRedirectUrl() }
+    });
+
+    if (error) {
+      throw authError(error, 'Could not resend the confirmation email. Please try again.');
+    }
   },
 
   async getCurrentUser() {
@@ -373,7 +442,7 @@ export const authService = {
       .from('profiles')
       .update(updatesPayload)
       .eq('id', userId)
-      .select()
+      .select(PROFILE_COLUMNS)
       .single();
 
     if (error) {
@@ -386,10 +455,10 @@ export const authService = {
     } = await supabase.auth.getUser();
 
     if (userError || !authUser) {
-      return formatUser({ id: userId }, profile || {});
+      return formatUser({ id: userId }, profile || {}, await getMyAccountStatus());
     }
 
-    return formatUser(authUser, profile || {});
+    return formatUser(authUser, profile || {}, await getMyAccountStatus());
   },
 
   async acceptHostingGuidelines(version = CURRENT_GUIDELINES_VERSION) {
@@ -428,7 +497,7 @@ export const authService = {
 
     const { data: profileData, error: refreshError } = await supabase
       .from('profiles')
-      .select('*')
+      .select(PROFILE_COLUMNS)
       .eq('id', authUser.id)
       .maybeSingle();
 
@@ -443,7 +512,7 @@ export const authService = {
       throw new Error('Failed to accept hosting guidelines: acceptance was not saved.');
     }
 
-    return formatUser(authUser, profileData);
+    return formatUser(authUser, profileData, await getMyAccountStatus());
   },
 
   // Returns true only if the signed-in user has a stored acceptance of the
