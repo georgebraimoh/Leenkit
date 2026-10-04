@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "npm run test:email && npm run test:db",
+    "test:email": "node tests/email/email.test.mts",
+    "test:db": "node tests/db/core.test.mjs && node tests/db/batch.test.mjs && node tests/db/hardening.test.mjs",
+    "check:secrets": "node scripts/check-secrets.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
@@ -20,10 +24,14 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.3.16",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
     "vite": "^8.3.0"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }
