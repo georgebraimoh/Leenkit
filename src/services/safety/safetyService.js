@@ -31,6 +31,9 @@ export const safetyService = {
     });
 
     if (error) {
+      if ((error.message || '').includes('LEENKIT_RATE_LIMITED')) {
+        throw new Error('You have sent several reports recently. Please wait a while before reporting again.');
+      }
       throw new Error('Your report could not be submitted. Please try again.');
     }
   }

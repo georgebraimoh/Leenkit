@@ -3,6 +3,14 @@ import { supabase } from '../../lib/supabase';
 export const MIN_HANGOUT_CAPACITY = 2;
 export const MAX_HANGOUT_CAPACITY = 10000;
 
+// Database guard errors (triggers/policies) -> messages people can act on.
+function dbError(error) {
+  const msg = error?.message || "";
+  if (msg.includes("LEENKIT_RATE_LIMITED")) return new Error("You are doing that too often. Please wait a moment and try again.");
+  if (msg.includes("LEENKIT_HANGOUT_CLOSED")) return new Error("This Hangout is no longer open.");
+  return new Error(msg || "Something went wrong. Please try again.");
+}
+
 const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80';
 
 function formatHangout(dbHangout, attendeesList = []) {
@@ -366,7 +374,7 @@ export const hangoutService = {
       .single();
 
     if (error) {
-      throw new Error(error.message);
+      throw dbError(error);
     }
 
     return this.formatMessage(data);
@@ -403,7 +411,7 @@ export const hangoutService = {
       .single();
 
     if (error) {
-      throw new Error(error.message);
+      throw dbError(error);
     }
 
     return {

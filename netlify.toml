@@ -2,3 +2,21 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Security headers for every page and asset.
+# CSP inventory (keep in sync when adding third parties):
+# - scripts: own bundle only (Vite emits no inline scripts)
+# - styles: own CSS + inline style attributes (React/framer-motion) + Google Fonts CSS
+# - fonts: Google Fonts
+# - images: any https source (Unsplash defaults, Supabase Storage, Google avatars) + data/blob previews
+# - connect: Supabase REST/Auth/Storage/Edge Functions (https) and Realtime (wss)
+# Paystack checkout and Google sign-in are full-page navigations, not embeds.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), payment=(), usb=(), interest-cohort=()"
+    Cross-Origin-Opener-Policy = "same-origin-allow-popups"

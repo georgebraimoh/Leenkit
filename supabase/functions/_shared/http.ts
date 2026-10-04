@@ -6,8 +6,10 @@ export function getAllowedOrigins(): string[] {
   if (envOrigins && envOrigins.trim().length > 0) {
     return envOrigins.split(",").map((o) => o.trim().toLowerCase()).filter(Boolean);
   }
-  console.error("ALLOWED_ORIGINS secret is not set; falling back to the production site and localhost.");
-  return ["https://leenkit.netlify.app", "http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"];
+  // Fail closed: without an explicit allowlist no browser origin (and no
+  // payment callback URL) is accepted. Set ALLOWED_ORIGINS per environment.
+  console.error("ALLOWED_ORIGINS secret is not set; rejecting all browser origins.");
+  return [];
 }
 
 export function corsHeaders(req: Request): Record<string, string> {

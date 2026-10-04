@@ -84,8 +84,14 @@ export default function Admin() {
 
   const runAction = async () => {
     if (!action) return;
-    setIsWorking(true);
     setActionError('');
+    // A payment is only marked refunded with evidence of a real Paystack
+    // refund (the database enforces this too).
+    if (action.kind === 'refund' && !note.trim()) {
+      setActionError('Enter the Paystack refund reference. Issue the refund in Paystack first.');
+      return;
+    }
+    setIsWorking(true);
     try {
       const { kind, item, status } = action;
       if (kind === 'report') await adminService.updateReport(item.id, status, note);
@@ -307,7 +313,9 @@ export default function Admin() {
           <div className="space-y-4">
             {actionCopy?.body && <p className="text-sm text-[#3D4948]">{actionCopy.body}</p>}
             <label className="block space-y-1.5">
-              <span className="text-xs font-bold text-[#172121]">Internal note (optional)</span>
+              <span className="text-xs font-bold text-[#172121]">
+                {action?.kind === 'refund' ? 'Paystack refund reference (required)' : 'Internal note (optional)'}
+              </span>
               <textarea
                 rows="3"
                 maxLength={1000}
