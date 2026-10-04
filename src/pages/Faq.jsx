@@ -159,7 +159,7 @@ const FAQ_SECTIONS = [
         id: 'how-payments',
         question: 'How do payments work?',
         answer:
-          'When a Hangout uses LEENKIT’s in-app payment flow, you complete checkout through the payment process shown on that Hangout. Some Hangouts may list a price for venue or on-site settlement instead. LEENKIT may also use third-party payment providers to process transactions. Review the Hangout details so you know what you are paying for.'
+          'Paid tickets and online sponsorships are paid on the Hangout page through Paystack, in Nigerian Naira. Your spot is confirmed only after LEENKIT has verified the payment with Paystack, and you get a receipt by email. Review the Hangout details so you know what you are paying for.'
       },
       {
         id: 'what-is-sponsorship',

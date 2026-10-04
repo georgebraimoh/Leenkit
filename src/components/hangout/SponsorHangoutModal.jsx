@@ -142,7 +142,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
             /* Form State: Enter Amount & Optional Message */
             <form onSubmit={handleSubmit} className="space-y-5">
               <p className="text-xs text-[#6F6F6F] -mt-2">
-                Help cover snacks, gear or the venue. Paystack payments go to the host (LEENKIT keeps 10% and covers card fees). Pledges are promises with no payment.
+                Help cover snacks, gear or the venue. Paystack payments go to the host (LEENKIT keeps a platform fee of 10%, minimum ₦200, and covers card fees). Pledges are promises with no payment.
               </p>
 
               {errorMsg && (

@@ -131,7 +131,7 @@ export default function Privacy() {
               Paid tickets and paid sponsorships are processed by Paystack, a third-party payment provider. When you start a payment, LEENKIT sends Paystack your email address, the amount and currency, a transaction reference, and identifiers for the Hangout and payment type. You then enter your payment details on Paystack’s checkout page — LEENKIT’s own forms do not ask for your card number.
             </p>
             <p>
-              LEENKIT keeps a record of each payment, including the reference, amount, currency, status, payment type, related Hangout, your email address, the Hangout title, any sponsorship message, and relevant timestamps. LEENKIT also stores the payment confirmation notices that Paystack sends. These notices may include transaction details and limited payment-method information provided by Paystack.
+              LEENKIT keeps a record of each payment, including the reference, amount, currency, status, payment type, related Hangout, your email address, the Hangout title, any sponsorship message, and relevant timestamps. LEENKIT also stores a reduced copy of the payment confirmations Paystack sends: transaction details such as the reference, amount, currency, status, timing, channel and fees, without your card or contact details. Confirmations received before this reduction was introduced may also contain limited payment-method details and the email address used for the payment.
             </p>
             <p>
               LEENKIT also records the platform fee and the Organizer’s share for each payment, so Organizers can see what they earned.
@@ -152,7 +152,7 @@ export default function Privacy() {
               LEENKIT includes a Report option on Hangouts, profiles, and Hangout Spaces. You must be signed in to submit a report. When you do, LEENKIT stores the report on its servers with your account ID, what you reported, the reason you chose, any details you add, the report’s status, and the time it was submitted.
             </p>
             <p>
-              Reports are not shown to other users, including the person or Hangout you report. You cannot view or edit a report after submitting it. LEENKIT does not promise a specific review process, response time, or outcome for a report. If you need help with a safety concern, also follow the guidance in the{' '}
+              Reports are not shown to other users, including the person or Hangout you report. You cannot view or edit a report after submitting it. LEENKIT does not promise a specific review process, response time, or outcome for a report. When LEENKIT takes action on a report, an account or a payment (for example a suspension or a refund), it keeps an internal record of the action, who took it and when. If you need help with a safety concern, also follow the guidance in the{' '}
               <Link to="/safety" className={linkClass}>Safety &amp; Trust Guide</Link>, and contact local emergency services if you are in immediate danger.
             </p>
           </Section>

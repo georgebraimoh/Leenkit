@@ -34,8 +34,8 @@ export default function DeleteAccountSection() {
     <section className="p-6 bg-white border border-rose-200 rounded-3xl space-y-3" aria-labelledby="delete-account-heading">
       <h2 id="delete-account-heading" className="text-lg font-bold font-heading text-rose-700">Delete account</h2>
       <p className="text-sm text-[#3D4948]">
-        This permanently removes your profile, photos and messages, cancels Hangouts you're hosting and removes you from ones you joined.
-        If you've bought or sold tickets, we keep an anonymous payment record for accounting, as the law requires.
+        This removes your profile details, profile photo and messages, cancels Hangouts you're hosting and removes you from ones you joined.
+        If you've bought or sold tickets or sponsorships, we keep the payment records, linked to an anonymised account, for accounting and disputes.
       </p>
       <Button variant="danger" size="md" onClick={() => { setIsOpen(true); setConfirmText(''); setError(''); }} className="gap-2">
         <Trash2 className="w-4 h-4" aria-hidden="true" /> Delete my account
@@ -44,8 +44,8 @@ export default function DeleteAccountSection() {
       <Modal isOpen={isOpen} onClose={() => !isDeleting && setIsOpen(false)} title="Delete your account?">
         <div className="space-y-4">
           <ul className="list-disc pl-5 text-sm text-[#3D4948] space-y-1">
-            <li>Your profile, photos, messages and follows are removed.</li>
-            <li>Upcoming Hangouts you host are cancelled and attendees are told. Paid tickets are refunded by LEENKIT.</li>
+            <li>Your profile details, profile photo, messages and follows are removed.</li>
+            <li>Upcoming Hangouts you host are cancelled and attendees are told. Paid tickets for them are flagged for refund review.</li>
             <li>Your payout account is disconnected.</li>
             <li>This can't be undone.</li>
           </ul>

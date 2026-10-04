@@ -125,7 +125,7 @@ export default function HangoutDetails() {
         } else if (res.status === 'requires_refund') {
           setPaymentNotice({
             type: 'warning',
-            message: `Your payment went through, but we could not confirm your spot (the Hangout filled up, closed, or you were already going). Keep your reference ${reference} and email ${LEGAL_CONTACT_EMAIL} for a refund.`
+            message: `Your payment went through, but we could not confirm your spot (the Hangout filled up, closed, or you were already going). You have not been added as an attendee. Keep your reference ${reference} and email ${LEGAL_CONTACT_EMAIL} about this payment.`
           });
         } else if (res.status === 'pending') {
           setPaymentNotice({ type: 'info', message: 'Your payment is still being confirmed. This page will update once Paystack confirms it; you can refresh in a minute.' });
