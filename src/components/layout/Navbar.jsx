@@ -8,8 +8,10 @@ import Button from '../common/Button';
 import NotificationDropdown from '../common/NotificationDropdown';
 import leenkitIcon from '../../assets/Leenkit icon.png';
 import Avatar from '../common/Avatar';
+import { usePaidFeatures } from '../../hooks/usePaidFeatures';
 
 export default function Navbar() {
+  const { paidEnabled } = usePaidFeatures();
   const { currentUser, isAuthenticated, openAuthModal, logout } = useUser();
   const { activeSearchLocation } = useLocationContext();
   const location = useLocation();
@@ -178,6 +180,7 @@ export default function Navbar() {
                       <span>My Profile</span>
                     </Link>
 
+                    {paidEnabled && (
                     <Link
                       to="/payouts"
                       onClick={() => setDropdownOpen(false)}
@@ -186,6 +189,7 @@ export default function Navbar() {
                       <Wallet className="w-4 h-4 text-[#18A999]" aria-hidden="true" />
                       <span>Payouts</span>
                     </Link>
+                    )}
 
                     {currentUser.isAdmin && (
                       <Link

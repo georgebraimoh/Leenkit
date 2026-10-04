@@ -10,6 +10,7 @@ import { authService } from '../services/auth/authService';
 import { validateAllSocialUrls } from '../utils/socialUrlValidator';
 import Avatar from '../components/common/Avatar';
 import DeleteAccountSection from '../components/auth/DeleteAccountSection';
+import { usePaidFeatures } from '../hooks/usePaidFeatures';
 
 
 const INTEREST_OPTIONS = [
@@ -18,6 +19,7 @@ const INTEREST_OPTIONS = [
 ];
 
 export default function EditProfile() {
+  const { paidEnabled } = usePaidFeatures();
   const navigate = useNavigate();
   const { currentUser, updateProfile } = useUser();
 
@@ -435,6 +437,7 @@ export default function EditProfile() {
           </div>
         </form>
 
+        {paidEnabled && (
         <section className="p-6 bg-white border border-[#DDE3E0] rounded-3xl flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold font-heading text-[#172121]">Payouts</h2>
@@ -442,6 +445,7 @@ export default function EditProfile() {
           </div>
           <Link to="/payouts"><Button variant="outline" size="md">Manage payouts</Button></Link>
         </section>
+        )}
 
         <DeleteAccountSection />
       </div>

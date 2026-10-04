@@ -3,6 +3,35 @@
 Status of branch `feature/payouts-admin` (not merged, not deployed). Nothing in
 this document has been applied to production.
 
+## Current launch mode: free Hangouts only
+
+The Paystack account is a **Starter Business**, which has no Transfers (so
+hosts cannot be paid automatically) and a ₦8,000,000 collection limit.
+Owner decision (2026-10-04): launch with **free Hangouts only** until LEENKIT
+is registered with CAC and the Paystack account is upgraded to a
+**Registered Business**.
+
+- `platform_settings.payments.paid_hangouts_enabled = false` (migration
+  `20261004020000`). The database refuses paid Hangouts, the payment and
+  payout functions refuse requests, and the app hides paid tickets, online
+  sponsorships and payouts. Pledges still work.
+- Existing paid Hangouts (created while testing) show "Ticket sales paused".
+- For this launch you do **not** need Paystack live keys, the `payment-jobs`
+  schedule, or `CRON_SECRET`.
+
+**Release for the free launch:** back up → `npx supabase db push` → set
+`ALLOWED_ORIGINS` and `APP_URL` → deploy the Edge Functions (§4/§8) → merge to
+`main`.
+
+**Turning paid Hangouts on later:**
+1. Register LEENKIT with CAC and open a corporate bank account.
+2. Paystack → Compliance → change business type to **Registered business**;
+   wait for approval; check that **Transfers** now appears.
+3. Follow §2–§4 and §7 (keys, webhook, OTP off, job schedule).
+4. `update public.platform_settings set value = jsonb_set(value, '{paid_hangouts_enabled}', 'true') where key = 'payments';`
+5. Remove the "Availability" sentence in Terms §7 and the "coming soon" FAQ
+   answers (wording changes only; no new Terms version needed).
+
 ## 0. Email status: deferred (no sending domain yet)
 
 Resend needs a domain you own (`leenkit.netlify.app` cannot be verified), so

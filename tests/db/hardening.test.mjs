@@ -5,6 +5,9 @@ import { createTestDb } from './harness.mjs';
 
 const { db, ok, as, asErr, tryOk, mkUser, finish } = await createTestDb('hardening');
 
+// Paid Hangouts are switched off by default (20261004020000); these tests exercise them.
+await db.exec(`UPDATE public.platform_settings SET value = value || '{"paid_hangouts_enabled": true}'::jsonb WHERE key = 'payments'`);
+
 const host = await mkUser('host@x.com', { name: 'Host' });
 const member = await mkUser('member@x.com', { name: 'Member' });
 const other = await mkUser('other@x.com', { name: 'Other' });

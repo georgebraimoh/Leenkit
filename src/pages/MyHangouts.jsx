@@ -25,6 +25,7 @@ import EmptyState from '../components/common/EmptyState';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 import { useToast } from '../components/common/Toast';
+import { usePaidFeatures } from '../hooks/usePaidFeatures';
 import {
   formatEventDate,
   formatEventTime,
@@ -45,6 +46,7 @@ const TABS = [
 ];
 
 export default function MyHangouts() {
+  const { paidEnabled } = usePaidFeatures();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { hangouts, isHangoutsLoading, cancelHangout, completeHangout, deleteHangout } = useLeenkit();
@@ -187,9 +189,11 @@ export default function MyHangouts() {
             <p className="text-sm text-[#6F6F6F] max-w-2xl">Hangouts you're going to, and the ones you host.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+          {paidEnabled && (
           <Link to="/payouts">
             <Button variant="outline" size="md" className="shrink-0">Payouts & earnings</Button>
           </Link>
+          )}
           <Link to="/create">
             <Button variant="primary" size="md" className="gap-2 shadow-sm shrink-0">
               <Plus className="w-4 h-4" aria-hidden="true" />

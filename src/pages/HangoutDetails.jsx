@@ -28,6 +28,7 @@ import SafetyReminder from '../components/safety/SafetyReminder';
 import SponsorHangoutModal from '../components/hangout/SponsorHangoutModal';
 import { hangoutService } from '../services/hangout/hangoutService';
 import { useLeaveRefundMessage, leaveToastMessage } from '../hooks/useLeaveRefundMessage';
+import { usePaidFeatures, PAID_PAUSED_MESSAGE } from '../hooks/usePaidFeatures';
 import { paymentService } from '../services/payment/paymentService';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
@@ -82,6 +83,7 @@ export default function HangoutDetails() {
   const [notFound, setNotFound] = useState(false);
 
   const hangout = getHangoutById(id);
+  const { paidEnabled } = usePaidFeatures();
   const leaveMessage = useLeaveRefundMessage(
     hangout,
     leaveConfirmOpen,
@@ -188,12 +190,15 @@ export default function HangoutDetails() {
     ? (closed === 'Cancelled' ? 'Hangout cancelled' : 'Hangout has ended')
     : isFull
       ? 'Hangout is full'
+      : hangout.isPaid && !paidEnabled
+        ? 'Ticket sales paused'
       : isJoining
         ? (hangout.isPaid ? 'Opening checkout...' : 'Joining...')
         : hangout.isPaid
           ? `Get ticket · ${priceDisplay}`
           : 'Join Hangout';
-  const joinDisabled = Boolean(closed) || isFull || isJoining;
+  const ticketsPaused = hangout.isPaid && !paidEnabled;
+  const joinDisabled = Boolean(closed) || isFull || isJoining || ticketsPaused;
 
   const handleBack = () => {
     if (window.history.length > 1) navigate(-1);
@@ -626,6 +631,9 @@ export default function HangoutDetails() {
                   >
                     {joinLabel}
                   </Button>
+                )}
+                {ticketsPaused && !attending && (
+                  <p className="text-xs text-[#6F6F6F] text-center">{PAID_PAUSED_MESSAGE}</p>
                 )}
 
                 <Button onClick={() => setShareModalOpen(true)} variant="outline" size="md" fullWidth className="gap-2">

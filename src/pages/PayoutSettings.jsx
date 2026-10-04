@@ -8,10 +8,12 @@ import { useUser } from '../context/UserContext';
 import { useToast } from '../components/common/Toast';
 import { payoutService, estimateFee } from '../services/account/accountService';
 import { formatMoney } from '../utils/format';
+import { usePaidFeatures } from '../hooks/usePaidFeatures';
 
 export default function PayoutSettings() {
   const { currentUser, isAuthenticated, isAuthLoading, openAuthModal } = useUser();
   const { showToast } = useToast();
+  const { paidEnabled, paidLoaded } = usePaidFeatures();
 
   const [account, setAccount] = useState(null);
   const [earnings, setEarnings] = useState([]);
@@ -45,11 +47,11 @@ export default function PayoutSettings() {
   }, [currentUser?.id]);
 
   useEffect(() => {
-    if (!isEditing || banks.length > 0 || !currentUser?.id) return;
+    if (!paidEnabled || !isEditing || banks.length > 0 || !currentUser?.id) return;
     payoutService.listBanks()
       .then(setBanks)
       .catch(err => setError(err.message || 'Could not load the list of banks.'));
-  }, [isEditing, banks.length, currentUser?.id]);
+  }, [paidEnabled, isEditing, banks.length, currentUser?.id]);
 
   // Verify the account name as soon as 10 digits and a bank are entered.
   useEffect(() => {
@@ -84,6 +86,21 @@ export default function PayoutSettings() {
       setIsSaving(false);
     }
   };
+
+  if (paidLoaded && !paidEnabled) {
+    return (
+      <PageTransition>
+        <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
+          <h1 className="text-2xl font-bold font-heading text-[#171717]">Payouts are coming soon</h1>
+          <p className="text-sm text-[#6F6F6F]">
+            Paid tickets and online sponsorships are not available on LEENKIT yet, so there is nothing to set up here for now.
+            Free Hangouts work as usual.
+          </p>
+          <Link to="/my-hangouts"><Button variant="outline" size="md">Back to your Hangouts</Button></Link>
+        </div>
+      </PageTransition>
+    );
+  }
 
   if (isAuthLoading) {
     return <div className="min-h-[50vh] flex items-center justify-center" aria-busy="true"><div className="w-8 h-8 border-4 border-[#18A999] border-t-transparent rounded-full animate-spin" /></div>;

@@ -5,6 +5,7 @@ import Button from '../common/Button';
 import { hangoutService } from '../../services/hangout/hangoutService';
 import { paymentService } from '../../services/payment/paymentService';
 import { useUser } from '../../context/UserContext';
+import { usePaidFeatures } from '../../hooks/usePaidFeatures';
 
 // Sponsorships are paid out to Nigerian bank accounts, so NGN only.
 const CURRENCIES = [
@@ -19,6 +20,9 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
   const [amount, setAmount] = useState('5000');
   const [message, setMessage] = useState('');
   const [mode, setMode] = useState('paystack'); // 'paystack' | 'pledge'
+  const { paidEnabled } = usePaidFeatures();
+  // Online sponsorship is only offered while paid features are switched on.
+  const effectiveMode = paidEnabled ? mode : 'pledge';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -53,7 +57,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
       setErrorMsg('Please enter a valid sponsorship amount greater than zero.');
       return;
     }
-    if (mode === 'paystack' && parsedAmount < MIN_SPONSORSHIP_NGN) {
+    if (effectiveMode === 'paystack' && parsedAmount < MIN_SPONSORSHIP_NGN) {
       setErrorMsg(`The minimum sponsorship is ₦${MIN_SPONSORSHIP_NGN.toLocaleString()}.`);
       return;
     }
@@ -64,7 +68,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
 
     setIsSubmitting(true);
 
-    if (mode === 'pledge') {
+    if (effectiveMode === 'pledge') {
       try {
         const record = await hangoutService.createHangoutSponsorship(currentUser.id, {
           hangoutId: hangout.id,
@@ -142,7 +146,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
             /* Form State: Enter Amount & Optional Message */
             <form onSubmit={handleSubmit} className="space-y-5">
               <p className="text-xs text-[#6F6F6F] -mt-2">
-                Help cover snacks, gear or the venue. Paystack payments go to the host (LEENKIT keeps a platform fee of 10%, minimum ₦200, and covers card fees). Pledges are promises with no payment.
+                Help cover snacks, gear or the venue. {paidEnabled ? "Paystack payments go to the host after the Hangout (LEENKIT keeps a platform fee of 10%, minimum ₦200, and covers card fees). Pledges are promises with no payment." : "A pledge is a promise to the host with no payment through LEENKIT. Online sponsorships are coming soon."}
               </p>
 
               {errorMsg && (
@@ -222,12 +226,13 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
               </div>
 
               {/* Sponsorship Mode Selector */}
+              {paidEnabled && (
               <div className="grid grid-cols-2 gap-2 p-1 bg-[#EEF1EF] rounded-2xl border border-[#DDE3E0]">
                 <button
                   type="button"
                   onClick={() => setMode('paystack')}
                   className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    mode === 'paystack'
+                    effectiveMode === 'paystack'
                       ? 'bg-[#18A999] text-white shadow-xs'
                       : 'text-[#6F6F6F] hover:text-[#171717]'
                   }`}
@@ -239,7 +244,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                   type="button"
                   onClick={() => setMode('pledge')}
                   className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    mode === 'pledge'
+                    effectiveMode === 'pledge'
                       ? 'bg-[#172121] text-white shadow-xs'
                       : 'text-[#6F6F6F] hover:text-[#172121]'
                   }`}
@@ -248,6 +253,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                   <span>Pledge Only</span>
                 </button>
               </div>
+              )}
 
               {/* Submit CTA */}
               <div className="pt-2">
@@ -263,7 +269,7 @@ export default function SponsorHangoutModal({ isOpen, onClose, hangout, onSponso
                   <span>
                     {isSubmitting
                       ? 'Initializing...'
-                      : mode === 'paystack'
+                      : effectiveMode === 'paystack'
                       ? `Pay ${formattedCTAAmount} via Paystack`
                       : `Pledge ${formattedCTAAmount}`}
                   </span>

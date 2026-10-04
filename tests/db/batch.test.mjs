@@ -7,6 +7,9 @@ import { createTestDb } from './harness.mjs';
 
 const { db, ok, as, asErr, tryOk, mkUser, finish } = await createTestDb('batch');
 
+// Paid Hangouts are switched off by default (20261004020000); these tests exercise them.
+await db.exec(`UPDATE public.platform_settings SET value = value || '{"paid_hangouts_enabled": true}'::jsonb WHERE key = 'payments'`);
+
 // ===== New-batch runtime tests =====
 const mk = mkUser;
 const host = await mk('host@x.com', { name: 'Host', avatar: 'https://x/h.png' });

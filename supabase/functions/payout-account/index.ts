@@ -5,7 +5,7 @@
 // POST { action: "resolve", bank_code, account_number }
 // POST { action: "save", bank_code, account_number }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { adminClient, corsHeaders, json, paystack, requireUser } from "../_shared/http.ts";
+import { adminClient, corsHeaders, json, paidHangoutsEnabled, paystack, requireUser } from "../_shared/http.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
@@ -18,6 +18,10 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "");
     const admin = adminClient();
+
+    if (!(await paidHangoutsEnabled(admin))) {
+      return json(req, { error: "Payouts are not available yet." }, 403);
+    }
 
     if (action === "banks") {
       const res = await paystack("/bank?country=nigeria&currency=NGN&perPage=200");

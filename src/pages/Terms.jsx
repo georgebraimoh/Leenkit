@@ -148,6 +148,9 @@ export default function Terms() {
           <section id="terms-payments" className="scroll-mt-24 space-y-3">
             <h2 className="text-xl font-bold font-heading text-[#172121]">7. Tickets, Payments & Sponsorships</h2>
             <p>
+              <strong>Availability.</strong> Paid tickets and online sponsorships are not available on LEENKIT yet. When LEENKIT makes them available, the rest of this section applies.
+            </p>
+            <p>
               Hangouts may be free or paid. Paid tickets and online sponsorships are processed by Paystack in Nigerian Naira (NGN). The buyer pays the price shown; LEENKIT does not add a booking fee for buyers.
             </p>
             <p>

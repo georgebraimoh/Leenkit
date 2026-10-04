@@ -147,25 +147,25 @@ const FAQ_SECTIONS = [
         id: 'all-free',
         question: 'Are all Hangouts free?',
         answer:
-          'No. Many Hangouts are free to join. Organizers can also set a ticket or entry price. Always check the Hangout page before you join or pay.'
+          'For now, yes: paid tickets and online sponsorships are not available on LEENKIT yet, so new Hangouts are free to join. When paid Hangouts arrive, the price will always be shown on the Hangout page before you pay.'
       },
       {
         id: 'paid-tickets',
         question: 'Can Hangouts have paid tickets?',
         answer:
-          'Yes. Organizers can create paid Hangouts with a listed price and currency. Review the ticket information on the Hangout before you complete any purchase.'
+          'Not yet. Paid tickets are coming soon. When they launch, Organizers will be able to set a ticket price in Nigerian Naira, and the payment, refund and payout rules in these FAQs and the Terms & Conditions will apply.'
       },
       {
         id: 'how-payments',
         question: 'How do payments work?',
         answer:
-          'Paid tickets and online sponsorships are paid on the Hangout page through Paystack, in Nigerian Naira. Your spot is confirmed only after LEENKIT has verified the payment with Paystack; the Hangout page shows the result. Paystack may also send you its own payment receipt. Review the Hangout details so you know what you are paying for.'
+          'Paid tickets and online sponsorships are coming soon. When they launch, you will pay on the Hangout page through Paystack, in Nigerian Naira. Your spot is confirmed only after LEENKIT has verified the payment with Paystack; the Hangout page shows the result. Paystack may also send you its own payment receipt. Review the Hangout details so you know what you are paying for.'
       },
       {
         id: 'what-is-sponsorship',
         question: 'What is sponsorship?',
         answer:
-          'Sponsorship lets people support a Hangout financially. Depending on what is available for that Hangout, this may be a recorded pledge or a payment through LEENKIT’s payment flow. Sponsorship is optional and is not the same as buying a ticket unless the Hangout says otherwise.'
+          'Sponsorship lets people support a Hangout. For now it is a pledge: a promise to the host recorded in the app, with no payment through LEENKIT. Online sponsorships through Paystack are coming soon. Sponsorship is optional and is not the same as buying a ticket unless the Hangout says otherwise.'
       },
       {
         id: 'after-pay',

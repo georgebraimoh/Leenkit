@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getFeeSettings, platformFee } from "../_shared/http.ts";
+import { getFeeSettings, paidHangoutsEnabled, platformFee } from "../_shared/http.ts";
 
 // Payouts settle to Nigerian bank accounts, so online payments are NGN only.
 const ALLOWED_CURRENCIES = ["NGN"];
@@ -87,6 +87,14 @@ serve(async (req) => {
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Paid features are switched off until the Paystack account can pay hosts.
+    if (!(await paidHangoutsEnabled(supabaseAdmin))) {
+      return new Response(JSON.stringify({ error: "Paid tickets and online sponsorships are not available yet." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Suspended or deleted accounts cannot pay (settlement runs as the service
     // role, so the attendee/sponsorship RLS checks would not stop them).

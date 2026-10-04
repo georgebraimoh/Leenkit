@@ -48,6 +48,16 @@ const buy = async (hangout, user, type = 'ticket', amount = 5000, mode = 'live')
 const pay = async (ref) => (await db.query(`SELECT * FROM public.payments WHERE reference=$1`, [ref])).rows[0];
 const attending = async (h, u) => (await db.query(`SELECT count(*)::int c FROM public.hangout_attendees WHERE hangout_id=$1 AND user_id=$2`, [h, u])).rows[0].c === 1;
 
+// ------------------------------------------------ master switch (default off)
+const switchOff = (await db.query(`SELECT value FROM public.platform_settings WHERE key='payments'`)).rows[0].value;
+ok('paid Hangouts are switched OFF by default', switchOff.paid_hangouts_enabled === false);
+await asErr('paid Hangout rejected by the database while switched off', 'authenticated', host, insertHangout(host), /PAID_HANGOUTS_DISABLED/);
+const freeId = (await as('authenticated', host, insertHangout(host, { is_paid: 'false', price: 'NULL' }))).rows[0].id;
+ok('free Hangouts still work while paid is off', !!freeId);
+await asErr('cannot turn a free Hangout paid while switched off', 'authenticated', host,
+  `UPDATE public.hangouts SET is_paid = true, price = 5000 WHERE id = '${freeId}'`, /PAID_HANGOUTS_DISABLED/);
+await db.exec(`UPDATE public.platform_settings SET value = value || '{"paid_hangouts_enabled": true}'::jsonb WHERE key = 'payments'`);
+
 // ------------------------------------------------ setup checks
 await asErr('paid Hangout needs a transfer-capable payout account', 'authenticated', noRecipientHost, insertHangout(noRecipientHost), /PAYOUT_SETUP_REQUIRED/);
 const settings = (await db.query(`SELECT value FROM public.platform_settings WHERE key='payments'`)).rows[0].value;

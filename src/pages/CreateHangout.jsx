@@ -16,6 +16,7 @@ import { hangoutService, MIN_HANGOUT_CAPACITY, MAX_HANGOUT_CAPACITY } from '../s
 import { CURRENT_GUIDELINES_VERSION } from '../services/auth/authService';
 import { todayISO, formatEventDate, formatEventTime, formatMoney } from '../utils/format';
 import { payoutService, estimateFee } from '../services/account/accountService';
+import { usePaidFeatures } from '../hooks/usePaidFeatures';
 
 const PRESET_IMAGES = [
   { label: "Photowalk / Outdoor", url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80" },
@@ -28,6 +29,7 @@ const PRESET_IMAGES = [
 ];
 
 export default function CreateHangout() {
+  const { paidEnabled } = usePaidFeatures();
   const navigate = useNavigate();
   const { createHangout } = useLeenkit();
   const { currentUser, acceptHostingGuidelines, isAuthenticated, isAuthLoading, openAuthModal } = useUser();
@@ -401,7 +403,7 @@ export default function CreateHangout() {
                 </div>
 
                 {/* Free vs Paid Radio Pill Selector */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className={`grid gap-3 ${paidEnabled ? 'grid-cols-2' : 'grid-cols-1'}`}>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isPaid: false, price: '' })}
@@ -414,6 +416,7 @@ export default function CreateHangout() {
                     Free Hangout
                   </button>
 
+                  {paidEnabled && (
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isPaid: true, currency: 'NGN' })}
@@ -425,7 +428,11 @@ export default function CreateHangout() {
                   >
                     Paid Hangout
                   </button>
+                  )}
                 </div>
+                {!paidEnabled && (
+                  <p className="text-xs text-[#6F6F6F]">Paid tickets are coming soon. For now, all Hangouts are free to join.</p>
+                )}
 
                 {formData.isPaid && payoutAccount === null && (
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex flex-wrap items-center justify-between gap-2">

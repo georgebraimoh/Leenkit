@@ -68,6 +68,13 @@ export async function paystack(path: string, init: RequestInit = {}): Promise<an
   return body;
 }
 
+// Master switch for paid Hangouts (platform_settings.payments.paid_hangouts_enabled).
+// Fails closed: anything other than an explicit true means "off".
+export async function paidHangoutsEnabled(admin: SupabaseClient): Promise<boolean> {
+  const { data } = await admin.from("platform_settings").select("value").eq("key", "payments").maybeSingle();
+  return data?.value?.paid_hangouts_enabled === true;
+}
+
 export type FeeSettings = { percent: number; min_ngn: number; min_payment_ngn: number };
 
 export async function getFeeSettings(admin: SupabaseClient): Promise<FeeSettings> {
