@@ -73,7 +73,8 @@ export default function HangoutDetails() {
     leaveHangout,
     isAttending,
     isHangoutsLoading,
-    refreshHangout
+    refreshHangout,
+    reloadHangouts
   } = useLeenkit();
   const { getUserById, currentUser, isAuthenticated, openAuthModal } = useUser();
 
@@ -117,6 +118,7 @@ export default function HangoutDetails() {
       await adminService.reviewHangout(id, 'approve');
       showToast('Hangout approved and published!', 'success');
       await refreshHangout(id);
+      await reloadHangouts();
     } catch (err) {
       showToast(err.message || 'Could not approve Hangout', 'error');
     } finally {
@@ -132,6 +134,7 @@ export default function HangoutDetails() {
       setRejectModalOpen(false);
       showToast('Hangout marked as rejected.', 'info');
       await refreshHangout(id);
+      await reloadHangouts();
     } catch (err) {
       showToast(err.message || 'Could not reject Hangout', 'error');
     } finally {

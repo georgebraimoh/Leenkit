@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import PageTransition from '../components/layout/PageTransition';
 import SearchBar from '../components/hangout/SearchBar';
 import FilterBar from '../components/hangout/FilterBar';
 import HangoutGrid from '../components/hangout/HangoutGrid';
 import Button from '../components/common/Button';
 import { useLeenkit } from '../context/LeenkitContext';
+import { useUser } from '../context/UserContext';
 import { useLocationContext } from '../context/LocationContext';
-import { RefreshCw, AlertTriangle } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, Clock } from 'lucide-react';
 import { isOpenHangout, sortByEventDate, parseLocalDate, todayISO } from '../utils/format';
 
 function isoOf(d) {
@@ -57,6 +58,9 @@ function GridSkeleton() {
 
 export default function Explore() {
   const { hangouts, isHangoutsLoading, hangoutsError, reloadHangouts } = useLeenkit();
+  const { currentUser } = useUser();
+  const isAdmin = Boolean(currentUser?.isAdmin);
+  const [adminApprovalFilter, setAdminApprovalFilter] = useState('all'); // 'all' | 'pending' | 'approved'
   const { activeSearchLocation, resetLocationFilter } = useLocationContext();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -64,6 +68,10 @@ export default function Explore() {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [when, setWhen] = useState(searchParams.get('when') || 'any');
   const [price, setPrice] = useState(searchParams.get('price') || 'any');
+
+  const pendingCount = useMemo(() => {
+    return hangouts.filter(h => h.approvalStatus === 'pending').length;
+  }, [hangouts]);
 
   useEffect(() => {
     const cat = searchParams.get('category');
@@ -89,6 +97,7 @@ export default function Explore() {
     setSelectedCategory('all');
     setWhen('any');
     setPrice('any');
+    setAdminApprovalFilter('all');
     resetLocationFilter();
     setSearchParams({}, { replace: true });
   };
@@ -98,7 +107,19 @@ export default function Explore() {
     const q = searchQuery.trim().toLowerCase();
 
     const list = hangouts.filter(hangout => {
-      if (!isOpenHangout(hangout)) return false;
+      if (!isAdmin) {
+        if (!isOpenHangout(hangout)) return false;
+      } else {
+        if (adminApprovalFilter === 'pending') {
+          if (hangout.approvalStatus !== 'pending') return false;
+        } else if (adminApprovalFilter === 'approved') {
+          if (!isOpenHangout(hangout)) return false;
+        } else {
+          // 'all': Show open hangouts AND pending review hangouts
+          const isPending = hangout.approvalStatus === 'pending';
+          if (!isPending && !isOpenHangout(hangout)) return false;
+        }
+      }
 
       const loc = typeof hangout.location === 'object' ? hangout.location : { placeName: hangout.location || '' };
 
@@ -126,14 +147,60 @@ export default function Explore() {
     });
 
     return sortByEventDate(list);
-  }, [hangouts, activeSearchLocation, searchQuery, selectedCategory, price, when]);
+  }, [hangouts, activeSearchLocation, searchQuery, selectedCategory, price, when, isAdmin, adminApprovalFilter]);
 
   const locationTitle = activeSearchLocation?.placeName ? `in ${activeSearchLocation.placeName}` : 'near you';
-  const isFiltered = selectedCategory !== 'all' || searchQuery || activeSearchLocation || when !== 'any' || price !== 'any';
+  const isFiltered = selectedCategory !== 'all' || searchQuery || activeSearchLocation || when !== 'any' || price !== 'any' || adminApprovalFilter !== 'all';
 
   return (
     <PageTransition>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Admin Review Mode Banner */}
+        {isAdmin && (
+          <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-2xl bg-amber-200 text-amber-900 border border-ink/20 flex items-center justify-center shrink-0">
+                <Shield className="w-5 h-5" />
+              </span>
+              <div>
+                <p className="text-sm font-extrabold text-[#111111] flex items-center gap-2">
+                  <span>Admin Moderation View</span>
+                  {pendingCount > 0 && (
+                    <span className="px-2.5 py-0.5 text-xs font-extrabold bg-amber-400 text-amber-950 rounded-full border border-ink/20">
+                      {pendingCount} Pending Review
+                    </span>
+                  )}
+                </p>
+                <p className="text-xs text-[#3D4948]">
+                  Pending Hangouts are visible to you here. Click any card to review and approve it.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {pendingCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAdminApprovalFilter(prev => prev === 'pending' ? 'all' : 'pending')}
+                  className={`flex-1 sm:flex-initial px-3.5 py-2 text-xs font-extrabold rounded-xl border-2 border-ink transition-colors cursor-pointer ${
+                    adminApprovalFilter === 'pending'
+                      ? 'bg-amber-400 text-amber-950 shadow-xs'
+                      : 'bg-white hover:bg-stone-50 text-[#111111]'
+                  }`}
+                >
+                  {adminApprovalFilter === 'pending' ? 'Showing Pending Only' : `Show Pending (${pendingCount})`}
+                </button>
+              )}
+              <Link
+                to="/admin"
+                className="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-extrabold bg-[#18A999] hover:bg-[#087F73] text-white rounded-xl border-2 border-ink transition-colors text-center"
+              >
+                Admin Panel
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4 max-w-3xl">
           <h1 className="text-4xl sm:text-5xl font-extrabold font-heading text-[#111111] tracking-tight">
             What's on <span className="text-[#FF6B2C]">{locationTitle}</span>

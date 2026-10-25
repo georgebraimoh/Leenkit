@@ -11,11 +11,15 @@ const DEFAULT_COVER = 'https://images.unsplash.com/photo-1528605248644-14dd04022
 const pill = 'px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide rounded-lg border-2 border-ink';
 
 export default function HangoutCard({ hangout, featured = false }) {
-  const { getUserById } = useUser();
+  const { getUserById, currentUser } = useUser();
   const { isAttending } = useLeenkit();
+
+  const isAdmin = Boolean(currentUser?.isAdmin);
+  const isPending = hangout?.approvalStatus === 'pending';
 
   const host = getUserById(hangout.hostId);
   const hostName = host?.name || 'LEENKIT Host';
+
 
   const formattedDate = hangout.date
     ? formatEventDate(hangout.date, { weekday: 'short', month: 'short', day: 'numeric' })
@@ -50,8 +54,13 @@ export default function HangoutCard({ hangout, featured = false }) {
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
             <span className={`${pill} bg-white text-[#111111]`}>{hangout.category || 'Hangout'}</span>
             <span className={`${pill} ${hangout.isPaid ? 'bg-[#FFD166] text-[#111111]' : 'bg-[#18A999] text-white'}`}>{formattedPrice}</span>
-            {closed && <span className={`${pill} bg-[#111111] text-white`}>{closed}</span>}
-            {!closed && isFull && <span className={`${pill} bg-[#FF6B2C] text-white`}>Full</span>}
+            {isPending ? (
+              <span className={`${pill} bg-amber-400 text-amber-950 font-extrabold shadow-xs`}>Pending Approval</span>
+            ) : closed ? (
+              <span className={`${pill} bg-[#111111] text-white`}>{closed}</span>
+            ) : !closed && isFull ? (
+              <span className={`${pill} bg-[#FF6B2C] text-white`}>Full</span>
+            ) : null}
           </div>
         </div>
 
@@ -82,7 +91,12 @@ export default function HangoutCard({ hangout, featured = false }) {
               </span>
             </div>
 
-            {isAttendingHangout ? (
+            {isPending && isAdmin ? (
+              <span className="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-amber-950 border-2 border-ink text-xs font-bold rounded-lg flex items-center gap-1 shrink-0 shadow-xs">
+                <span>Review & Approve</span>
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </span>
+            ) : isAttendingHangout ? (
               <span className="px-3 py-1.5 bg-[#DDF4EF] text-[#111111] border-2 border-ink text-xs font-bold rounded-lg flex items-center gap-1 shrink-0">
                 <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />
                 Joined
