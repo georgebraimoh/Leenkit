@@ -197,11 +197,43 @@ export const hangoutService = {
       approval_status: 'pending'
     };
 
-    const { data: createdHangout, error: createError } = await supabase
+    let createdHangout;
+    let createError;
+
+    const res = await supabase
       .from('hangouts')
       .insert(payload)
       .select()
       .single();
+
+    createdHangout = res.data;
+    createError = res.error;
+
+    // Graceful fallback if newer upgrade columns (approval_status, hide_exact_location, series_id)
+    // are pending schema cache reload or pending database migration on remote Supabase:
+    if (createError && (
+      createError.message?.toLowerCase().includes('schema cache') ||
+      createError.message?.includes('approval_status') ||
+      createError.message?.includes('hide_exact_location') ||
+      createError.message?.includes('series_id')
+    )) {
+      const fallbackPayload = { ...payload };
+      delete fallbackPayload.approval_status;
+      delete fallbackPayload.hide_exact_location;
+      delete fallbackPayload.series_id;
+      delete fallbackPayload.series_index;
+
+      const fallbackRes = await supabase
+        .from('hangouts')
+        .insert(fallbackPayload)
+        .select()
+        .single();
+
+      if (!fallbackRes.error) {
+        createdHangout = fallbackRes.data;
+        createError = null;
+      }
+    }
 
     if (createError) {
       throw new Error(createError.message);

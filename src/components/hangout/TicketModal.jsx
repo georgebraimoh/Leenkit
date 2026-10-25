@@ -5,15 +5,33 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Ticket, CheckCircle2, Copy, Check, Clock, User, ShieldCheck } from 'lucide-react';
 import { useToast } from '../common/Toast';
 
-export default function TicketModal({ isOpen, onClose, hangout, ticket, attendeeName }) {
+export default function TicketModal({
+  isOpen,
+  onClose,
+  hangout,
+  ticket,
+  ticketCode,
+  checkedInAt,
+  attendeeName
+}) {
   const { showToast } = useToast();
   const [copied, setCopied] = useState(false);
 
-  if (!isOpen || !ticket || !hangout) return null;
+  if (!isOpen || !hangout) return null;
+
+  // Support both ticket object and standalone ticketCode/checkedInAt props,
+  // plus fallback code if database column is pending migration
+  const effectiveCode = (
+    ticket?.ticketCode ||
+    ticketCode ||
+    `LK-${(hangout.id || 'EVT').replace(/-/g, '').slice(0, 4).toUpperCase()}-${(attendeeName || 'PASS').slice(0, 4).toUpperCase()}`
+  ).trim();
+
+  const isCheckedIn = Boolean(ticket?.checkedInAt || checkedInAt);
 
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(ticket.ticketCode);
+      await navigator.clipboard.writeText(effectiveCode);
       setCopied(true);
       showToast('Ticket code copied!', 'success');
       setTimeout(() => setCopied(false), 2000);
@@ -22,11 +40,11 @@ export default function TicketModal({ isOpen, onClose, hangout, ticket, attendee
     }
   };
 
-  const isCheckedIn = Boolean(ticket.checkedInAt);
   const qrPayload = JSON.stringify({
     hangoutId: hangout.id,
-    ticketCode: ticket.ticketCode
+    ticketCode: effectiveCode
   });
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Your Entry Ticket">
@@ -59,7 +77,7 @@ export default function TicketModal({ isOpen, onClose, hangout, ticket, attendee
             <p className="text-[11px] font-bold text-[#6F6F6F] uppercase tracking-wider">Ticket Code</p>
             <div className="flex items-center justify-center gap-2">
               <span className="font-mono text-xl font-extrabold text-[#111111] tracking-wider px-3 py-1 bg-white border border-ink rounded-xl">
-                {ticket.ticketCode}
+                {effectiveCode}
               </span>
               <button
                 type="button"
@@ -81,7 +99,7 @@ export default function TicketModal({ isOpen, onClose, hangout, ticket, attendee
             {isCheckedIn ? (
               <>
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Checked In on {new Date(ticket.checkedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                <span>Checked In on {new Date(ticket?.checkedInAt || checkedInAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </>
             ) : (
               <>

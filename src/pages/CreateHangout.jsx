@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { m } from 'framer-motion';
-import { MapPin, CheckCircle, ArrowRight, MessageSquare, Upload, Share2, Tag, AlertCircle, Repeat, Lock } from 'lucide-react';
+import { MapPin, CheckCircle, ArrowRight, MessageSquare, Upload, Share2, Tag, AlertCircle, Repeat, Lock, Clock } from 'lucide-react';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
 import FormField from '../components/common/FormField';
@@ -327,51 +327,61 @@ export default function CreateHangout() {
         )}
 
         {createdActivity ? (
-          /* Success Screen */
+          /* Success Screen - Pending Approval */
           <m.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white border-2 border-ink rounded-3xl p-8 text-center space-y-6 shadow-sm"
           >
-            <div className="w-16 h-16 bg-[#DDF4EF] text-[#18A999] rounded-full flex items-center justify-center mx-auto shadow-xs">
-              <CheckCircle className="w-8 h-8" />
+            <div className="w-16 h-16 bg-amber-50 text-amber-600 border-2 border-amber-300 rounded-full flex items-center justify-center mx-auto shadow-xs">
+              <Clock className="w-8 h-8" />
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#18A999]">Success</span>
-              <h2 className="text-3xl font-bold font-heading text-[#111111]">
-                Your Hangout is live.
+              <span className="text-xs font-extrabold uppercase tracking-widest text-amber-800 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full inline-block">
+                Pending Approval
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#111111]">
+                Submitted for Admin Review
               </h2>
               <p className="text-sm text-[#3D4948] max-w-md mx-auto leading-relaxed">
-                It's live. People can now find and join it.
+                Your Hangout has been created and is waiting for approval by our moderation team. Once approved, it will go live for everyone on Explore.
               </p>
             </div>
 
-            <div className="p-4 bg-[#EEF1EF] rounded-2xl max-w-sm mx-auto text-left space-y-1 border-2 border-ink">
-              <p className="text-xs font-bold uppercase text-[#18A999]">{createdActivity.category}</p>
-              <h4 className="font-bold text-[#111111] font-heading">{createdActivity.title}</h4>
+            <div className="p-4 bg-[#EEF1EF] rounded-2xl max-w-sm mx-auto text-left space-y-1.5 border-2 border-ink">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#087F73] bg-[#DDF4EF] px-2 py-0.5 rounded-md">
+                {createdActivity.category}
+              </span>
+              <h4 className="font-extrabold text-[#111111] font-heading">{createdActivity.title}</h4>
               <p className="text-xs text-[#6F6F6F] flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-[#18A999] shrink-0" />
                 <span>{createdActivity.location?.placeName || 'Venue'} · {formatEventDate(createdActivity.date)}{createdActivity.time ? ` at ${formatEventTime(createdActivity.time)}` : ''}</span>
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Button
-                type="button"
-                variant="primary"
-                size="lg"
-                onClick={() => setIsShareModalOpen(true)}
-                className="w-full sm:w-auto gap-2"
-              >
-                <Share2 className="w-5 h-5" />
-                <span>Share Hangout</span>
-              </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+              <Link to={`/hangout/${createdActivity.id}`} className="w-full sm:w-auto">
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  className="w-full sm:w-auto gap-2"
+                >
+                  <span>View Your Hangout</span>
+                </Button>
+              </Link>
 
-              <Link to={`/hangout/${createdActivity.id}/space`}>
-                <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2">
-                  <MessageSquare className="w-5 h-5 text-[#18A999]" />
-                  <span>Open Space Chat</span>
+              <Link to="/my-hangouts" className="w-full sm:w-auto">
+                <Button variant="outline" size="md" className="w-full sm:w-auto gap-2">
+                  <span>Go to My Hangouts</span>
+                </Button>
+              </Link>
+
+              <Link to={`/hangout/${createdActivity.id}/space`} className="w-full sm:w-auto">
+                <Button variant="outline" size="md" className="w-full sm:w-auto gap-2">
+                  <MessageSquare className="w-4 h-4 text-[#18A999]" />
+                  <span>Space</span>
                 </Button>
               </Link>
             </div>

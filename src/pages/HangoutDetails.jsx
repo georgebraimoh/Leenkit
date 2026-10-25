@@ -377,6 +377,7 @@ export default function HangoutDetails() {
           isOpen={ticketModalOpen}
           onClose={() => setTicketModalOpen(false)}
           hangout={hangout}
+          ticket={myTicket}
           ticketCode={myTicket?.ticketCode}
           checkedInAt={myTicket?.checkedInAt}
           attendeeName={currentUser?.name}
