@@ -14,7 +14,12 @@ import {
   ArrowLeft,
   CalendarPlus,
   Lock,
-  X
+  X,
+  QrCode,
+  UserCheck,
+  Clock,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
@@ -22,11 +27,15 @@ import HostCard from '../components/hangout/HostCard';
 import EmptyState from '../components/common/EmptyState';
 import ShareModal from '../components/common/ShareModal';
 import ConfirmModal from '../components/common/ConfirmModal';
+import Modal from '../components/common/Modal';
 import Avatar from '../components/common/Avatar';
 import ReportModal from '../components/safety/ReportModal';
 import SafetyReminder from '../components/safety/SafetyReminder';
 import SponsorHangoutModal from '../components/hangout/SponsorHangoutModal';
+import TicketModal from '../components/hangout/TicketModal';
+import CheckInModal from '../components/hangout/CheckInModal';
 import { hangoutService } from '../services/hangout/hangoutService';
+import { adminService } from '../services/admin/adminService';
 import { useLeaveRefundMessage, leaveToastMessage } from '../hooks/useLeaveRefundMessage';
 import { usePaidFeatures, PAID_PAUSED_MESSAGE } from '../hooks/usePaidFeatures';
 import { paymentService } from '../services/payment/paymentService';
@@ -81,6 +90,13 @@ export default function HangoutDetails() {
   const [actionError, setActionError] = useState('');
   const [isFetchingSingle, setIsFetchingSingle] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [ticketModalOpen, setTicketModalOpen] = useState(false);
+  const [checkInModalOpen, setCheckInModalOpen] = useState(false);
+  const [myTicket, setMyTicket] = useState(null);
+  const [seriesHangouts, setSeriesHangouts] = useState([]);
+  const [isAdminReviewing, setIsAdminReviewing] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   const hangout = getHangoutById(id);
   const { paidEnabled } = usePaidFeatures();
@@ -91,7 +107,37 @@ export default function HangoutDetails() {
   );
   const attending = hangout ? isAttending(hangout.id) : false;
   const isHost = Boolean(currentUser?.id && hangout?.hostId === currentUser.id);
+  const isAdmin = Boolean(currentUser?.isAdmin);
   const isMember = attending || isHost;
+
+  const handleAdminApprove = async () => {
+    if (!id) return;
+    setIsAdminReviewing(true);
+    try {
+      await adminService.reviewHangout(id, 'approve');
+      showToast('Hangout approved and published!', 'success');
+      await refreshHangout(id);
+    } catch (err) {
+      showToast(err.message || 'Could not approve Hangout', 'error');
+    } finally {
+      setIsAdminReviewing(false);
+    }
+  };
+
+  const handleAdminReject = async () => {
+    if (!id) return;
+    setIsAdminReviewing(true);
+    try {
+      await adminService.reviewHangout(id, 'reject', rejectReason);
+      setRejectModalOpen(false);
+      showToast('Hangout marked as rejected.', 'info');
+      await refreshHangout(id);
+    } catch (err) {
+      showToast(err.message || 'Could not reject Hangout', 'error');
+    } finally {
+      setIsAdminReviewing(false);
+    }
+  };
 
   // Deep links: fetch this one Hangout if the list doesn't have it.
   useEffect(() => {
@@ -104,6 +150,36 @@ export default function HangoutDetails() {
       .finally(() => { if (active) setIsFetchingSingle(false); });
     return () => { active = false; };
   }, [id, hangout, isHangoutsLoading, refreshHangout]);
+
+  // Fetch attendee's digital ticket
+  useEffect(() => {
+    if (!id || !attending || !currentUser?.id) {
+      setMyTicket(null);
+      return;
+    }
+    let active = true;
+    hangoutService.getMyTicket(id, currentUser.id).then((ticket) => {
+      if (active && ticket) {
+        setMyTicket(ticket);
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [id, attending, currentUser?.id]);
+
+  // Fetch series siblings if this hangout is part of a series
+  useEffect(() => {
+    if (!hangout?.seriesId) {
+      setSeriesHangouts([]);
+      return;
+    }
+    let active = true;
+    hangoutService.getSeriesHangouts(hangout.seriesId).then((items) => {
+      if (active && items) {
+        setSeriesHangouts(items);
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [hangout?.seriesId]);
 
   const loadSponsorshipSummary = useCallback(async () => {
     if (!id || !isMember) return;
@@ -186,19 +262,26 @@ export default function HangoutDetails() {
   const coverImgSrc = (imgError || !hangout.image) ? DEFAULT_COVER_IMAGE : hangout.image;
   const priceDisplay = hangout.isPaid ? formatMoney(hangout.price, hangout.currency) : 'Free';
 
-  const joinLabel = closed
-    ? (closed === 'Cancelled' ? 'Hangout cancelled' : 'Hangout has ended')
-    : isFull
-      ? 'Hangout is full'
-      : hangout.isPaid && !paidEnabled
-        ? 'Ticket sales paused'
-      : isJoining
-        ? (hangout.isPaid ? 'Opening checkout...' : 'Joining...')
-        : hangout.isPaid
-          ? `Get ticket · ${priceDisplay}`
-          : 'Join Hangout';
+  const isPending = hangout.approvalStatus === 'pending';
+  const isRejected = hangout.approvalStatus === 'rejected';
+
+  const joinLabel = isPending
+    ? 'Pending admin approval'
+    : isRejected
+      ? 'Hangout not approved'
+      : closed
+        ? (closed === 'Cancelled' ? 'Hangout cancelled' : 'Hangout has ended')
+        : isFull
+          ? 'Hangout is full'
+          : hangout.isPaid && !paidEnabled
+            ? 'Ticket sales paused'
+          : isJoining
+            ? (hangout.isPaid ? 'Opening checkout...' : 'Joining...')
+            : hangout.isPaid
+              ? `Get ticket · ${priceDisplay}`
+              : 'Join Hangout';
   const ticketsPaused = hangout.isPaid && !paidEnabled;
-  const joinDisabled = Boolean(closed) || isFull || isJoining || ticketsPaused;
+  const joinDisabled = Boolean(closed) || isFull || isJoining || ticketsPaused || isPending || isRejected;
 
   const handleBack = () => {
     if (window.history.length > 1) navigate(-1);
@@ -290,6 +373,64 @@ export default function HangoutDetails() {
           error={leaveError}
         />
 
+        <TicketModal
+          isOpen={ticketModalOpen}
+          onClose={() => setTicketModalOpen(false)}
+          hangout={hangout}
+          ticketCode={myTicket?.ticketCode}
+          checkedInAt={myTicket?.checkedInAt}
+          attendeeName={currentUser?.name}
+        />
+
+        {isHost && (
+          <CheckInModal
+            isOpen={checkInModalOpen}
+            onClose={() => setCheckInModalOpen(false)}
+            hangout={hangout}
+            onCheckInSuccess={() => {
+              refreshHangout(hangout.id).catch(() => {});
+            }}
+          />
+        )}
+
+        {/* Admin Rejection Reason Modal */}
+        <Modal
+          isOpen={rejectModalOpen}
+          onClose={() => !isAdminReviewing && setRejectModalOpen(false)}
+          title={`Reject "${hangout.title}"?`}
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-[#3D4948]">
+              Please state why this Hangout is not approved. The organizer will see this feedback in their dashboard.
+            </p>
+            <label className="block space-y-1.5">
+              <span className="text-xs font-bold text-[#111111]">Rejection Reason</span>
+              <textarea
+                rows="3"
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="e.g. Incomplete venue information or violates community hosting standards"
+                className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
+              />
+            </label>
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
+              <Button variant="outline" size="md" fullWidth onClick={() => setRejectModalOpen(false)} disabled={isAdminReviewing}>
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="md"
+                fullWidth
+                onClick={handleAdminReject}
+                disabled={isAdminReviewing}
+                className="bg-rose-600 hover:bg-rose-700 text-white"
+              >
+                {isAdminReviewing ? 'Rejecting...' : 'Reject Hangout'}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
         {/* Top bar */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-4 flex items-center justify-between">
           <button
@@ -317,6 +458,88 @@ export default function HangoutDetails() {
             </button>
           </div>
         </div>
+
+        {/* Admin Review Action Bar */}
+        {isAdmin && isPending && (
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-4">
+            <div className="p-4 sm:p-5 bg-amber-50 border-2 border-amber-300 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-amber-600" />
+                  Admin Review Required
+                </span>
+                <p className="text-xs text-amber-950">
+                  This Hangout is awaiting admin review before it becomes publicly visible on Explore and open for RSVPs/tickets.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  fullWidth
+                  onClick={handleAdminApprove}
+                  disabled={isAdminReviewing}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-bold"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{isAdminReviewing ? 'Approving...' : 'Approve & Publish'}</span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  fullWidth
+                  onClick={() => setRejectModalOpen(true)}
+                  disabled={isAdminReviewing}
+                  className="border-rose-300 text-rose-700 hover:bg-rose-50 gap-1.5 text-xs font-bold"
+                >
+                  <XCircle className="w-4 h-4" />
+                  <span>Reject</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Host Pending Notice */}
+        {!isAdmin && isHost && isPending && (
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-4">
+            <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl flex items-start gap-3 shadow-xs">
+              <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-amber-950">Under Review by LEENKIT Admins</p>
+                <p className="text-xs text-amber-800">
+                  Your Hangout has been submitted for review. Once approved, it will automatically appear in Explore and open for RSVPs and tickets.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rejection Notice */}
+        {isRejected && (
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-4">
+            <div className="p-4 bg-rose-50 border-2 border-rose-300 rounded-2xl flex items-start gap-3 shadow-xs">
+              <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <div className="space-y-1 flex-1">
+                <p className="text-sm font-bold text-rose-950">Hangout Not Approved</p>
+                <p className="text-xs text-rose-800">
+                  {hangout.rejectionReason || 'This Hangout did not meet community hosting guidelines.'}
+                </p>
+                {isAdmin && (
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={handleAdminApprove}
+                    disabled={isAdminReviewing}
+                    className="mt-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+                  >
+                    Re-evaluate & Approve
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Notices */}
         {notices.length > 0 && (
@@ -437,21 +660,75 @@ export default function HangoutDetails() {
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     <span className="text-xs uppercase font-bold tracking-wider text-[#6F6F6F]">Location</span>
-                    <p className="text-sm font-bold text-[#111111] font-heading break-words">{rawLocation || 'Location TBD'}</p>
-                    {googleMapsUrl && (
-                      <a
-                        href={googleMapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 mt-1 px-3 py-1.5 bg-[#18A999] hover:bg-[#087F73] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-                        <span>Open in Google Maps</span>
-                      </a>
+                    {hangout.hideExactLocation && !isMember ? (
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-[#111111] font-heading flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 text-amber-600 shrink-0" aria-hidden="true" />
+                          <span>Venue hidden</span>
+                        </p>
+                        <p className="text-xs text-[#6F6F6F]">
+                          Exact address & map link are revealed once you join this Hangout.
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm font-bold text-[#111111] font-heading break-words">{rawLocation || 'Location TBD'}</p>
+                        {hangout.hideExactLocation && isMember && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#087F73] bg-[#DDF4EF] px-2 py-0.5 rounded-md">
+                            <Lock className="w-3 h-3 text-[#087F73]" /> Venue revealed to attendees
+                          </span>
+                        )}
+                        {googleMapsUrl && (
+                          <a
+                            href={googleMapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 mt-1 px-3 py-1.5 bg-[#18A999] hover:bg-[#087F73] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                            <span>Open in Google Maps</span>
+                          </a>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
               </div>
+
+              {/* Series Navigation (if part of recurring series) */}
+              {seriesHangouts.length > 1 && (
+                <div className="p-4 bg-[#DDF4EF]/40 border-2 border-ink rounded-2xl space-y-2 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs uppercase font-extrabold tracking-wider text-[#087F73]">
+                      Part of a Hangout Series
+                    </span>
+                    <span className="text-xs font-bold text-[#3D4948]">
+                      Part {hangout.seriesIndex || 1} of {seriesHangouts.length}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {seriesHangouts.map((sh, idx) => {
+                      const isCurrent = sh.id === hangout.id;
+                      return isCurrent ? (
+                        <span
+                          key={sh.id}
+                          className="px-3 py-1 bg-[#18A999] text-white text-xs font-bold rounded-xl border border-ink"
+                        >
+                          Part {idx + 1} (This Event)
+                        </span>
+                      ) : (
+                        <Link
+                          key={sh.id}
+                          to={`/hangout/${sh.id}`}
+                          className="px-3 py-1 bg-white hover:bg-stone-50 text-[#111111] text-xs font-bold rounded-xl border border-ink transition-colors"
+                        >
+                          Part {idx + 1}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Community support (members only) */}
@@ -597,6 +874,32 @@ export default function HangoutDetails() {
                       </Button>
                     </Link>
 
+                    {attending && (
+                      <Button
+                        onClick={() => setTicketModalOpen(true)}
+                        variant="outline"
+                        size="md"
+                        fullWidth
+                        className="gap-2 border-2 border-ink text-[#111111] hover:bg-stone-50 font-bold"
+                      >
+                        <QrCode className="w-4 h-4 text-[#18A999]" aria-hidden="true" />
+                        <span>View Ticket & QR Code</span>
+                      </Button>
+                    )}
+
+                    {isHost && (
+                      <Button
+                        onClick={() => setCheckInModalOpen(true)}
+                        variant="outline"
+                        size="md"
+                        fullWidth
+                        className="gap-2 border-2 border-[#18A999] text-[#087F73] bg-[#DDF4EF]/40 hover:bg-[#DDF4EF] font-bold"
+                      >
+                        <UserCheck className="w-4 h-4 text-[#18A999]" aria-hidden="true" />
+                        <span>Check-In Attendees</span>
+                      </Button>
+                    )}
+
                     {!closed && (
                       <Button
                         onClick={() => setSponsorModalOpen(true)}
@@ -672,12 +975,38 @@ export default function HangoutDetails() {
             </Button>
 
             {isMember ? (
-              <Link to={`/hangout/${hangout.id}/space`}>
-                <Button variant="primary" size="sm" className="gap-1.5">
-                  <MessageSquare className="w-4 h-4" aria-hidden="true" />
-                  <span>Enter Space</span>
-                </Button>
-              </Link>
+              <>
+                {attending && (
+                  <Button
+                    onClick={() => setTicketModalOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="p-2"
+                    aria-label="View Ticket"
+                    title="View Ticket"
+                  >
+                    <QrCode className="w-4 h-4 text-[#18A999]" aria-hidden="true" />
+                  </Button>
+                )}
+                {isHost && (
+                  <Button
+                    onClick={() => setCheckInModalOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="p-2"
+                    aria-label="Check-In Attendees"
+                    title="Check-In Attendees"
+                  >
+                    <UserCheck className="w-4 h-4 text-[#18A999]" aria-hidden="true" />
+                  </Button>
+                )}
+                <Link to={`/hangout/${hangout.id}/space`}>
+                  <Button variant="primary" size="sm" className="gap-1.5">
+                    <MessageSquare className="w-4 h-4" aria-hidden="true" />
+                    <span>Space</span>
+                  </Button>
+                </Link>
+              </>
             ) : (
               <Button onClick={handleJoinClick} disabled={joinDisabled} variant="primary" size="sm">
                 {joinLabel}

@@ -63,12 +63,15 @@ export function hasStarted(hangout) {
 
 // Open for discovery and joining.
 export function isOpenHangout(hangout) {
-  return Boolean(hangout) && hangout.status === 'upcoming' && !isPastHangout(hangout);
+  const isApproved = !hangout?.approvalStatus || hangout.approvalStatus === 'approved';
+  return Boolean(hangout) && hangout.status === 'upcoming' && isApproved && !isPastHangout(hangout);
 }
 
 // Label + reason when a Hangout can no longer be joined.
 export function closedReason(hangout) {
   if (!hangout) return null;
+  if (hangout.approvalStatus === 'pending') return 'Pending approval';
+  if (hangout.approvalStatus === 'rejected') return 'Not approved';
   if (hangout.status === 'cancelled') return 'Cancelled';
   if (hangout.status === 'completed') return 'Ended';
   if (isPastHangout(hangout)) return 'Ended';

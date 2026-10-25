@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { m } from 'framer-motion';
-import { MapPin, CheckCircle, ArrowRight, MessageSquare, Upload, Share2, Tag, AlertCircle } from 'lucide-react';
+import { MapPin, CheckCircle, ArrowRight, MessageSquare, Upload, Share2, Tag, AlertCircle, Repeat, Lock } from 'lucide-react';
 import PageTransition from '../components/layout/PageTransition';
 import Button from '../components/common/Button';
 import FormField from '../components/common/FormField';
@@ -17,6 +17,23 @@ import { CURRENT_GUIDELINES_VERSION } from '../services/auth/authService';
 import { todayISO, formatEventDate, formatEventTime, formatMoney } from '../utils/format';
 import { payoutService, estimateFee } from '../services/account/accountService';
 import { usePaidFeatures } from '../hooks/usePaidFeatures';
+
+function addRecurrenceDate(baseDateStr, recurrenceType, index) {
+  if (index === 0) return baseDateStr;
+  const [year, month, day] = baseDateStr.split('-').map(Number);
+  const d = new Date(year, month - 1, day);
+  if (recurrenceType === 'weekly') {
+    d.setDate(d.getDate() + 7 * index);
+  } else if (recurrenceType === 'biweekly') {
+    d.setDate(d.getDate() + 14 * index);
+  } else if (recurrenceType === 'monthly') {
+    d.setMonth(d.getMonth() + index);
+  }
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 const PRESET_IMAGES = [
   { label: "Photowalk / Outdoor", url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80" },
@@ -38,6 +55,7 @@ export default function CreateHangout() {
     title: '',
     category: 'Food',
     location: null,
+    hideExactLocation: false,
     date: '',
     time: '17:00',
     maxAttendees: 10,
@@ -45,7 +63,10 @@ export default function CreateHangout() {
     image: PRESET_IMAGES[0].url,
     isPaid: false,
     price: '',
-    currency: 'NGN'
+    currency: 'NGN',
+    isSeries: false,
+    recurrenceType: 'weekly',
+    totalOccurrences: 4
   });
 
   const [customImageFile, setCustomImageFile] = useState(null);
@@ -171,11 +192,48 @@ export default function CreateHangout() {
       }
 
       setUploadingState('Publishing Hangout...');
-      const newActivity = await createHangout({
-        ...formData,
-        image: finalImageUrl
-      });
-      setCreatedActivity(newActivity);
+
+      if (formData.isSeries) {
+        const count = Math.min(Math.max(parseInt(formData.totalOccurrences, 10) || 4, 2), 24);
+        const series = await hangoutService.createSeries({
+          hostId: currentUser?.id,
+          title: formData.title,
+          recurrenceType: formData.recurrenceType,
+          totalOccurrences: count
+        });
+
+        let primaryActivity = null;
+
+        for (let i = 0; i < count; i++) {
+          const partDate = addRecurrenceDate(formData.date, formData.recurrenceType, i);
+          const partTitle = i === 0
+            ? formData.title
+            : `${formData.title} (${formData.recurrenceType === 'weekly' ? 'Week' : 'Part'} ${i + 1})`;
+
+          const created = await createHangout({
+            ...formData,
+            title: partTitle,
+            date: partDate,
+            image: finalImageUrl,
+            seriesId: series.id,
+            seriesIndex: i + 1,
+            hideExactLocation: formData.hideExactLocation
+          });
+
+          if (i === 0) {
+            primaryActivity = created;
+          }
+        }
+
+        setCreatedActivity(primaryActivity);
+      } else {
+        const newActivity = await createHangout({
+          ...formData,
+          image: finalImageUrl,
+          hideExactLocation: formData.hideExactLocation
+        });
+        setCreatedActivity(newActivity);
+      }
     } catch (err) {
       setCreateError(err.message || 'Failed to create Hangout.');
     } finally {
@@ -342,6 +400,24 @@ export default function CreateHangout() {
                 error={errors.location}
               />
 
+              {/* Hidden Venue Toggle */}
+              <div className="p-4 bg-[#EEF1EF]/70 border-2 border-ink rounded-2xl flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="hideExactLocation"
+                  checked={formData.hideExactLocation}
+                  onChange={e => setFormData({ ...formData, hideExactLocation: e.target.checked })}
+                  className="mt-1 w-4 h-4 text-[#18A999] rounded border-ink focus:ring-[#18A999] cursor-pointer"
+                />
+                <label htmlFor="hideExactLocation" className="text-xs text-[#3D4948] cursor-pointer">
+                  <span className="font-bold text-[#111111] flex items-center gap-1.5 mb-0.5">
+                    <Lock className="w-3.5 h-3.5 text-[#18A999]" />
+                    Hide exact address until RSVP
+                  </span>
+                  Keep the exact venue and Google Maps link hidden from public browsing. Only attendees who join or buy a ticket will see the exact location.
+                </label>
+              </div>
+
               {/* Category */}
               <FormField label="Category" required>
                 <select
@@ -386,6 +462,57 @@ export default function CreateHangout() {
                     className="w-full px-4 py-3 bg-[#EEF1EF] border-2 border-ink rounded-2xl text-sm focus:outline-none focus:bg-white focus:border-[#18A999]"
                   />
                 </FormField>
+              </div>
+
+              {/* Recurring & Series Hangout Section */}
+              <div className="p-5 bg-[#EEF1EF]/70 border-2 border-ink rounded-2xl space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-[#111111] uppercase tracking-wider flex items-center gap-1.5">
+                      <Repeat className="w-3.5 h-3.5 text-[#18A999]" />
+                      <span>Recurring Meetup Series</span>
+                    </span>
+                    <p className="text-xs text-[#3D4948]">
+                      Turn this Hangout into a multi-part or recurring series with automatic scheduling.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+                    <input
+                      type="checkbox"
+                      checked={formData.isSeries}
+                      onChange={e => setFormData({ ...formData, isSeries: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#18A999]"></div>
+                  </label>
+                </div>
+
+                {formData.isSeries && (
+                  <div className="pt-3 border-t-2 border-ink grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField label="Recurrence Cadence">
+                      <select
+                        value={formData.recurrenceType}
+                        onChange={e => setFormData({ ...formData, recurrenceType: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-sm focus:outline-none focus:border-[#18A999]"
+                      >
+                        <option value="weekly">Weekly (Every 7 days)</option>
+                        <option value="biweekly">Bi-weekly (Every 14 days)</option>
+                        <option value="monthly">Monthly (Every month)</option>
+                      </select>
+                    </FormField>
+
+                    <FormField label="Total Occurrences (2-24)">
+                      <input
+                        type="number"
+                        min={2}
+                        max={24}
+                        value={formData.totalOccurrences}
+                        onChange={e => setFormData({ ...formData, totalOccurrences: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-white border-2 border-ink rounded-xl text-sm focus:outline-none focus:border-[#18A999]"
+                      />
+                    </FormField>
+                  </div>
+                )}
               </div>
 
               {/* Paid vs Free Hangout Readiness Section */}

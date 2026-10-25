@@ -14,8 +14,21 @@ export const adminService = {
       refundsDue: Number(r.refunds_due || 0),
       suspendedUsers: Number(r.suspended_users || 0),
       payoutAccounts: Number(r.payout_accounts || 0),
-      feesCollectedNgn: Number(r.fees_collected_ngn || 0)
+      feesCollectedNgn: Number(r.fees_collected_ngn || 0),
+      pendingHangouts: Number(r.pending_hangouts || 0)
     };
+  },
+
+  async listHangouts(approvalStatus = null) {
+    return unwrap(await supabase.rpc('admin_list_hangouts', { p_approval_status: approvalStatus })) || [];
+  },
+
+  async reviewHangout(hangoutId, action, reason = null) {
+    return unwrap(await supabase.rpc('admin_review_hangout', {
+      p_hangout_id: hangoutId,
+      p_action: action,
+      p_reason: reason || null
+    }));
   },
 
   async listReports(status = null) {

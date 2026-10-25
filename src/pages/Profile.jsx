@@ -5,11 +5,13 @@ import HangoutCard from '../components/hangout/HangoutCard';
 import Button from '../components/common/Button';
 import ReportModal from '../components/safety/ReportModal';
 import ProfileImageViewer from '../components/common/ProfileImageViewer';
-import { MapPin, Edit3, ShieldCheck, Sparkles, Calendar, LogOut, ShieldAlert, ExternalLink, Globe } from 'lucide-react';
+import { MapPin, Edit3, ShieldCheck, Sparkles, Calendar, LogOut, ShieldAlert, ExternalLink, Globe, Bell, BellOff } from 'lucide-react';
 import { InstagramIcon, TikTokIcon, SpotifyIcon } from '../components/common/SocialIcons';
 import { useUser } from '../context/UserContext';
 import { useLeenkit } from '../context/LeenkitContext';
 import { authService } from '../services/auth/authService';
+import { pushNotificationService } from '../services/notification/pushNotificationService';
+import { useToast } from '../components/common/Toast';
 import Avatar from '../components/common/Avatar';
 import { isOpenHangout, isPastHangout, sortByEventDate } from '../utils/format';
 
@@ -17,6 +19,7 @@ export default function Profile() {
   const { username } = useParams();
   const { users, currentUser, logout, isAuthenticated, isAuthLoading, isVibingWith, vibeWith, unvibeWith, vibingIds, getUserById, openAuthModal } = useUser();
   const { hangouts } = useLeenkit();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -24,6 +27,8 @@ export default function Profile() {
   const [asyncUser, setAsyncUser] = useState(null);
   const [isFetchingProfile, setIsFetchingProfile] = useState(false);
   const [isVibeLoading, setIsVibeLoading] = useState(false);
+  const [isPushSubscribed, setIsPushSubscribed] = useState(false);
+  const [isPushLoading, setIsPushLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -108,6 +113,35 @@ export default function Profile() {
       console.error('Failed to update vibe status:', err);
     } finally {
       setIsVibeLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentUser?.id || !pushNotificationService.isPushSupported()) return;
+    let active = true;
+    pushNotificationService.isUserSubscribed(currentUser.id)
+      .then(sub => { if (active) setIsPushSubscribed(sub); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [currentUser?.id]);
+
+  const handleTogglePush = async () => {
+    if (!currentUser?.id) return;
+    setIsPushLoading(true);
+    try {
+      if (isPushSubscribed) {
+        await pushNotificationService.unsubscribe(currentUser.id);
+        setIsPushSubscribed(false);
+        showToast('Push notifications disabled', 'info');
+      } else {
+        await pushNotificationService.subscribe(currentUser.id);
+        setIsPushSubscribed(true);
+        showToast('Push notifications enabled!', 'success');
+      }
+    } catch (err) {
+      showToast(err.message || 'Could not update push notification settings', 'error');
+    } finally {
+      setIsPushLoading(false);
     }
   };
 
@@ -253,6 +287,32 @@ export default function Profile() {
 
             {isOwnProfile ? (
               <div className="flex flex-wrap items-center gap-3 shrink-0">
+                {pushNotificationService.isPushSupported() && (
+                  <Button
+                    onClick={handleTogglePush}
+                    disabled={isPushLoading}
+                    variant="outline"
+                    size="md"
+                    className={`gap-2 ${
+                      isPushSubscribed
+                        ? 'border-[#18A999] text-[#087F73] bg-[#DDF4EF]/40 hover:bg-[#DDF4EF]'
+                        : 'border-ink text-[#111111] hover:bg-stone-50'
+                    }`}
+                  >
+                    {isPushSubscribed ? (
+                      <>
+                        <Bell className="w-4 h-4 text-[#18A999] fill-[#18A999]" />
+                        <span>Push Alerts On</span>
+                      </>
+                    ) : (
+                      <>
+                        <BellOff className="w-4 h-4 text-[#6F6F6F]" />
+                        <span>Enable Push Alerts</span>
+                      </>
+                    )}
+                  </Button>
+                )}
+
                 <Link to="/edit-profile">
                   <Button variant="outline" size="md" className="gap-2">
                     <Edit3 className="w-4 h-4" />

@@ -8,7 +8,8 @@ import Button from '../components/common/Button';
 import Loader from '../components/common/Loader';
 import ConfirmModal from '../components/common/ConfirmModal';
 import ReportModal from '../components/safety/ReportModal';
-import { Lock, ShieldAlert, AlertTriangle, MessageCircle } from 'lucide-react';
+import MemoriesTab from '../components/space/MemoriesTab';
+import { Lock, ShieldAlert, AlertTriangle, MessageCircle, MessageSquare, Camera } from 'lucide-react';
 import { useLeenkit } from '../context/LeenkitContext';
 import { useUser } from '../context/UserContext';
 import { closedReason } from '../utils/format';
@@ -59,6 +60,7 @@ export default function HangoutSpace() {
   } = useLeenkit();
   const { currentUser, isAuthLoading, isAuthenticated, openAuthModal } = useUser();
 
+  const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'memories'
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
@@ -210,67 +212,101 @@ export default function HangoutSpace() {
           onLeave={!isHost && !closed ? () => setLeaveOpen(true) : undefined}
         />
 
+        {/* Space Tab Switcher (Chat vs Memories) */}
+        <div className="flex border-b-2 border-ink bg-white shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab('chat')}
+            className={`flex-1 py-2.5 px-3 text-xs font-extrabold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-r-2 border-ink ${
+              activeTab === 'chat'
+                ? 'bg-[#18A999] text-white'
+                : 'text-[#6F6F6F] hover:bg-[#FFF8EE] hover:text-[#111111]'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>Chat</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('memories')}
+            className={`flex-1 py-2.5 px-3 text-xs font-extrabold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+              activeTab === 'memories'
+                ? 'bg-[#18A999] text-white'
+                : 'text-[#6F6F6F] hover:bg-[#FFF8EE] hover:text-[#111111]'
+            }`}
+          >
+            <Camera className="w-4 h-4" />
+            <span>Memories</span>
+          </button>
+        </div>
+
         {closed === 'Cancelled' && (
           <p className="bg-[#FFD166] border-b-2 border-ink px-4 py-2 text-xs font-bold text-[#111111] shrink-0">
             Cancelled. This chat is read-only.
           </p>
         )}
 
-        <div
-          ref={chatContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto chat-wallpaper px-3 py-3"
-          role="log"
-          aria-live="polite"
-          aria-label="Messages"
-        >
-          {loadError && (
-            <p role="alert" className="p-3 mb-2 bg-rose-50 border-2 border-ink rounded-2xl text-xs font-bold text-rose-700 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" aria-hidden="true" /> {loadError}
-            </p>
-          )}
+        {activeTab === 'memories' ? (
+          <MemoriesTab hangout={hangout} isHost={isHost} isAttending={attending} />
+        ) : (
+          <>
+            <div
+              ref={chatContainerRef}
+              onScroll={handleScroll}
+              className="flex-1 overflow-y-auto chat-wallpaper px-3 py-3"
+              role="log"
+              aria-live="polite"
+              aria-label="Messages"
+            >
+              {loadError && (
+                <p role="alert" className="p-3 mb-2 bg-rose-50 border-2 border-ink rounded-2xl text-xs font-bold text-rose-700 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" aria-hidden="true" /> {loadError}
+                </p>
+              )}
 
-          {messagesLoading ? (
-            <Loader label="Loading messages" className="h-full" />
-          ) : roomMessages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center gap-3 px-6">
-              <span className="w-12 h-12 rounded-2xl bg-[#FFD166] border-2 border-ink flex items-center justify-center">
-                <MessageCircle className="w-6 h-6" aria-hidden="true" />
-              </span>
-              <p className="font-heading font-extrabold text-base text-[#111111]">No messages yet</p>
-              <p className="text-xs text-[#3D4948]">Say hi to the group.</p>
+              {messagesLoading ? (
+                <Loader label="Loading messages" className="h-full" />
+              ) : roomMessages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center gap-3 px-6">
+                  <span className="w-12 h-12 rounded-2xl bg-[#FFD166] border-2 border-ink flex items-center justify-center">
+                    <MessageCircle className="w-6 h-6" aria-hidden="true" />
+                  </span>
+                  <p className="font-heading font-extrabold text-base text-[#111111]">No messages yet</p>
+                  <p className="text-xs text-[#3D4948]">Say hi to the group.</p>
+                </div>
+              ) : (
+                roomMessages.map((msg, i) => {
+                  const label = dayLabel(msg.createdAt);
+                  const prev = roomMessages[i - 1];
+                  const next = roomMessages[i + 1];
+                  const prevLabel = prev ? dayLabel(prev.createdAt) : null;
+                  return (
+                    <Fragment key={msg.id}>
+                      {label && label !== prevLabel && (
+                        <div className="flex justify-center my-3" aria-hidden="true">
+                          <span className="px-3 py-1 text-[11px] font-bold bg-white text-[#111111] rounded-lg border-2 border-ink">{label}</span>
+                        </div>
+                      )}
+                      <ChatMessage
+                        message={msg}
+                        isOwnMessage={Boolean(currentUser?.id && msg.userId === currentUser.id)}
+                        isFirstInGroup={!sameGroup(prev, msg)}
+                        isLastInGroup={!sameGroup(msg, next)}
+                      />
+                    </Fragment>
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          ) : (
-            roomMessages.map((msg, i) => {
-              const label = dayLabel(msg.createdAt);
-              const prev = roomMessages[i - 1];
-              const next = roomMessages[i + 1];
-              const prevLabel = prev ? dayLabel(prev.createdAt) : null;
-              return (
-                <Fragment key={msg.id}>
-                  {label && label !== prevLabel && (
-                    <div className="flex justify-center my-3" aria-hidden="true">
-                      <span className="px-3 py-1 text-[11px] font-bold bg-white text-[#111111] rounded-lg border-2 border-ink">{label}</span>
-                    </div>
-                  )}
-                  <ChatMessage
-                    message={msg}
-                    isOwnMessage={Boolean(currentUser?.id && msg.userId === currentUser.id)}
-                    isFirstInGroup={!sameGroup(prev, msg)}
-                    isLastInGroup={!sameGroup(msg, next)}
-                  />
-                </Fragment>
-              );
-            })
-          )}
-          <div ref={messagesEndRef} />
-        </div>
 
-        <ChatInput
-          onSendMessage={handleSend}
-          disabled={closed === 'Cancelled'}
-          disabledReason={closed === 'Cancelled' ? 'Messaging closed when the host cancelled this Hangout.' : ''}
-        />
+            <ChatInput
+              onSendMessage={handleSend}
+              disabled={closed === 'Cancelled'}
+              disabledReason={closed === 'Cancelled' ? 'Messaging closed when the host cancelled this Hangout.' : ''}
+            />
+          </>
+        )}
       </PhoneFrame>
     </PageTransition>
   );

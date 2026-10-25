@@ -55,7 +55,14 @@ function formatHangout(dbHangout, attendeesList = []) {
     isPopular: dbHangout.is_popular || false,
     isPaid: Boolean(dbHangout.is_paid),
     price: dbHangout.price ? Number(dbHangout.price) : null,
-    currency: dbHangout.currency || 'NGN'
+    currency: dbHangout.currency || 'NGN',
+    hideExactLocation: Boolean(dbHangout.hide_exact_location),
+    seriesId: dbHangout.series_id || null,
+    seriesIndex: dbHangout.series_index || null,
+    approvalStatus: dbHangout.approval_status || 'approved',
+    rejectionReason: dbHangout.rejection_reason || null,
+    reviewedAt: dbHangout.reviewed_at || null,
+    reviewedBy: dbHangout.reviewed_by || null
   };
 }
 
@@ -183,7 +190,11 @@ export const hangoutService = {
       country_code: loc.countryCode || null,
       latitude: typeof loc.latitude === 'number' && !isNaN(loc.latitude) ? loc.latitude : null,
       longitude: typeof loc.longitude === 'number' && !isNaN(loc.longitude) ? loc.longitude : null,
-      google_maps_url: loc.googleMapsUrl || newHangoutData.googleMapsUrl || null
+      google_maps_url: loc.googleMapsUrl || newHangoutData.googleMapsUrl || null,
+      hide_exact_location: Boolean(newHangoutData.hideExactLocation),
+      series_id: newHangoutData.seriesId || null,
+      series_index: newHangoutData.seriesIndex || null,
+      approval_status: 'pending'
     };
 
     const { data: createdHangout, error: createError } = await supabase
@@ -484,6 +495,149 @@ export const hangoutService = {
       console.warn('Unexpected error fetching sponsorship summary:', err);
       return { currencies: [], totalSponsorCount: 0 };
     }
+  },
+
+  // 1. Digital Ticket & Check-in
+  async checkInAttendee(hangoutId, ticketCode) {
+    if (!hangoutId || !ticketCode) throw new Error('Hangout ID and Ticket Code are required.');
+    const { data, error } = await supabase.rpc('check_in_attendee', {
+      p_hangout_id: hangoutId,
+      p_ticket_code: ticketCode.trim().toUpperCase()
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  async getMyTicket(hangoutId, userId) {
+    if (!hangoutId || !userId) return null;
+    const { data, error } = await supabase
+      .from('hangout_attendees')
+      .select('id, ticket_code, checked_in_at, created_at')
+      .eq('hangout_id', hangoutId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return {
+      ticketCode: data.ticket_code,
+      checkedInAt: data.checked_in_at,
+      joinedAt: data.created_at
+    };
+  },
+
+  // 2. Hangout Memories Stream
+  async fetchMemories(hangoutId) {
+    if (!hangoutId) return [];
+    const { data, error } = await supabase
+      .from('hangout_memories')
+      .select(`
+        id,
+        hangout_id,
+        user_id,
+        image_url,
+        caption,
+        phase,
+        created_at,
+        profiles (
+          id,
+          name,
+          username,
+          avatar
+        )
+      `)
+      .eq('hangout_id', hangoutId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Error fetching memories:', error.message);
+      return [];
+    }
+
+    return (data || []).map(m => ({
+      id: m.id,
+      hangoutId: m.hangout_id,
+      userId: m.user_id,
+      imageUrl: m.image_url,
+      caption: m.caption,
+      phase: m.phase,
+      createdAt: m.created_at,
+      author: m.profiles ? {
+        name: m.profiles.name,
+        username: m.profiles.username,
+        avatar: m.profiles.avatar
+      } : null
+    }));
+  },
+
+  async addMemory(hangoutId, userId, { file, caption, phase = 'during' }) {
+    if (!hangoutId || !userId) throw new Error('Sign in required to share memory.');
+    if (!file) throw new Error('Please select a photo.');
+
+    const fileExt = file.name.split('.').pop() || 'jpg';
+    const filePath = `memories/${hangoutId}/${Date.now()}_${Math.random().toString(36).substring(2, 6)}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('hangout-images')
+      .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadError) throw new Error(`Photo upload failed: ${uploadError.message}`);
+
+    const { data: publicUrlData } = supabase.storage
+      .from('hangout-images')
+      .getPublicUrl(filePath);
+
+    const { data, error } = await supabase
+      .from('hangout_memories')
+      .insert({
+        hangout_id: hangoutId,
+        user_id: userId,
+        image_url: publicUrlData.publicUrl,
+        caption: caption ? caption.trim().slice(0, 500) : null,
+        phase
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  async deleteMemory(memoryId) {
+    if (!memoryId) return;
+    const { error } = await supabase
+      .from('hangout_memories')
+      .delete()
+      .eq('id', memoryId);
+    if (error) throw new Error(error.message);
+  },
+
+  // 3. Series / Recurring Hangouts
+  async createSeries({ hostId, title, recurrenceType = 'weekly', totalOccurrences = 4 }) {
+    const { data, error } = await supabase
+      .from('hangout_series')
+      .insert({
+        host_id: hostId,
+        title,
+        recurrence_type: recurrenceType,
+        total_occurrences: totalOccurrences
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
+  async getSeriesHangouts(seriesId) {
+    if (!seriesId) return [];
+    const { data, error } = await supabase
+      .from('hangouts')
+      .select('id, title, date, time, series_index, status')
+      .eq('series_id', seriesId)
+      .order('series_index', { ascending: true });
+
+    if (error) return [];
+    return data || [];
   }
 };
 

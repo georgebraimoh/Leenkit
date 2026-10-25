@@ -16,11 +16,20 @@ const REPORT_FILTERS = [
   { id: 'all', label: 'All' }
 ];
 
+const HANGOUT_FILTERS = [
+  { id: 'pending', label: 'Pending Review' },
+  { id: 'approved', label: 'Approved' },
+  { id: 'rejected', label: 'Rejected' },
+  { id: 'all', label: 'All' }
+];
+
 const STATUS_STYLES = {
   pending: 'bg-amber-50 text-amber-800 border-amber-200',
   reviewing: 'bg-sky-50 text-sky-800 border-sky-200',
   resolved: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-  dismissed: 'bg-stone-100 text-stone-700 border-stone-200'
+  dismissed: 'bg-stone-100 text-stone-700 border-stone-200',
+  approved: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  rejected: 'bg-rose-50 text-rose-800 border-rose-200'
 };
 
 function when(iso) {
@@ -38,16 +47,18 @@ export default function Admin() {
   const { currentUser, isAuthLoading } = useUser();
   const { showToast } = useToast();
 
-  const [tab, setTab] = useState('reports');
+  const [tab, setTab] = useState('hangouts');
   const [overview, setOverview] = useState(null);
   const [reportFilter, setReportFilter] = useState('open');
+  const [hangoutFilter, setHangoutFilter] = useState('pending');
+  const [hangouts, setHangouts] = useState([]);
   const [reports, setReports] = useState([]);
   const [payments, setPayments] = useState([]);
   const [payouts, setPayouts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // { kind: 'report'|'suspend'|'cancel'|'refund', item, status? }
+  // { kind: 'report'|'suspend'|'cancel'|'refund'|'approve_hangout'|'reject_hangout', item, status? }
   const [action, setAction] = useState(null);
   const [note, setNote] = useState('');
   const [isWorking, setIsWorking] = useState(false);
@@ -60,22 +71,24 @@ export default function Admin() {
     setIsLoading(true);
     setError('');
     try {
-      const [ov, reps, pays, pouts] = await Promise.all([
+      const [ov, reps, pays, pouts, hgts] = await Promise.all([
         adminService.overview(),
         adminService.listReports(reportFilter === 'all' || reportFilter === 'open' ? null : reportFilter),
         adminService.listPayments('requires_refund'),
-        adminService.listPayouts(null)
+        adminService.listPayouts(null),
+        adminService.listHangouts(hangoutFilter === 'all' ? null : hangoutFilter)
       ]);
       setOverview(ov);
       setReports(reportFilter === 'open' ? reps.filter(r => r.status === 'pending' || r.status === 'reviewing') : reps);
       setPayments(pays);
       setPayouts(pouts);
+      setHangouts(hgts);
     } catch (err) {
       setError(err.message || 'Could not load admin data.');
     } finally {
       setIsLoading(false);
     }
-  }, [isAdmin, reportFilter]);
+  }, [isAdmin, reportFilter, hangoutFilter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -97,6 +110,8 @@ export default function Admin() {
     setIsWorking(true);
     try {
       const { kind, item, status } = action;
+      if (kind === 'approve_hangout') await adminService.reviewHangout(item.id, 'approve');
+      if (kind === 'reject_hangout') await adminService.reviewHangout(item.id, 'reject', note);
       if (kind === 'report') await adminService.updateReport(item.id, status, note);
       if (kind === 'suspend') {
         await adminService.setSuspension(item.target_id, true, note || item.reason);
@@ -136,6 +151,8 @@ export default function Admin() {
   }
 
   const actionCopy = action && {
+    approve_hangout: { title: `Approve "${action.item.title}"?`, confirm: 'Approve & Publish', variant: 'primary', body: 'This Hangout will immediately become approved, visible on Explore, and open for RSVPs and tickets.' },
+    reject_hangout: { title: `Reject "${action.item.title}"?`, confirm: 'Reject Hangout', variant: 'danger', body: 'The host will be notified with your reason below. The Hangout will not appear on Explore.' },
     report: { title: action.status === 'dismissed' ? 'Dismiss report' : action.status === 'reviewing' ? 'Mark as reviewing' : 'Resolve report', confirm: 'Save', variant: 'primary' },
     suspend: { title: `Suspend ${action.item.target_label}?`, confirm: 'Suspend account', variant: 'danger', body: 'They will not be able to host, join or post. Their upcoming Hangouts are cancelled and attendees notified.' },
     cancel: { title: `Cancel "${action.item.target_label}"?`, confirm: 'Cancel Hangout', variant: 'danger', body: 'Attendees are notified, and everyone who paid (tickets and sponsorships) is refunded in full automatically.' },
@@ -158,8 +175,9 @@ export default function Admin() {
         </div>
 
         {overview && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             {[
+              { label: 'Pending review', value: overview.pendingHangouts, icon: Clock },
               { label: 'Open reports', value: overview.pendingReports, icon: ShieldAlert },
               { label: 'Refunds due', value: overview.refundsDue, icon: Wallet },
               { label: 'Suspended', value: overview.suspendedUsers, icon: Ban },
@@ -176,9 +194,10 @@ export default function Admin() {
           </div>
         )}
 
-        <div className="flex gap-2 border-b-2 border-ink pb-2" role="tablist">
+        <div className="flex gap-2 border-b-2 border-ink pb-2 overflow-x-auto" role="tablist">
           {[
-            { id: 'reports', label: 'Reports' },
+            { id: 'hangouts', label: `Hangouts (${overview?.pendingHangouts || 0} pending)` },
+            { id: 'reports', label: `Reports (${overview?.pendingReports || 0})` },
             { id: 'refunds', label: `Refunds (${payments.length})` },
             { id: 'payouts', label: `Payouts (${payouts.filter(p => p.status === 'failed' || p.status === 'needs_review').length} need attention)` }
           ].map(t => (
@@ -188,7 +207,7 @@ export default function Admin() {
               role="tab"
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer ${tab === t.id ? 'bg-[#111111] text-white' : 'text-[#3D4948] hover:bg-white'}`}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer whitespace-nowrap ${tab === t.id ? 'bg-[#111111] text-white' : 'text-[#3D4948] hover:bg-white'}`}
             >
               {t.label}
             </button>
@@ -196,6 +215,145 @@ export default function Admin() {
         </div>
 
         {error && <p role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-sm text-rose-700">{error}</p>}
+
+        {tab === 'hangouts' && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Filter hangouts">
+              {HANGOUT_FILTERS.map(f => (
+                <button
+                  key={f.id}
+                  type="button"
+                  aria-pressed={hangoutFilter === f.id}
+                  onClick={() => setHangoutFilter(f.id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer ${
+                    hangoutFilter === f.id ? 'bg-[#18A999] text-white' : 'bg-white border-2 border-ink text-[#3D4948]'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {isLoading ? (
+              <div className="h-32 bg-white border-2 border-ink rounded-2xl animate-pulse" aria-busy="true" />
+            ) : hangouts.length === 0 ? (
+              <p className="p-8 bg-white border-2 border-ink rounded-2xl text-center text-sm text-[#6F6F6F]">
+                No hangouts found for this filter.
+              </p>
+            ) : (
+              <ul className="space-y-4">
+                {hangouts.map(h => {
+                  const isPending = h.approval_status === 'pending';
+                  const isRejected = h.approval_status === 'rejected';
+                  const isApproved = h.approval_status === 'approved';
+                  const priceLabel = h.is_paid ? formatMoney(h.price, h.currency) : 'Free';
+
+                  return (
+                    <li key={h.id} className="p-5 bg-white border-2 border-ink rounded-2xl space-y-4">
+                      <div className="flex flex-col sm:flex-row gap-4 items-start justify-between">
+                        <div className="flex gap-4 items-start min-w-0">
+                          {h.image && (
+                            <img
+                              src={h.image}
+                              alt=""
+                              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-ink shrink-0"
+                            />
+                          )}
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full border ${STATUS_STYLES[h.approval_status] || ''}`}>
+                                {isPending ? 'Pending Review' : isApproved ? 'Approved' : 'Rejected'}
+                              </span>
+                              <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-stone-100 text-[#111111] border border-ink">
+                                {h.category || 'General'}
+                              </span>
+                              <span className={`px-2 py-0.5 text-xs font-bold rounded-full text-white ${h.is_paid ? 'bg-amber-600' : 'bg-emerald-600'}`}>
+                                {priceLabel}
+                              </span>
+                              <span className="text-xs text-[#6F6F6F]">
+                                Capacity: {h.attendee_count || 1}/{h.max_attendees}
+                              </span>
+                            </div>
+
+                            <h3 className="text-base font-bold text-[#111111] break-words">
+                              <Link to={`/hangout/${h.id}`} className="hover:underline inline-flex items-center gap-1">
+                                {h.title} <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                              </Link>
+                            </h3>
+
+                            <div className="text-xs text-[#6F6F6F] space-y-0.5">
+                              <p>
+                                <strong>Host:</strong>{' '}
+                                {h.host_username ? (
+                                  <Link to={`/profile/${h.host_username}`} className="underline text-[#111111] font-semibold">
+                                    {h.host_name} (@{h.host_username})
+                                  </Link>
+                                ) : (
+                                  h.host_name || 'Organizer'
+                                )}
+                              </p>
+                              <p>
+                                <strong>When:</strong> {h.hangout_date} at {h.hangout_time || 'TBD'}
+                              </p>
+                              <p className="truncate">
+                                <strong>Where:</strong> {h.place_name ? `${h.place_name} (${h.address || h.city || ''})` : (h.address || h.city || 'Location TBD')}
+                              </p>
+                            </div>
+
+                            {h.description && (
+                              <p className="text-xs text-[#3D4948] line-clamp-2 pt-1">
+                                {h.description}
+                              </p>
+                            )}
+
+                            {isRejected && h.rejection_reason && (
+                              <p className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-medium">
+                                <strong>Rejection Reason:</strong> {h.rejection_reason}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex flex-row sm:flex-col gap-2 shrink-0 w-full sm:w-auto pt-2 sm:pt-0">
+                          <Link to={`/hangout/${h.id}`} className="w-full sm:w-auto">
+                            <Button size="sm" variant="outline" fullWidth className="gap-1.5 text-xs">
+                              <ExternalLink className="w-3.5 h-3.5" /> View
+                            </Button>
+                          </Link>
+
+                          {!isApproved && (
+                            <Button
+                              size="sm"
+                              variant="primary"
+                              fullWidth
+                              onClick={() => openAction('approve_hangout', h)}
+                              className="gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                            </Button>
+                          )}
+
+                          {!isRejected && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              fullWidth
+                              onClick={() => openAction('reject_hangout', h)}
+                              className="gap-1.5 text-xs text-rose-700 border-rose-300 hover:bg-rose-50"
+                            >
+                              <XCircle className="w-3.5 h-3.5" /> Reject
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
 
         {tab === 'reports' && (
           <div className="space-y-4">

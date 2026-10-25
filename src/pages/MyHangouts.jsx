@@ -287,8 +287,18 @@ export default function MyHangouts() {
                         <span className={`px-3 py-1 text-xs font-bold rounded-full shadow-xs ${hangout.isPaid ? 'bg-amber-500/90 text-white' : 'bg-emerald-600/90 text-white'}`}>
                           {priceLabel}
                         </span>
+                        {isHost && hangout.approvalStatus === 'pending' && (
+                          <span className="px-3 py-1 text-xs font-bold rounded-full shadow-xs bg-amber-500 text-white">
+                            Pending Review
+                          </span>
+                        )}
+                        {isHost && hangout.approvalStatus === 'rejected' && (
+                          <span className="px-3 py-1 text-xs font-bold rounded-full shadow-xs bg-rose-600 text-white">
+                            Not Approved
+                          </span>
+                        )}
                       </div>
-                      {closed && (
+                      {closed && hangout.approvalStatus !== 'pending' && hangout.approvalStatus !== 'rejected' && (
                         <span className="absolute top-3 right-3 px-3 py-1 text-xs font-extrabold uppercase tracking-wider bg-stone-800 text-white rounded-full shadow-xs">
                           {closed}
                         </span>
